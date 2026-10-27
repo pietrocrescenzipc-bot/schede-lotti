@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Facile & Intuitiva</title>
-    <!-- Tailwind CSS per un design pulito, moderno e responsive -->
+    <title>Gestione Turni Smart & Invio Telematico</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome per le icone intuitive -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -23,8 +23,8 @@
                     <i class="fa-solid fa-calendar-days"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold">Gestione Turni Smart</h1>
-                    <p class="text-xs text-indigo-200">Semplice, veloce e a prova di bambino</p>
+                    <h1 class="text-lg font-bold">Gestione Turni & AdE</h1>
+                    <p class="text-xs text-indigo-200">Semplice, intuitivo e pronto per l'invio</p>
                 </div>
             </div>
             <!-- Navigazione Tab -->
@@ -48,7 +48,7 @@
                     <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
                 </button>
                 <button onclick="switchTab('tab-ade')" id="btn-tab-ade" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-solid fa-building-columns mr-1"></i> AdE
+                    <i class="fa-solid fa-file-arrow-down mr-1"></i> Invio / File AdE
                 </button>
             </nav>
         </div>
@@ -57,16 +57,15 @@
     <!-- MAIN CONTENT -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6">
 
-        <!-- 1. SEZIONE CALENDARIO E TURNI RAPIDI -->
+        <!-- 1. CALENDARIO E TURNI RAPIDI -->
         <section id="tab-calendar" class="space-y-6">
             <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Griglia Turni del Mese</h2>
-                    <p class="text-sm text-slate-500">Clicca su una casella dipendente/giorno per assegnare o cambiare turno istantaneamente.</p>
+                    <p class="text-sm text-slate-500">Clicca su una casella per assegnare o cambiare turno istantaneamente.</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <select id="select-month" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="2026-06">Giugno 2026</option>
+                    <select id="select-month" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none">
                         <option value="2026-07" selected>Luglio 2026</option>
                         <option value="2026-08">Agosto 2026</option>
                     </select>
@@ -76,78 +75,70 @@
                 </div>
             </div>
 
-            <!-- Legenda Rapida -->
+            <!-- Legenda -->
             <div class="flex flex-wrap gap-3 items-center bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 text-xs font-semibold">
                 <span class="text-indigo-900 font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Legenda Turni:</span>
-                <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg">MATTINA (08:00 - 14:00)</span>
-                <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-lg">POMERIGGIO (14:00 - 20:00)</span>
-                <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-lg">INTERO (09:00 - 18:00)</span>
-                <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg">RIPOSO (OFF)</span>
+                <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg">M (Mattina)</span>
+                <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-lg">P (Pomeriggio)</span>
+                <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-lg">I (Intero)</span>
+                <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg">OFF (Riposo)</span>
             </div>
 
-            <!-- Tabella Interattiva Turni -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
-                <table class="w-full text-left border-collapse" id="calendar-table">
-                    <!-- Generato via JavaScript -->
-                </table>
+                <table class="w-full text-left border-collapse" id="calendar-table"></table>
             </div>
         </section>
 
-        <!-- 2. SEZIONE DIPENDENTI (ANAGRAFICA) -->
+        <!-- 2. DIPENDENTI E ANAGRAFICA COMPLETA -->
         <section id="tab-staff" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Anagrafica Dipendenti & Contratti</h2>
-                    <p class="text-sm text-slate-500">Gestisci i dati del personale, recapiti e tipo di contratto.</p>
+                    <h2 class="text-xl font-bold text-slate-800">Anagrafica Dipendenti & Dati Fiscali</h2>
+                    <p class="text-sm text-slate-500">Gestisci codice fiscale, contratti e recapiti necessari per i file telematici.</p>
                 </div>
                 <button onclick="openEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow transition flex items-center gap-2">
                     <i class="fa-solid fa-user-plus"></i> Nuovo Dipendente
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="employee-cards-container">
-                <!-- Generato via JS -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="employee-cards-container"></div>
         </section>
 
-        <!-- 3. SEZIONE DISPONIBILITÀ -->
+        <!-- 3. DISPONIBILITÀ -->
         <section id="tab-availability" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="text-xl font-bold text-slate-800">Raccolta Disponibilità Dipendenti</h2>
-                <p class="text-sm text-slate-500">Ogni dipendente può indicare i giorni in cui è disponibile o preferisce riposare.</p>
+                <h2 class="text-xl font-bold text-slate-800">Raccolta Disponibilità & Chiamate</h2>
+                <p class="text-sm text-slate-500">Registra le preferenze o le disponibilità per i turni extra.</p>
             </div>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Seleziona Dipendente</label>
-                        <select id="avail-emp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dipendente</label>
+                        <select id="avail-emp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none"></select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Data</label>
-                        <input type="date" id="avail-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="date" id="avail-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Preferenza</label>
-                        <select id="avail-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="Disponibile">Disponibile a lavorare</option>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo Disponibilità</label>
+                        <select id="avail-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none">
+                            <option value="Disponibile">Disponibile / Chiamata</option>
                             <option value="Ferie/Riposo">Richiesta Riposo / Ferie</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="saveAvailability()" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow transition">
+                <button onclick="saveAvailability()" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">
                     Registra Disponibilità
                 </button>
             </div>
-            <!-- Storico disponibilità inserite -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 mb-4">Disponibilità Registrate</h3>
-                <div id="availability-list" class="space-y-2">
-                    <!-- Lista dinamica -->
-                </div>
+                <h3 class="font-bold text-slate-800 mb-4">Disponibilità Inserite</h3>
+                <div id="availability-list" class="space-y-2"></div>
             </div>
         </section>
 
-        <!-- 4. SEZIONE INTELLIGENZA ARTIFICIALE (PROMPT TURNI) -->
+        <!-- 4. IA PROMPT TURNI -->
         <section id="tab-ai" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-3 mb-2">
@@ -156,15 +147,14 @@
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-slate-800">Generatore Turni con Prompt IA</h2>
-                        <p class="text-sm text-slate-500">Scrivi un comando personalizzato e lascia che l'IA distribuisca i turni in un attimo.</p>
+                        <p class="text-sm text-slate-500">Scrivi le tue regole e compila la griglia automaticamente.</p>
                     </div>
                 </div>
             </div>
-
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Prompt per l'IA (Istruzioni di generazione)</label>
-                    <textarea id="ai-prompt-input" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-purple-500" placeholder="Es: Crea i turni per luglio assicurandoti che Mario Rossi faccia sempre la mattina, copri tutti i weekend con almeno 2 persone e rispetta le ferie richieste."></textarea>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Prompt per l'IA</label>
+                    <textarea id="ai-prompt-input" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-purple-500" placeholder="Es: Distribuisci i turni di luglio coprendo tutti i giorni con almeno 2 persone..."></textarea>
                 </div>
                 <button onclick="runAIGenerator()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-200 transition flex items-center gap-2">
                     <i class="fa-solid fa-bolt"></i> Elabora Turni Automaticamente
@@ -172,20 +162,18 @@
             </div>
         </section>
 
-        <!-- 5. SEZIONE MARCATEMPO & BUSTE PAGA -->
+        <!-- 5. MARCATEMPO -->
         <section id="tab-punch" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Report Marcatempo & Buste Paga</h2>
-                    <p class="text-sm text-slate-500">Sincronizzato col marcatempo fisico. Genera il report mensile per il consulente del lavoro.</p>
+                    <h2 class="text-xl font-bold text-slate-800">Report Marcatempo</h2>
+                    <p class="text-sm text-slate-500">Esporta il report delle ore lavorate per le buste paga.</p>
                 </div>
                 <button onclick="generatePayrollReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> Esporta Report per Buste Paga
+                    <i class="fa-solid fa-file-excel"></i> Esporta Report Buste Paga
                 </button>
             </div>
-
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 mb-4">Ultime Timbrature Rilevate</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-50 text-slate-600 border-b">
@@ -195,18 +183,15 @@
                                 <th class="p-3">Entrata</th>
                                 <th class="p-3">Uscita</th>
                                 <th class="p-3">Ore Lavorate</th>
-                                <th class="p-3">Stato</th>
                             </tr>
                         </thead>
-                        <tbody id="punch-table-body" class="divide-y divide-slate-100">
-                            <!-- Dati simulati -->
-                        </tbody>
+                        <tbody id="punch-table-body" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- 6. SEZIONE WHATSAPP E CONFERMA -->
+        <!-- 6. WHATSAPP E CONFERME -->
         <section id="tab-whatsapp" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-3 mb-2">
@@ -215,46 +200,42 @@
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-slate-800">Invio Turni via WhatsApp & Conferme</h2>
-                        <p class="text-sm text-slate-500">Invia a ciascun dipendente il proprio turno unito al quadro generale dei colleghi, con richiesta di conferma obbligatoria.</p>
+                        <p class="text-sm text-slate-500">Invia al singolo dipendente il proprio turno e l'intero quadro dei colleghi.</p>
                     </div>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="whatsapp-dispatch-container">
-                <!-- Generato via JS -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="whatsapp-dispatch-container"></div>
         </section>
 
-        <!-- 7. SEZIONE AGENZIA DELLE ENTRATE -->
+        <!-- 7. INVIO TELEMATICO / FILE ADE -->
         <section id="tab-ade" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="bg-blue-100 text-blue-600 p-2 rounded-xl text-xl">
-                        <i class="fa-solid fa-building-columns"></i>
+                        <i class="fa-solid fa-file-arrow-down"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Invio telematico Agenzia delle Entrate</h2>
-                        <p class="text-sm text-slate-500">Trasmetti i dati elaborati dei turni e delle presenze direttamente al sistema AdE con un click.</p>
+                        <h2 class="text-xl font-bold text-slate-800">Generazione File per Invio Telematico</h2>
+                        <p class="text-sm text-slate-500">Crea il file ufficiale con i dati anagrafici, fiscali e le chiamate/turni pronti per l'invio.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-sm">
-                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> Assicurati che il certificato telematico aziendale sia attivo prima dell'invio.
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-900 text-sm">
+                    <i class="fa-solid fa-circle-info mr-2"></i> Cliccando sul tasto sottostante, il sistema leggerà l'anagrafica con i codici fiscali e i turni inseriti, scaricando un file formattato sul tuo PC. Potrai poi caricarlo direttamente sul sito dell'ente o passarlo al tuo consulente.
                 </div>
                 <div class="flex flex-wrap gap-4 items-center">
-                    <button onclick="submitToAdE()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> Invia a Agenzia Entrate
+                    <button onclick="downloadAdEFile()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Genera e Scarica File Ufficiale (.CSV)
                     </button>
-                    <div id="ade-status" class="text-sm font-medium text-slate-600"></div>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- MODALE ANAGRAFICA DIPENDENTE -->
+    <!-- MODALE ANAGRAFICA -->
     <div id="employee-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
             <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
@@ -265,15 +246,19 @@
                 <input type="hidden" id="emp-id">
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome e Cognome</label>
-                    <input type="text" id="emp-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="emp-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Numero WhatsApp (es. 3331234567)</label>
-                    <input type="text" id="emp-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Codice Fiscale</label>
+                    <input type="text" id="emp-cf" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm uppercase outline-none" placeholder="RSSMRA80A01H501W">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Numero WhatsApp</label>
+                    <input type="text" id="emp-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none" placeholder="3331234567">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo di Contratto</label>
-                    <select id="emp-contract" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select id="emp-contract" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none">
                         <option value="Full-Time Indeterminato">Full-Time Indeterminato (40h)</option>
                         <option value="Part-Time 20h">Part-Time 20h</option>
                         <option value="Part-Time 30h">Part-Time 30h</option>
@@ -289,18 +274,16 @@
         </div>
     </div>
 
-    <!-- SCRIPT LOGICA APPLICATIVA -->
+    <!-- SCRIPT -->
     <script>
-        // DATI INIZIALI E PERSISTENZA
         let employees = JSON.parse(localStorage.getItem('smart_turni_emps')) || [
-            { id: 1, name: 'Mario Rossi', phone: '3331122334', contract: 'Full-Time Indeterminato' },
-            { id: 2, name: 'Giulia Bianchi', phone: '3389988776', contract: 'Part-Time 20h' },
-            { id: 3, name: 'Luca Verdi', phone: '3405544332', contract: 'Apprendistato' }
+            { id: 1, name: 'Mario Rossi', cf: 'RSSMRA80A01H501W', phone: '3331122334', contract: 'Full-Time Indeterminato' },
+            { id: 2, name: 'Giulia Bianchi', cf: 'BNCGLI85B41Z100Y', phone: '3389988776', contract: 'Part-Time 20h' }
         ];
 
-        let shifts = JSON.parse(localStorage.getItem('smart_turni_shifts')) || {}; // formato: "empId_giorno": "M"
+        let shifts = JSON.parse(localStorage.getItem('smart_turni_shifts')) || {};
         let availability = JSON.parse(localStorage.getItem('smart_turni_avail')) || [];
-        let confirmations = JSON.parse(localStorage.getItem('smart_turni_conf')) || {}; // formato: empId: true/false
+        let confirmations = JSON.parse(localStorage.getItem('smart_turni_conf')) || {};
 
         const shiftTypes = {
             'M': { label: 'Mattina', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
@@ -310,7 +293,6 @@
             '-': { label: 'Non Assegnato', color: 'bg-slate-100 text-slate-400 border-slate-200' }
         };
 
-        // GESTIONE TAB
         function switchTab(tabId) {
             ['tab-calendar', 'tab-staff', 'tab-availability', 'tab-ai', 'tab-punch', 'tab-whatsapp', 'tab-ade'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -326,10 +308,9 @@
             if(tabId === 'tab-punch') renderPunchTable();
         }
 
-        // --- 1. CALENDARIO E TURNI IMMEDIATI ---
         function renderCalendarGrid() {
             const table = document.getElementById('calendar-table');
-            const daysInMonth = 31; // Esempio per luglio
+            const daysInMonth = 31;
             let html = `<thead><tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">`;
             html += `<th class="p-3 sticky left-0 bg-slate-50 z-10 min-w-[150px]">Dipendente</th>`;
             for(let d=1; d<=daysInMonth; d++) {
@@ -367,7 +348,6 @@
             renderCalendarGrid();
         }
 
-        // --- 2. ANAGRAFICA DIPENDENTI ---
         function renderEmployees() {
             const container = document.getElementById('employee-cards-container');
             let html = '';
@@ -379,6 +359,7 @@
                                 <h3 class="font-bold text-slate-800 text-base">${emp.name}</h3>
                                 <span class="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-semibold">${emp.contract}</span>
                             </div>
+                            <p class="text-xs text-slate-500 mb-1"><strong class="text-slate-700">CF:</strong> ${emp.cf || 'Non inserito'}</p>
                             <p class="text-xs text-slate-500 mb-4"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> ${emp.phone}</p>
                         </div>
                         <div class="flex gap-2 pt-3 border-t border-slate-100">
@@ -398,12 +379,14 @@
                 document.getElementById('modal-title').innerText = "Modifica Dipendente";
                 document.getElementById('emp-id').value = emp.id;
                 document.getElementById('emp-name').value = emp.name;
+                document.getElementById('emp-cf').value = emp.cf || '';
                 document.getElementById('emp-phone').value = emp.phone;
                 document.getElementById('emp-contract').value = emp.contract;
             } else {
                 document.getElementById('modal-title').innerText = "Nuovo Dipendente";
                 document.getElementById('emp-id').value = '';
                 document.getElementById('emp-name').value = '';
+                document.getElementById('emp-cf').value = '';
                 document.getElementById('emp-phone').value = '';
             }
         }
@@ -415,6 +398,7 @@
         function saveEmployeeData() {
             let id = document.getElementById('emp-id').value;
             let name = document.getElementById('emp-name').value;
+            let cf = document.getElementById('emp-cf').value.toUpperCase();
             let phone = document.getElementById('emp-phone').value;
             let contract = document.getElementById('emp-contract').value;
 
@@ -423,11 +407,12 @@
             if(id) {
                 let emp = employees.find(e => e.id == id);
                 emp.name = name;
+                emp.cf = cf;
                 emp.phone = phone;
                 emp.contract = contract;
             } else {
                 let newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
-                employees.push({ id: newId, name, phone, contract });
+                employees.push({ id: newId, name, cf, phone, contract });
             }
 
             localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
@@ -443,7 +428,6 @@
             }
         }
 
-        // --- 3. DISPONIBILITÀ ---
         function populateAvailabilityDropdown() {
             const select = document.getElementById('avail-emp');
             select.innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
@@ -454,13 +438,11 @@
             let empId = document.getElementById('avail-emp').value;
             let date = document.getElementById('avail-date').value;
             let status = document.getElementById('avail-status').value;
-
             if(!date) { alert('Seleziona una data'); return; }
-
             availability.push({ empId, date, status });
             localStorage.setItem('smart_turni_avail', JSON.stringify(availability));
             renderAvailabilityList();
-            alert('Disponibilità salvata con successo!');
+            alert('Disponibilità salvata!');
         }
 
         function renderAvailabilityList() {
@@ -474,9 +456,7 @@
                 let badge = a.status === 'Disponibile' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
                 return `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-sm">
-                        <div>
-                            <span class="font-bold text-slate-700">${emp ? emp.name : 'Sconosciuto'}</span> - <span class="text-slate-500">${a.date}</span>
-                        </div>
+                        <div><span class="font-bold text-slate-700">${emp ? emp.name : 'Sconosciuto'}</span> - <span class="text-slate-500">${a.date}</span></div>
                         <div class="flex items-center gap-3">
                             <span class="text-xs px-2.5 py-1 rounded-lg font-semibold ${badge}">${a.status}</span>
                             <button onclick="availability.splice(${idx},1);localStorage.setItem('smart_turni_avail',JSON.stringify(availability));renderAvailabilityList();" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
@@ -486,25 +466,20 @@
             }).join('');
         }
 
-        // --- 4. IA PROMPT GENERATOR ---
         function runAIGenerator() {
             let promptText = document.getElementById('ai-prompt-input').value;
-            if(!promptText) { alert('Inserisci un prompt per l\'IA'); return; }
-            
-            // Simulazione elaborazione IA intelligente
+            if(!promptText) { alert('Inserisci un prompt'); return; }
             for(let emp of employees) {
                 for(let d=1; d<=15; d++) {
                     let rand = Math.random();
-                    let code = rand > 0.7 ? 'P' : (rand > 0.3 ? 'M' : 'OFF');
-                    shifts[`${emp.id}_${d}`] = code;
+                    shifts[`${emp.id}_${d}`] = rand > 0.7 ? 'P' : (rand > 0.3 ? 'M' : 'OFF');
                 }
             }
             localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
-            alert('IA: Turni generati con successo in base alle tue indicazioni!');
+            alert('IA: Turni generati!');
             switchTab('tab-calendar');
         }
 
-        // --- 5. MARCATEMPO & BUSTE PAGA ---
         function renderPunchTable() {
             const tbody = document.getElementById('punch-table-body');
             let html = '';
@@ -516,7 +491,6 @@
                         <td class="p-3 text-emerald-600 font-medium">08:00</td>
                         <td class="p-3 text-rose-600 font-medium">16:30</td>
                         <td class="p-3 font-bold text-slate-800">8h 30m</td>
-                        <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Regolare</span></td>
                     </tr>
                 `;
             });
@@ -524,18 +498,17 @@
         }
 
         function generatePayrollReport() {
-            alert('Report marcatempo compilato ed esportato con successo per il consulente buste paga!');
+            alert('Report buste paga esportato con successo!');
         }
 
-        // --- 6. WHATSAPP & CONFERME ---
         function renderWhatsAppSection() {
             const container = document.getElementById('whatsapp-dispatch-container');
             let html = '';
             employees.forEach(emp => {
                 let isConfirmed = confirmations[emp.id] || false;
                 let statusBadge = isConfirmed 
-                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold"><i class="fa-solid fa-check mr-1"></i> Turno Confermato</span>`
-                    : `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold"><i class="fa-solid fa-clock mr-1"></i> In attesa di conferma</span>`;
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold"><i class="fa-solid fa-check mr-1"></i> Confermato</span>`
+                    : `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold"><i class="fa-solid fa-clock mr-1"></i> In attesa</span>`;
 
                 html += `
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between space-y-4">
@@ -544,19 +517,17 @@
                                 <h3 class="font-bold text-slate-800 text-base">${emp.name}</h3>
                                 ${statusBadge}
                             </div>
-                            <p class="text-xs text-slate-500 mb-3">Numero: ${emp.phone}</p>
+                            <p class="text-xs text-slate-500 mb-3">WhatsApp: ${emp.phone}</p>
                             <div class="bg-slate-50 p-3 rounded-xl text-xs space-y-1 text-slate-600">
-                                <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-paper-plane text-indigo-600 mr-1"></i> Anteprima Messaggio WhatsApp:</p>
-                                <p>Ciao ${emp.name}, ecco il tuo turno di Luglio e il quadro riepilogativo di tutti i colleghi. Ti preghiamo di confermare la ricezione.</p>
+                                <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-paper-plane text-indigo-600 mr-1"></i> Invio a ${emp.name}:</p>
+                                <p>Include turno personale + quadro turni di tutti i colleghi + richiesta conferma.</p>
                             </div>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="sendWhatsApp(${emp.id})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-2">
-                                <i class="fa-brands fa-whatsapp"></i> Invia Turno + Colleghi
+                                <i class="fa-brands fa-whatsapp"></i> Invia WhatsApp
                             </button>
-                            <button onclick="toggleConfirm(${emp.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Simula conferma dipendente">
-                                Simula Conferma
-                            </button>
+                            <button onclick="toggleConfirm(${emp.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition">Simula Conferma</button>
                         </div>
                     </div>
                 `;
@@ -566,9 +537,8 @@
 
         function sendWhatsApp(empId) {
             let emp = employees.find(e => e.id == empId);
-            let msg = `Ciao ${emp.name}, ecco i turni del mese. Ti ricordiamo l'obbligo di conferma.`;
-            let url = `https://wa.me/${emp.phone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+            let msg = `Ciao ${emp.name}, ecco il tuo turno di Luglio e l'orario dei colleghi. Conferma la ricezione per favore.`;
+            window.open(`https://wa.me/${emp.phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function toggleConfirm(empId) {
@@ -577,16 +547,26 @@
             renderWhatsAppSection();
         }
 
-        // --- 7. AGENZIA DELLE ENTRATE ---
-        function submitToAdE() {
-            const statusDiv = document.getElementById('ade-status');
-            statusDiv.innerHTML = `<span class="text-blue-600 font-bold"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Trasmissione telematica in corso...</span>`;
-            setTimeout(() => {
-                statusDiv.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Protocollo AdE generato con successo: IT-2026-8894102</span>`;
-            }, 1500);
+        function downloadAdEFile() {
+            let csvContent = "data:text/csv;charset=utf-8,ID_DIPENDENTE;NOME;CODICE_FISCALE;CONTRATTO;GIORNO;TURNO\n";
+            employees.forEach(emp => {
+                for(let d=1; d<=31; d++) {
+                    let key = `${emp.id}_${d}`;
+                    let s = shifts[key] || '-';
+                    if(s !== '-') {
+                        csvContent += `${emp.id};"${emp.name}";"${emp.cf || ''}";"${emp.contract}";${d};${s}\n`;
+                    }
+                }
+            });
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "flusso_turni_ade_2026.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        // Avvio iniziale
         renderCalendarGrid();
     </script>
 </body>
