@@ -1,244 +1,238 @@
+```html
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TurniFacile - HR & Shift Management</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Gestione Turni Facile & Smart</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Fredoka Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        playful: ['Fredoka', 'cursive', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --fluida-bg: #f4f6f8;
-            --fluida-sidebar: #ffffff;
-            --fluida-primary: #00b074;
-            --fluida-dark: #1b253b;
-            --fluida-gray: #62748e;
-            --sidebar-width: 270px;
-        }
-        body {
-            background-color: var(--fluida-bg);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--fluida-dark);
-            -webkit-font-smoothing: antialiased;
-        }
-        /* Sidebar stile Fluida */
-        #sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: var(--fluida-sidebar);
-            border-right: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
-            z-index: 1050;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar-brand {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--fluida-dark);
-            padding: 24px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .sidebar-brand i { color: var(--fluida-primary); font-size: 1.4rem; }
-        .sidebar-menu {
-            padding: 16px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-        .sidebar-menu .btn {
-            text-align: left;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: none;
-            background: transparent;
-            color: var(--fluida-gray);
-            transition: all 0.2s ease;
-        }
-        .sidebar-menu .btn:hover, .sidebar-menu .btn.active {
-            background: #e6f7f2;
-            color: var(--fluida-primary);
-            font-weight: 600;
-        }
-        /* Main Container */
-        #content {
-            margin-left: var(--sidebar-width);
-            padding: 32px;
-            min-height: 100vh;
-        }
-        .card-fluida {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-        .section-view { display: none; }
-        .section-view.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Widget & Grid Cards */
-        .widget-box {
-            background: #fafbfc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 20px;
-        }
-        .btn-fluida {
-            background: var(--fluida-primary);
-            color: white;
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 10px 20px;
-            border: none;
-            transition: opacity 0.2s;
-        }
-        .btn-fluida:hover { background: #009862; color: white; }
-        
-        .table-fluida th {
-            background: #f8fafc;
-            color: var(--fluida-gray);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        @media (max-width: 991px) {
-            #sidebar { margin-left: calc(var(--sidebar-width) * -1); }
-            #sidebar.show { margin-left: 0; }
-            #content { margin-left: 0; padding: 16px; }
-            .mobile-nav-toggle { display: inline-flex !important; }
-        }
-        .mobile-nav-toggle {
-            display: none;
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            align-items: center;
-            gap: 8px;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-playful { font-family: 'Fredoka', cursive, sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        * { transition: background-color 0.2s ease, transform 0.1s ease; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 h-full flex flex-col antialiased">
 
-    <!-- Sidebar -->
-    <nav id="sidebar">
-        <div class="sidebar-brand">
-            <i class="fa-solid fa-layer-group"></i>
-            <span>TurniFacile HR</span>
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-200%] opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-slate-700">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-green-400 text-xl"></i>
+        <div>
+            <h4 id="toast-title" class="font-playful font-semibold text-sm">Operazione riuscita!</h4>
+            <p id="toast-msg" class="text-xs text-slate-300">Tutto fatto alla perfezione.</p>
         </div>
-        <div class="sidebar-menu">
-            <button class="btn active" onclick="switchSection('dashboard', this)"><i class="fa-solid fa-house"></i> Home Dashboard</button>
-            <button class="btn" onclick="switchSection('turni', this)"><i class="fa-solid fa-calendar-days"></i> Pianificazione Turni</button>
-            <button class="btn" onclick="switchSection('anagrafica', this)"><i class="fa-solid fa-users"></i> Anagrafica & Personale</button>
-            <button class="btn" onclick="switchSection('disponibilita', this)"><i class="fa-solid fa-clock-rotate-left"></i> Ferie & Disponibilità</button>
-            <button class="btn" onclick="switchSection('marcatempo', this)"><i class="fa-solid fa-fingerprint"></i> Presenze & Marcatempo</button>
-            <button class="btn" onclick="switchSection('ade', this)"><i class="fa-solid fa-building-columns"></i> Agenzia delle Entrate</button>
-            <button class="btn" onclick="switchSection('whatsapp', this)"><i class="fa-brands fa-whatsapp text-success"></i> WhatsApp & Notifiche</button>
+    </div>
+
+    <!-- App Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-gradient-to-tr from-green-500 to-emerald-400 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-green-200">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div>
+                    <h1 class="font-playful text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">TurniFacile <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-sans font-medium">Bimbi & Pro</span></h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Gestione presenze, marcatempo, WhatsApp e Agenzia Entrate</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button onclick="openHelpModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span class="hidden md:inline">Guida Rapida</span>
+                </button>
+                <div class="hidden sm:flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-600 font-medium">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Online & Sicuro</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="bg-white border-b border-slate-200 shadow-xs overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-4 py-2.5 whitespace-nowrap">
+            <button onclick="switchTab('tab-calendario', this)" class="tab-btn active px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 bg-green-500 text-white shadow-md shadow-green-100">
+                <i class="fa-solid fa-calendar-week"></i>
+                <span>1. Calendario Turni</span>
+            </button>
+            <button onclick="switchTab('tab-anagrafica', this)" class="tab-btn px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-users"></i>
+                <span>2. Anagrafica & Contratti</span>
+            </button>
+            <button onclick="switchTab('tab-disponibilita', this)" class="tab-btn px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>3. Disponibilità</span>
+            </button>
+            <button onclick="switchTab('tab-ia', this)" class="tab-btn px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-robot"></i>
+                <span>4. Generatore IA & Prompt</span>
+            </button>
+            <button onclick="switchTab('tab-marcatempo', this)" class="tab-btn px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>5. Marcatempo & Buste Paga</span>
+            </button>
+            <button onclick="switchTab('tab-whatsapp', this)" class="tab-btn px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-brands fa-whatsapp text-emerald-500"></i>
+                <span>6. WhatsApp & Conferme</span>
+            </button>
+            <button onclick="switchTab('tab-ade', this)" class="tab-btn px-4 py-2.5 rounded-xl font-playful font-semibold text-sm flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-landmark text-amber-600"></i>
+                <span>7. Agenzia Entrate</span>
+            </button>
         </div>
     </nav>
 
     <!-- Main Content Area -->
-    <div id="content">
-        <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')">
-            <i class="fa-solid fa-bars"></i> Menu Principale
-        </button>
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 overflow-y-auto">
 
-        <!-- 1. DASHBOARD -->
-        <div id="dashboard" class="section-view active">
-            <div class="card-fluida">
-                <h3>Panoramica Attività 📊</h3>
-                <p class="text-muted">Gestione centralizzata presenze, turni e comunicazioni in tempo reale.</p>
-                <div class="row g-4 mt-2">
-                    <div class="col-md-4">
-                        <div class="widget-box">
-                            <span class="text-muted small fw-bold">COLLABORATORI ATTIVI</span>
-                            <h2 class="fw-bold mt-1 mb-2">6</h2>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="switchSection('anagrafica', document.querySelectorAll('.sidebar-menu .btn')[2])">Gestisci</button>
-                        </div>
+        <!-- TAB 1: CALENDARIO TURNI COMPILATO -->
+        <div id="tab-calendario" class="tab-content active space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="font-playful text-xl font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-days text-green-500"></i>
+                        <span>Calendario Turni Precompilato (Novembre 2026)</span>
+                    </h2>
+                    <p class="text-sm text-slate-500">Visualizza subito la programmazione completa di tutti i dipendenti.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <select id="select-mese" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <option>Ottobre 2026</option>
+                        <option selected>Novembre 2026</option>
+                        <option>Dicembre 2026</option>
+                    </select>
+                    <button onclick="mostraNotifica('Calendario aggiornato con successo!', 'success')" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-xl text-sm shadow-md shadow-green-100 flex items-center space-x-2">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Aggiorna</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Legenda Rapida Orari -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-sun"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-medium">Mattina</div>
+                        <div class="font-playful font-bold text-slate-800">08:00 - 14:00</div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="widget-box">
-                            <span class="text-muted small fw-bold">COPERTURA TURNO OGGI</span>
-                            <h2 class="fw-bold mt-1 mb-2 text-success">100%</h2>
-                            <button class="btn btn-sm btn-outline-success" onclick="switchSection('turni', document.querySelectorAll('.sidebar-menu .btn')[1])">Visualizza Calendario</button>
-                        </div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-2xl flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-cloud-sun"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-medium">Pomeriggio</div>
+                        <div class="font-playful font-bold text-slate-800">14:00 - 20:00</div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="widget-box">
-                            <span class="text-muted small fw-bold">INVIO COMUNICAZIONI</span>
-                            <h2 class="fw-bold mt-1 mb-2 text-primary">Pronto</h2>
-                            <button class="btn btn-sm btn-fluida" onclick="switchSection('whatsapp', document.querySelectorAll('.sidebar-menu .btn')[6])">Invia WhatsApp</button>
-                        </div>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 p-3 rounded-2xl flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-moon"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-medium">Full / Notturno</div>
+                        <div class="font-playful font-bold text-slate-800">09:00 - 18:00</div>
+                    </div>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 p-3 rounded-2xl flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-mug-hot"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-medium">Riposo</div>
+                        <div class="font-playful font-bold text-slate-800">FERIE / OFF</div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 2. TURNI -->
-        <div id="turni" class="section-view">
-            <div class="card-fluida">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                    <h3>Calendario & Pianificazione Turni 🗓️</h3>
-                    <button class="btn-fluida" onclick="generaTurniAI()"><i class="fa-solid fa-wand-magic-sparkles"></i> Ottimizza con IA</button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-fluida align-middle text-center">
+            <!-- Tabella Calendario -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th>Giorno</th>
-                                <th>Data</th>
-                                <th>Turno Sala 1</th>
-                                <th>Turno Sala 2</th>
-                                <th>Cucina & Linea</th>
-                                <th>Note / Gestione</th>
+                            <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-playful text-sm">
+                                <th class="p-4 font-semibold">Dipendente</th>
+                                <th class="p-4 font-semibold">Lun 2 Nov</th>
+                                <th class="p-4 font-semibold">Mar 3 Nov</th>
+                                <th class="p-4 font-semibold">Mer 4 Nov</th>
+                                <th class="p-4 font-semibold">Gio 5 Nov</th>
+                                <th class="p-4 font-semibold">Ven 6 Nov</th>
+                                <th class="p-4 font-semibold">Sab 7 Nov</th>
+                                <th class="p-4 font-semibold">Dom 8 Nov</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td class="fw-bold">GIO</td>
-                                <td>1 Ott</td>
-                                <td>Luigi</td>
-                                <td>-</td>
-                                <td>Orsola, Maimona</td>
-                                <td><span class="badge bg-light text-dark border">Standard</span></td>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-semibold text-slate-800 flex items-center space-x-3">
+                                    <span class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-playful font-bold text-sm">MR</span>
+                                    <div>
+                                        <div>Mario Rossi</div>
+                                        <div class="text-xs text-slate-400 font-normal">Full-time (40h)</div>
+                                    </div>
+                                </td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-amber-100 text-amber-800 font-semibold text-xs block text-center">14:00 - 20:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-amber-100 text-amber-800 font-semibold text-xs block text-center">14:00 - 20:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-rose-100 text-rose-800 font-semibold text-xs block text-center">RIPOSO</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-rose-100 text-rose-800 font-semibold text-xs block text-center">RIPOSO</span></td>
                             </tr>
-                            <tr>
-                                <td class="fw-bold">VEN</td>
-                                <td>2 Ott</td>
-                                <td>Alessia, Andrea</td>
-                                <td>Luigi</td>
-                                <td>Orsola, Maimona, Angori</td>
-                                <td><span class="badge bg-warning text-dark">Chiamata AdE</span></td>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-semibold text-slate-800 flex items-center space-x-3">
+                                    <span class="w-9 h-9 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center font-playful font-bold text-sm">LB</span>
+                                    <div>
+                                        <div>Laura Bianchi</div>
+                                        <div class="text-xs text-slate-400 font-normal">Part-time (24h)</div>
+                                    </div>
+                                </td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-amber-100 text-amber-800 font-semibold text-xs block text-center">14:00 - 20:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-rose-100 text-rose-800 font-semibold text-xs block text-center">RIPOSO</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-amber-100 text-amber-800 font-semibold text-xs block text-center">14:00 - 20:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">09:00 - 15:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-rose-100 text-rose-800 font-semibold text-xs block text-center">RIPOSO</span></td>
                             </tr>
-                            <tr>
-                                <td class="fw-bold">SAB</td>
-                                <td>3 Ott</td>
-                                <td>Alessia, Andrea, Luigi</td>
-                                <td>Alessia</td>
-                                <td>Orsola, Maimona, Angori</td>
-                                <td><span class="badge bg-warning text-dark">Chiamata AdE</span></td>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-semibold text-slate-800 flex items-center space-x-3">
+                                    <span class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-playful font-bold text-sm">GV</span>
+                                    <div>
+                                        <div>Giuseppe Verdi</div>
+                                        <div class="text-xs text-slate-400 font-normal">Full-time (40h)</div>
+                                    </div>
+                                </td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-purple-100 text-purple-800 font-semibold text-xs block text-center">09:00 - 18:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-purple-100 text-purple-800 font-semibold text-xs block text-center">09:00 - 18:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-rose-100 text-rose-800 font-semibold text-xs block text-center">RIPOSO</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-purple-100 text-purple-800 font-semibold text-xs block text-center">09:00 - 18:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-rose-100 text-rose-800 font-semibold text-xs block text-center">RIPOSO</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
+                                <td class="p-3"><span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-semibold text-xs block text-center">08:00 - 14:00</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -246,144 +240,774 @@
             </div>
         </div>
 
-        <!-- 3. ANAGRAFICA -->
-        <div id="anagrafica" class="section-view">
-            <div class="card-fluida">
-                <h3>Anagrafica & Contratti Staff 👥</h3>
-                <p class="text-muted">Aggiungi o rimuovi collaboratori e gestisci i recapiti per le comunicazioni.</p>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4"><input type="text" id="nomeDip" class="form-control" placeholder="Nome e Cognome"></div>
-                    <div class="col-md-3">
-                        <select id="contrattoDip" class="form-select">
-                            <option value="Indeterminato">Indeterminato</option>
-                            <option value="Determinato">Determinato</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="A Chiamata">A Chiamata</option>
+        <!-- TAB 2: ANAGRAFICA DIPENDENTI -->
+        <div id="tab-anagrafica" class="tab-content space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="font-playful text-xl font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-users text-green-500"></i>
+                        <span>Anagrafica & Contratti Dipendenti</span>
+                    </h2>
+                    <p class="text-sm text-slate-500">Gestisci i dati personali, tipo di contratto, ore settimanali, WhatsApp e PIN.</p>
+                </div>
+                <button onclick="openAddEmployeeModal()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm shadow-md shadow-green-100 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Nuovo Dipendente</span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-playful text-sm">
+                                <th class="p-4 font-semibold">Dipendente</th>
+                                <th class="p-4 font-semibold">Contratto & Ore</th>
+                                <th class="p-4 font-semibold">WhatsApp</th>
+                                <th class="p-4 font-semibold">PIN Marcatempo</th>
+                                <th class="p-4 font-semibold text-right">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-semibold text-slate-800 flex items-center space-x-3">
+                                    <span class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-playful font-bold">MR</span>
+                                    <div>
+                                        <div>Mario Rossi</div>
+                                        <div class="text-xs text-slate-400 font-normal">mario.rossi@email.it</div>
+                                    </div>
+                                </td>
+                                <td class="p-4"><span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold">Full-time (40h)</span></td>
+                                <td class="p-4 text-slate-600"><i class="fa-brands fa-whatsapp text-green-500 mr-1.5"></i> +39 333 1234567</td>
+                                <td class="p-4"><span class="font-mono bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold text-slate-700">1234</span></td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button onclick="mostraNotifica('Modifica anagrafica Mario Rossi', 'success')" class="p-2 text-slate-400 hover:text-green-600 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="mostraNotifica('Dipendente rimosso', 'success')" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-semibold text-slate-800 flex items-center space-x-3">
+                                    <span class="w-10 h-10 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center font-playful font-bold">LB</span>
+                                    <div>
+                                        <div>Laura Bianchi</div>
+                                        <div class="text-xs text-slate-400 font-normal">laura.bianchi@email.it</div>
+                                    </div>
+                                </td>
+                                <td class="p-4"><span class="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold">Part-time (24h)</span></td>
+                                <td class="p-4 text-slate-600"><i class="fa-brands fa-whatsapp text-green-500 mr-1.5"></i> +39 338 9876543</td>
+                                <td class="p-4"><span class="font-mono bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold text-slate-700">5678</span></td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button onclick="mostraNotifica('Modifica anagrafica Laura Bianchi', 'success')" class="p-2 text-slate-400 hover:text-green-600 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="mostraNotifica('Dipendente rimosso', 'success')" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-semibold text-slate-800 flex items-center space-x-3">
+                                    <span class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-playful font-bold">GV</span>
+                                    <div>
+                                        <div>Giuseppe Verdi</div>
+                                        <div class="text-xs text-slate-400 font-normal">giuseppe.verdi@email.it</div>
+                                    </div>
+                                </td>
+                                <td class="p-4"><span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold">Full-time (40h)</span></td>
+                                <td class="p-4 text-slate-600"><i class="fa-brands fa-whatsapp text-green-500 mr-1.5"></i> +39 340 5554433</td>
+                                <td class="p-4"><span class="font-mono bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold text-slate-700">9988</span></td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button onclick="mostraNotifica('Modifica anagrafica Giuseppe Verdi', 'success')" class="p-2 text-slate-400 hover:text-green-600 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="mostraNotifica('Dipendente rimosso', 'success')" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: DISPONIBILITA -->
+        <div id="tab-disponibilita" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-playful text-xl font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-heart-pulse text-green-500"></i>
+                        <span>Inserimento Disponibilità Giornaliere</span>
+                    </h2>
+                    <p class="text-sm text-slate-500">Ogni dipendente può indicare quando è disponibile o preferisce riposare. Tocca le caselle per impostarle!</p>
+                </div>
+                <div class="flex items-center space-x-3 w-full sm:w-auto">
+                    <select class="bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 w-full sm:w-auto">
+                        <option>Mario Rossi (Full-time)</option>
+                        <option>Laura Bianchi (Part-time)</option>
+                        <option>Giuseppe Verdi (Full-time)</option>
+                    </select>
+                    <button onclick="mostraNotifica('Disponibilità salvate con successo!', 'success')" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm shadow-md shadow-green-100 whitespace-nowrap">
+                        Salva
+                    </button>
+                </div>
+            </div>
+
+            <!-- Griglia interattiva disponibilità -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Lunedì</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">2 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-check text-emerald-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-check text-amber-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>🌙 Notturno</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Martedì</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">3 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-check text-emerald-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold text-xs flex items-center justify-between">
+                            <span>🌙 Notturno</span>
+                            <i class="fa-solid fa-check text-emerald-600"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Mercoledì</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">4 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-check text-amber-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 font-semibold text-xs flex items-center justify-between">
+                            <span>🌙 Notturno</span>
+                            <i class="fa-solid fa-check text-amber-600"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Giovedì</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">5 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-check text-emerald-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-check text-amber-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>🌙 Notturno</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Venerdì</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">6 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-check text-emerald-600"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 font-semibold text-xs flex items-center justify-between">
+                            <span>🌙 Notturno</span>
+                            <i class="fa-solid fa-check text-amber-600"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Sabato</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">7 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-rose-300 bg-rose-50 text-rose-800 font-semibold text-xs flex items-center justify-between">
+                            <span>☕ Riposo / Off</span>
+                            <i class="fa-solid fa-check text-rose-600"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="font-playful font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex justify-between items-center">
+                        <span>Domenica</span>
+                        <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600">8 Nov</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>☀️ Mattina (08-14)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between">
+                            <span>🌤️ Pomeriggio (14-20)</span>
+                            <i class="fa-solid fa-xmark text-slate-300"></i>
+                        </button>
+                        <button onclick="toggleDisp(this)" class="w-full py-2.5 px-3 rounded-xl border border-rose-300 bg-rose-50 text-rose-800 font-semibold text-xs flex items-center justify-between">
+                            <span>☕ Riposo / Off</span>
+                            <i class="fa-solid fa-check text-rose-600"></i>
+                        </button>
+                    </div>
+                    <span class="text-center text-[10px] text-slate-400 font-medium">Tocca per modificare</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: IA & PROMPT ELABORATORE -->
+        <div id="tab-ia" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-playful text-xl font-bold text-slate-900">Generatore Turni con Intelligenza Artificiale</h2>
+                        <p class="text-sm text-slate-500">Modifica il prompt testuale per personalizzare le regole di generazione dei turni.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block font-playful font-semibold text-sm text-slate-700">Prompt / Istruzioni per l'IA:</label>
+                    <textarea id="prompt-input" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-xs">Genera il turno settimanale rispettando queste regole:
+1. Massimo 40 ore settimanali per i Full-time, 24 ore per i Part-time.
+2. Coprire sempre la fascia Mattina e Pomeriggio con almeno 2 dipendenti.
+3. Nessun dipendente deve fare due turni consecutivi senza almeno 11 ore di stacco.
+4. Rispetta le preferenze di riposo indicate nel pannello disponibilità.</textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                    <button onclick="generaTurniAI()" id="btn-genera-ai" class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white font-playful font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-green-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Genera Turni con IA Magica</span>
+                    </button>
+                    <button onclick="caricaPromptPreset('ristorante')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-3 rounded-xl text-sm transition">
+                        Preset: Ristorante 🍕
+                    </button>
+                    <button onclick="caricaPromptPreset('negozio')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-3 rounded-xl text-sm transition">
+                        Preset: Negozio 🛍️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Risultato IA -->
+            <div id="ai-result-box" class="hidden bg-emerald-50 border border-emerald-200 p-6 rounded-2xl shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-circle-check text-green-600 text-2xl"></i>
+                        <div>
+                            <h3 class="font-playful font-bold text-emerald-900 text-base">Turni elaborati con successo dall'IA!</h3>
+                            <p class="text-xs text-emerald-700">Tutti i vincoli contrattuali e le disponibilità sono stati rispettati.</p>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('tab-calendario', document.querySelectorAll('.tab-btn')[0])" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs">
+                        Visualizza Calendario <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-emerald-100 text-xs text-slate-700 font-mono space-y-1">
+                    <div>> Analisi disponibilità dipendenti completata.</div>
+                    <div>> Verifica riposi e contratti (40h / 24h) OK.</div>
+                    <div>> Ottimizzazione turni completata senza conflitti.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: MARCATERMO & BUSTE PAGA -->
+        <div id="tab-marcatempo" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 lg:col-span-1">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-fingerprint text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-playful text-lg font-bold text-slate-900">Marcatempo Virtuale</h2>
+                            <p class="text-xs text-slate-500">Timbra ingresso o uscita</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold text-slate-600">Seleziona Dipendente:</label>
+                        <select id="marcatempo-dip" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-semibold text-slate-800">
+                            <option>Mario Rossi (PIN: 1234)</option>
+                            <option>Laura Bianchi (PIN: 5678)</option>
+                            <option>Giuseppe Verdi (PIN: 9988)</option>
                         </select>
                     </div>
-                    <div class="col-md-3"><input type="text" id="telDip" class="form-control" placeholder="WhatsApp (es. 339...)"></div>
-                    <div class="col-md-2"><button class="btn-fluida w-100" onclick="aggiungiDipendente()">Aggiungi</button></div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-fluida align-middle" id="tabellaAnagrafica">
-                        <thead>
-                            <tr>
-                                <th>Nome Dipendente</th>
-                                <th>Tipologia Contratto</th>
-                                <th>Recapito WhatsApp</th>
-                                <th>Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td class="fw-bold">Alessia</td><td>Part-time</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td class="fw-bold">Luigi</td><td>Indeterminato</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td class="fw-bold">Andrea</td><td>Determinato</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td class="fw-bold">Orsola</td><td>Indeterminato</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td class="fw-bold">Maimona</td><td>Part-time</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td class="fw-bold">Angori</td><td>A Chiamata</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
 
-        <!-- 4. DISPONIBILITA -->
-        <div id="disponibilita" class="section-view">
-            <div class="card-fluida">
-                <h3>Richieste Ferie & Disponibilità ⏱️</h3>
-                <p class="text-muted">Registra le preferenze o le assenze richieste dai dipendenti.</p>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold">Dipendente</label>
-                        <select class="form-select"><option>Alessia</option><option>Luigi</option><option>Andrea</option><option>Orsola</option></select>
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold text-slate-600">Inserisci PIN (4 cifre):</label>
+                        <input type="password" maxlength="4" value="1234" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center text-xl font-mono tracking-widest font-bold text-slate-800">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold">Data</label>
-                        <input type="date" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold">Tipologia</label>
-                        <select class="form-select"><option>Disponibile</option><option>Ferie / Permesso</option></select>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="timbraCartellino('Ingresso')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-playful font-bold py-3.5 px-4 rounded-xl text-sm shadow-md shadow-emerald-100 flex flex-col items-center justify-center space-y-1">
+                            <i class="fa-solid fa-right-to-bracket text-lg"></i>
+                            <span>ENTRATA</span>
+                        </button>
+                        <button onclick="timbraCartellino('Uscita')" class="bg-rose-500 hover:bg-rose-600 text-white font-playful font-bold py-3.5 px-4 rounded-xl text-sm shadow-md shadow-rose-100 flex flex-col items-center justify-center space-y-1">
+                            <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                            <span>USCITA</span>
+                        </button>
                     </div>
                 </div>
-                <button class="btn-fluida mt-3" onclick="alert('Disponibilità salvata correttamente!')">Registra Richiesta</button>
-            </div>
-        </div>
 
-        <!-- 5. MARCATEMPO -->
-        <div id="marcatempo" class="section-view">
-            <div class="card-fluida">
-                <h3>Presenze & Report Buste Paga 📋</h3>
-                <p class="text-muted">Riepilogo ore e straordinari pronto per il consulente del lavoro.</p>
-                <button class="btn-fluida mb-3" onclick="alert('Report presenze esportato con successo!')"><i class="fa-solid fa-file-excel"></i> Esporta Report Ore</button>
-                <div class="p-3 bg-light rounded font-monospace text-secondary small border">
-                    [REPORT PRESENZE OTTOBRE]<br>- Alessia: 154 ore (6h straordinario)<br>- Luigi: 140 ore (0h straordinario)<br>- Andrea: 130 ore (4h straordinario)<br>- Orsola: 160 ore (8h straordinario)<br>- Maimona: 120 ore (2h straordinario)<br>- Angori: 42 ore (A chiamata)
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-file-invoice-dollar text-lg"></i>
+                                </div>
+                                <div>
+                                    <h2 class="font-playful text-lg font-bold text-slate-900">Report Ore per Buste Paga</h2>
+                                    <p class="text-xs text-slate-500">Riepilogo presenze da inviare al consulente del lavoro</p>
+                                </div>
+                            </div>
+                            <button onclick="mostraNotifica('Report PDF inviato con successo al consulente paghe!', 'success')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-md shadow-indigo-100 flex items-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Invia a Studio Paghe</span>
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto border border-slate-100 rounded-xl">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-100 text-slate-600 font-playful">
+                                    <tr>
+                                        <th class="p-3">Dipendente</th>
+                                        <th class="p-3">Ore Ordinarie</th>
+                                        <th class="p-3">Straordinari</th>
+                                        <th class="p-3">Assenze / Permessi</th>
+                                        <th class="p-3 text-right">Totale Ore</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr>
+                                        <td class="p-3 font-semibold text-slate-800">Mario Rossi (Full-time)</td>
+                                        <td class="p-3">160h</td>
+                                        <td class="p-3 text-emerald-600 font-semibold">+4h</td>
+                                        <td class="p-3 text-slate-400">0h</td>
+                                        <td class="p-3 text-right font-bold text-slate-900">164h</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-slate-800">Laura Bianchi (Part-time)</td>
+                                        <td class="p-3">96h</td>
+                                        <td class="p-3 text-emerald-600 font-semibold">+2h</td>
+                                        <td class="p-3 text-slate-400">0h</td>
+                                        <td class="p-3 text-right font-bold text-slate-900">98h</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-slate-800">Giuseppe Verdi (Full-time)</td>
+                                        <td class="p-3">152h</td>
+                                        <td class="p-3 text-emerald-600 font-semibold">+8h</td>
+                                        <td class="p-3 text-amber-600 font-semibold">8h (Permesso)</td>
+                                        <td class="p-3 text-right font-bold text-slate-900">160h</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between text-xs text-slate-600">
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-shield-halved text-green-600 text-base"></i>
+                            <span>Dati conformi e pronti per l'elaborazione stipendi.</span>
+                        </span>
+                        <button onclick="mostraNotifica('Download Excel completato', 'success')" class="text-indigo-600 font-semibold hover:underline">
+                            Scarica Excel <i class="fa-solid fa-download ml-1"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 6. AGENZIA ENTRATE -->
-        <div id="ade" class="section-view">
-            <div class="card-fluida">
-                <h3>Comunicazione Chiamate AdE 🏛️</h3>
-                <p class="text-muted">Invio telematico obbligatorio per contratti di lavoro intermittente.</p>
-                <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success">
-                    <i class="fa-solid fa-circle-check"></i> Canale telematico pronto per la trasmissione.
+        <!-- TAB 6: WHATSAPP & CONFERME -->
+        <div id="tab-whatsapp" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-playful text-xl font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-brands fa-whatsapp text-green-500 text-2xl"></i>
+                        <span>Invio Turni via WhatsApp & Conferme</span>
+                    </h2>
+                    <p class="text-sm text-slate-500">Invia ad ogni dipendente sia il proprio turno che quello dei colleghi, richiedendo la conferma obbligatoria.</p>
                 </div>
-                <button class="btn btn-dark fw-bold" onclick="alert('Chiamate inviate correttamente all Agenzia delle Entrate!')"><i class="fa-solid fa-paper-plane"></i> Invia Telematico AdE</button>
+                <button onclick="mostraNotifica('Invio massiccio WhatsApp avviato con successo!', 'success')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-playful font-bold px-5 py-3 rounded-xl text-sm shadow-lg shadow-emerald-200 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Invia a Tutti via WhatsApp</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Mario -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-playful font-bold">MR</span>
+                            <div>
+                                <h3 class="font-playful font-bold text-slate-800">Mario Rossi</h3>
+                                <p class="text-xs text-slate-400">+39 333 1234567</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fa-solid fa-check-double text-[10px]"></i>
+                            <span>Confermato</span>
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-xl text-xs text-slate-600 space-y-1.5 font-sans">
+                        <div class="font-bold text-slate-700">📅 Messaggio inviato (Tuo turno + Colleghi):</div>
+                        <p class="italic text-slate-500">"Ciao Mario! Il tuo turno: Lun-Mar 08-14, Mer-Gio 14-20. Turni colleghi: Laura (14-20), Giuseppe (09-18). Rispondi OK per confermare."</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2 pt-2">
+                        <button onclick="simulaInvioWhatsApp('Mario Rossi')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-2 border border-emerald-200">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>Invia a Mario</span>
+                        </button>
+                        <button onclick="mostraNotifica('Sollecito inviato a Mario!', 'success')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2.5 rounded-xl text-xs font-semibold" title="Sollecita">
+                            <i class="fa-solid fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Laura -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-10 h-10 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center font-playful font-bold">LB</span>
+                            <div>
+                                <h3 class="font-playful font-bold text-slate-800">Laura Bianchi</h3>
+                                <p class="text-xs text-slate-400">+39 338 9876543</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fa-solid fa-clock text-[10px]"></i>
+                            <span>In Attesa</span>
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-xl text-xs text-slate-600 space-y-1.5 font-sans">
+                        <div class="font-bold text-slate-700">📅 Messaggio inviato (Tuo turno + Colleghi):</div>
+                        <p class="italic text-slate-500">"Ciao Laura! Il tuo turno: Lun 14-20, Mer-Gio 08-14. Turni colleghi: Mario (08-14), Giuseppe (09-18). Rispondi OK per confermare."</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2 pt-2">
+                        <button onclick="simulaInvioWhatsApp('Laura Bianchi')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-2 border border-emerald-200">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>Invia a Laura</span>
+                        </button>
+                        <button onclick="mostraNotifica('Sollecito inviato a Laura!', 'success')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2.5 rounded-xl text-xs font-semibold" title="Sollecita">
+                            <i class="fa-solid fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Giuseppe -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-playful font-bold">GV</span>
+                            <div>
+                                <h3 class="font-playful font-bold text-slate-800">Giuseppe Verdi</h3>
+                                <p class="text-xs text-slate-400">+39 340 5554433</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fa-solid fa-check-double text-[10px]"></i>
+                            <span>Confermato</span>
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-xl text-xs text-slate-600 space-y-1.5 font-sans">
+                        <div class="font-bold text-slate-700">📅 Messaggio inviato (Tuo turno + Colleghi):</div>
+                        <p class="italic text-slate-500">"Ciao Giuseppe! Il tuo turno: Lun-Mar 09-18, Gio 09-18. Turni colleghi: Mario (08-14), Laura (14-20). Rispondi OK per confermare."</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2 pt-2">
+                        <button onclick="simulaInvioWhatsApp('Giuseppe Verdi')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-2 border border-emerald-200">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>Invia a Giuseppe</span>
+                        </button>
+                        <button onclick="mostraNotifica('Sollecito inviato a Giuseppe!', 'success')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2.5 rounded-xl text-xs font-semibold" title="Sollecita">
+                            <i class="fa-solid fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 7. WHATSAPP -->
-        <div id="whatsapp" class="section-view">
-            <div class="card-fluida">
-                <h3>Invio Turni & Notifiche WhatsApp 💬</h3>
-                <p class="text-muted">Invia i turni personali e di squadra con richiesta di conferma lettura.</p>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Seleziona Dipendente</label>
-                    <select id="waDip" class="form-select">
-                        <option>Alessia</option><option>Luigi</option><option>Andrea</option><option>Orsola</option><option>Maimona</option><option>Angori</option>
+        <!-- TAB 7: AGENZIA DELLE ENTRATE -->
+        <div id="tab-ade" class="tab-content space-y-6">
+            <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-3xl mx-auto space-y-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-inner">
+                        <i class="fa-solid fa-landmark"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-playful text-2xl font-bold text-slate-900">Invio Telematico Agenzia delle Entrate</h2>
+                        <p class="text-sm text-slate-500">Invio automatico dei dati turni elaborati e presenze fiscali in un solo clic.</p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 space-y-2">
+                    <div class="font-bold flex items-center space-x-2 text-sm">
+                        <i class="fa-solid fa-circle-info text-amber-600"></i>
+                        <span>Procedura Guidata Semplificata</span>
+                    </div>
+                    <p>Il sistema compila il tracciato record conforme alle specifiche tecniche dell'Agenzia delle Entrate e invia la ricevuta telematica.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-600">Periodo di Riferimento:</label>
+                            <input type="text" value="Novembre 2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-semibold text-slate-800" readonly>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-600">Partita IVA Azienda:</label>
+                            <input type="text" value="01234560555" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-mono font-semibold text-slate-800" readonly>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-slate-600">Tracciato Dati Pronti per l'Invio:</label>
+                        <div class="bg-slate-900 text-green-400 p-4 rounded-xl font-mono text-xs overflow-x-auto space-y-1 shadow-inner">
+                            <div>{ "azienda": "01234560555", "periodo": "2026-11", "dipendenti": 3, "ore_tot": 422, "stato": "VALIDATO_OK" }</div>
+                            <div class="text-slate-400">> Firma elettronica applicata con successo.</div>
+                            <div class="text-slate-400">> Pronto per la trasmissione telematica sicura HTTPS.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100">
+                    <div class="text-xs text-slate-500 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-lock text-green-600"></i>
+                        <span>Connessione protetta SSL con FiscoOnline</span>
+                    </div>
+                    <button onclick="inviaAgenziaEntrateSimulazione()" id="btn-ade" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-playful font-bold px-8 py-3.5 rounded-xl text-sm shadow-lg shadow-amber-200 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Invia Ora all'Agenzia delle Entrate</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Aggiungi Dipendente -->
+    <div id="modal-employee" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-playful text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus text-green-500"></i>
+                    <span>Nuovo Dipendente</span>
+                </h3>
+                <button onclick="closeAddEmployeeModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-600">Nome e Cognome:</label>
+                    <input type="text" id="new-nome" placeholder="Es. Anna Neri" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-400">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-600">Tipo di Contratto:</label>
+                    <select id="new-contratto" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <option>Full-time (40h settimanali)</option>
+                        <option>Part-time (24h settimanali)</option>
+                        <option>Part-time (20h settimanali)</option>
+                        <option>Apprendistato</option>
                     </select>
                 </div>
-                <button class="btn-fluida" onclick="inviaWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Invia Turno via WhatsApp</button>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-600">Numero WhatsApp:</label>
+                    <input type="text" id="new-whatsapp" placeholder="+39 333 0000000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-400">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-600">PIN Marcatempo (4 cifre):</label>
+                    <input type="password" maxlength="4" id="new-pin" placeholder="1234" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-mono tracking-widest font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-400">
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3 pt-2">
+                <button onclick="closeAddEmployeeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm">Annulla</button>
+                <button onclick="salvaNuovoDipendente()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-playful font-bold py-3 rounded-xl text-sm shadow-md shadow-green-100">Salva Dipendente</button>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal: Guida / Aiuto -->
+    <div id="modal-help" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-playful text-xl font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+                    <span>Come usare TurniFacile</span>
+                </h3>
+                <button onclick="closeHelpModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-600 font-sans">
+                <p>👋 <strong>Benvenuto!</strong> Questa applicazione è progettata per essere semplicissima e intuitiva su PC e Smartphone:</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>Calendario:</strong> Visualizza i turni precompilati di tutti i dipendenti.</li>
+                    <li><strong>Anagrafica:</strong> Gestisci dipendenti, contratti e PIN.</li>
+                    <li><strong>Disponibilità:</strong> Tocca le caselle per impostare i giorni liberi.</li>
+                    <li><strong>IA Turni:</strong> Modifica il prompt e genera la pianificazione automatica.</li>
+                    <li><strong>WhatsApp:</strong> Invia il turno al singolo dipendente (con i turni dei colleghi) e richiedi la conferma.</li>
+                    <li><strong>Agenzia Entrate & Buste Paga:</strong> Invia report presenze e tracciati fiscali in un clic.</li>
+                </ul>
+            </div>
+            <button onclick="closeHelpModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-playful font-bold py-3 rounded-xl text-sm shadow-md shadow-indigo-100">Ho capito!</button>
+        </div>
+    </div>
+
+    <!-- Script Logica -->
     <script>
-        function switchSection(sectionId, btnElement) {
-            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            document.querySelectorAll('.sidebar-menu .btn').forEach(el => el.classList.remove('active'));
-            if(btnElement) btnElement.classList.add('active');
-            if(window.innerWidth < 992) document.getElementById('sidebar').classList.remove('show');
-        }
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-green-500', 'text-white', 'shadow-md', 'shadow-green-100');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
 
-        function aggiungiDipendente() {
-            let nome = document.getElementById('nomeDip').value;
-            let contratto = document.getElementById('contrattoDip').value;
-            let tel = document.getElementById('telDip').value;
-            if(!nome) { alert('Inserisci il nome del dipendente'); return; }
-            let tbody = document.querySelector('#tabellaAnagrafica tbody');
-            tbody.innerHTML += `<tr><td class="fw-bold">${nome}</td><td>${contratto}</td><td>${tel}</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>`;
-            document.getElementById('nomeDip').value = '';
-            document.getElementById('telDip').value = '';
-            alert('Dipendente aggiunto con successo!');
-        }
-
-        function generaTurniAI() {
-            let promptText = prompt("Inserisci le istruzioni per generare i turni (es. 'Ottimizza i weekend e riduci gli straordinari'):");
-            if(promptText) {
-                alert("Turni elaborati con successo e calendario aggiornato!");
+            document.getElementById(tabId).classList.add('active');
+            if(btnElement) {
+                btnElement.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                btnElement.classList.add('bg-green-500', 'text-white', 'shadow-md', 'shadow-green-100');
             }
         }
 
-        function inviaWhatsApp() {
-            let dip = document.getElementById('waDip').value;
-            alert(`Messaggio WhatsApp inviato a ${dip} con successo!\nIl dipendente ha ricevuto il proprio turno, l'orario completo dello staff e la richiesta di conferma.`);
+        function mostraNotifica(messaggio, tipo = 'success') {
+            const toast = document.getElementById('toast');
+            const title = document.getElementById('toast-title');
+            const msg = document.getElementById('toast-msg');
+            const icon = document.getElementById('toast-icon');
+
+            msg.innerText = messaggio;
+            if(tipo === 'success') {
+                title.innerText = "Ottimo lavoro! 🎉";
+                icon.className = "fa-solid fa-circle-check text-green-400 text-xl";
+            }
+
+            toast.classList.remove('translate-y-[-200%]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-200%]', 'opacity-0');
+            }, 3500);
         }
+
+        function toggleDisp(btn) {
+            const icon = btn.querySelector('i');
+            if(icon.classList.contains('fa-check')) {
+                icon.className = "fa-solid fa-xmark text-slate-300";
+                btn.className = "w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-semibold text-xs flex items-center justify-between";
+            } else {
+                icon.className = "fa-solid fa-check text-emerald-600";
+                btn.className = "w-full py-2.5 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold text-xs flex items-center justify-between";
+            }
+        }
+
+        function generaTurniAI() {
+            const btn = document.getElementById('btn-genera-ai');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Elaborazione IA in corso...</span>`;
+            
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span>Genera Turni con IA Magica</span>`;
+                document.getElementById('ai-result-box').classList.remove('hidden');
+                mostraNotifica('Turni generati con successo dall\'Intelligenza Artificiale!', 'success');
+            }, 1200);
+        }
+
+        function caricaPromptPreset(tipo) {
+            const input = document.getElementById('prompt-input');
+            if(tipo === 'ristorante') {
+                input.value = "Regole Ristorante: Coprire pranzo (12-15) e cena (19-23). Massimo 40h settimanali. Minimo 2 cuochi e 3 cameriere per turno serale.";
+                mostraNotifica('Caricato preset Ristorante 🍕', 'success');
+            } else {
+                input.value = "Regole Negozio: Orario continuato 09:00 - 20:00. Turni rotativi mattina e pomeriggio. Sabato e domenica presenza minima 2 addetti.";
+                mostraNotifica('Caricato preset Negozio 🛍️', 'success');
+            }
+        }
+
+        function timbraCartellino(tipo) {
+            const dip = document.getElementById('marcatempo-dip').value;
+            const oraCorrente = new Date().toLocaleTimeString();
+            mostraNotifica(`Timbratura "${tipo}" registrata per ${dip} alle ore ${oraCorrente}!`, 'success');
+        }
+
+        function simulaInvioWhatsApp(nome) {
+            mostraNotifica(`Messaggio WhatsApp con turno personale e colleghi inviato a ${nome}!`, 'success');
+        }
+
+        function inviaAgenziaEntrateSimulazione() {
+            const btn = document.getElementById('btn-ade');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Invio in corso a FiscoOnline...</span>`;
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>Invia Ora all'Agenzia delle Entrate</span>`;
+                mostraNotifica('Dati turni e presenze trasmessi con successo all\'Agenzia delle Entrate! Protocollo #IT-2026-88942.', 'success');
+            }, 1500);
+        }
+
+        function openAddEmployeeModal() { document.getElementById('modal-employee').classList.remove('hidden'); }
+        function closeAddEmployeeModal() { document.getElementById('modal-employee').classList.add('hidden'); }
+        function salvaNuovoDipendente() {
+            const nome = document.getElementById('new-nome').value;
+            if(!nome) {
+                alert("Inserisci il nome del dipendente.");
+                return;
+            }
+            closeAddEmployeeModal();
+            mostraNotifica(`Dipendente ${nome} aggiunto con successo!`, 'success');
+        }
+
+        function openHelpModal() { document.getElementById('modal-help').classList.remove('hidden'); }
+        function closeHelpModal() { document.getElementById('modal-help').classList.add('hidden'); }
     </script>
 </body>
 </html>
+```
