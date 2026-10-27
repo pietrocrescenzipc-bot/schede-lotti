@@ -81,7 +81,7 @@
                     <div class="space-y-2">
                         <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti</h2>
                         <p class="text-gray-600 text-base md:text-lg max-w-xl mx-auto">
-                            Gestisci le tue preparazioni, incolla rapidamente i dati da Google Lens e tieni sotto controllo le scadenze.
+                            Gestisci le tue preparazioni, incolla rapidamente da Google Lens e tieni sotto controllo le scadenze.
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -94,7 +94,6 @@
                     </div>
                 </div>
 
-                <!-- Box degli Allert Scadenze (Controlla solo l'ultimo lotto inserito per ogni ingrediente) -->
                 <div id="expiry-alerts-container" class="space-y-3"></div>
             </div>
 
@@ -105,11 +104,14 @@
                             <span class="text-xs uppercase tracking-widest text-red-600 font-black bg-red-50 px-3.5 py-1.5 rounded-full border border-red-100 shadow-sm">Scheda di Produzione</span>
                             <h2 id="view-prep-title" class="text-2xl md:text-3xl font-black text-gray-900 mt-2">Nome Preparazione</h2>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="printCurrentCard()" class="py-3 px-5 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold shadow-md transition flex items-center gap-2">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <button onclick="openEditPrepModal()" class="py-3 px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-2xl font-bold transition shadow-sm flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-pen-to-square"></i> Modifica Scheda
+                            </button>
+                            <button onclick="printCurrentCard()" class="py-3 px-5 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold shadow-md transition flex items-center gap-2 text-sm">
                                 <i class="fa-solid fa-print"></i> Stampa
                             </button>
-                            <button onclick="deleteCurrentPreparation()" class="py-3 px-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl font-bold transition shadow-sm" title="Elimina">
+                            <button onclick="deleteCurrentPreparation()" class="py-3 px-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl font-bold transition shadow-sm text-sm" title="Elimina">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -160,6 +162,32 @@
         </main>
     </div>
 
+    <!-- Modale Nuova / Modifica Preparazione -->
+    <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center pb-4 border-b border-gray-100">
+                <h3 id="modal-title" class="font-black text-2xl text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus text-red-600"></i> Nuova Preparazione
+                </h3>
+                <button onclick="closeNewPrepModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2 text-sm">Nome Preparato:</label>
+                    <input type="text" id="new-prep-name" placeholder="Inserisci nome..." class="w-full border-2 border-gray-200 rounded-2xl p-4 font-bold text-lg focus:border-red-600 focus:outline-none shadow-sm">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2 text-sm">Ingredienti (uno per riga o separati da virgola):</label>
+                    <textarea id="new-prep-ingredients" rows="4" placeholder="Farina&#10;Acqua&#10;Lievito&#10;Sale" class="w-full border-2 border-gray-200 rounded-2xl p-4 font-medium text-base focus:border-red-600 focus:outline-none shadow-sm"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeNewPrepModal()" class="py-3 px-6 bg-gray-100 hover:bg-gray-200 rounded-2xl font-bold text-gray-700 transition">Annulla</button>
+                <button onclick="savePreparationData()" class="py-3 px-8 bg-red-600 hover:bg-red-700 rounded-2xl font-black text-white shadow-lg shadow-red-600/30 transition">Salva Scheda</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const defaultPreparations = [
             { id: 'impasto-pizza', name: 'IMPASTO PIZZA', ingredients: ['FARINA', 'SOIA', 'LIEVITO', 'SALE'] },
@@ -170,6 +198,7 @@
         let preparations = JSON.parse(localStorage.getItem('pizzeria_preparations')) || defaultPreparations;
         let batchArchive = JSON.parse(localStorage.getItem('pizzeria_archive')) || [];
         let currentActivePrepId = null;
+        let isEditingMode = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPrepList();
@@ -193,7 +222,7 @@
 
             if (tabName === 'home') {
                 document.getElementById('tab-home').classList.remove('hidden');
-                checkLatestExpiryAlerts(); // Aggiorna gli allert quando si torna alla home
+                checkLatestExpiryAlerts();
             }
             else if (tabName === 'preparation') document.getElementById('tab-preparation').classList.remove('hidden');
             else if (tabName === 'report') {
@@ -207,21 +236,17 @@
             }
         };
 
-        // Funzione per controllare ed estrarre SOLTANTO l'ultimo lotto inserito per ogni ingrediente nell'archivio
         window.checkLatestExpiryAlerts = function() {
             const container = document.getElementById('expiry-alerts-container');
             container.innerHTML = '';
 
             if (batchArchive.length === 0) return;
 
-            // Mappa per memorizzare l'ultimo inserimento di ciascun ingrediente univoco
             const latestIngredientsMap = new Map();
 
-            // L'archivio è in ordine cronologico inverso (il più recente è in cima, indice 0)
             batchArchive.forEach(entry => {
                 entry.ingredients.forEach(ing => {
                     const normalizedName = ing.name.trim().toUpperCase();
-                    // Se non abbiamo ancora salvato questo ingrediente, prendiamo questo (che è l'ultimo in ordine di tempo)
                     if (!latestIngredientsMap.has(normalizedName)) {
                         latestIngredientsMap.set(normalizedName, {
                             prepName: entry.prepName,
@@ -240,7 +265,6 @@
             latestIngredientsMap.forEach((data, ingName) => {
                 if (!data.fornitore) return;
 
-                // Cerca una data nel formato DD/MM/YYYY o DD-MM-YYYY dentro il campo fornitore/scadenza
                 const dateRegex = /\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/;
                 const match = data.fornitore.match(dateRegex);
 
@@ -256,7 +280,6 @@
                     const diffTime = expiryDate - today;
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                    // Allert se mancano 3 giorni o meno alla scadenza, oppure se è già scaduto (diffDays <= 3)
                     if (diffDays <= 3) {
                         let badgeColor = 'bg-amber-500 text-white';
                         let statusText = `Scade tra ${diffDays} giorni`;
@@ -364,6 +387,7 @@
             switchTab('preparation');
         };
 
+        // Funzione Smart ultra-pulita: estrae solo il codice lotto escludendo etichette e scritte estranee
         window.smartPaste = async function(index) {
             try {
                 const text = await navigator.clipboard.readText();
@@ -381,15 +405,20 @@
 
                 if (dateMatch) {
                     scadField.value = dateMatch[0];
-                    let remaining = cleanText.replace(dateMatch[0], '').replace(/(scad|scadenza|exp|data)/gi, '').trim();
+                    let remaining = cleanText.replace(dateMatch[0], '');
+                    // Rimuove etichette testuali indesiderate e simboli isolati
+                    remaining = remaining.replace(/(scad|scadenza|exp|data|lotto|lot|n\.|nr\.|cod\.)/gi, '');
+                    remaining = remaining.replace(/[\.\-\:\•\·]+/g, ' ').trim();
                     lottoField.value = remaining.replace(/[\n\r]+/g, ' ').trim();
                 } else {
                     const lines = cleanText.split(/[\n\r]+/).filter(l => l.trim().length > 0);
                     if (lines.length >= 2) {
-                        lottoField.value = lines[0].trim();
-                        scadField.value = lines[1].trim();
+                        let line0 = lines[0].replace(/(lotto|lot|n\.|nr\.)/gi, '').replace(/[\.\-\:\•\·]+/g, ' ').trim();
+                        lottoField.value = line0;
+                        scadField.value = lines[1].replace(/(scad|scadenza|exp|data)/gi, '').replace(/[\.\-\:\•\·]+/g, ' ').trim();
                     } else {
-                        lottoField.value = cleanText;
+                        let singleClean = cleanText.replace(/(lotto|lot|scad|scadenza|n\.|nr\.)/gi, '').replace(/[\.\-\:\•\·]+/g, ' ').trim();
+                        lottoField.value = singleClean;
                     }
                 }
             } catch (err) {
@@ -398,8 +427,21 @@
         };
 
         window.openNewPrepModal = function() {
+            isEditingMode = false;
+            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-circle-plus text-red-600"></i> Nuova Preparazione';
             document.getElementById('new-prep-name').value = '';
             document.getElementById('new-prep-ingredients').value = '';
+            document.getElementById('new-prep-modal').classList.remove('hidden');
+        };
+
+        window.openEditPrepModal = function() {
+            const prep = preparations.find(p => p.id === currentActivePrepId);
+            if (!prep) return;
+
+            isEditingMode = true;
+            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-600"></i> Modifica Preparazione';
+            document.getElementById('new-prep-name').value = prep.name;
+            document.getElementById('new-prep-ingredients').value = prep.ingredients.join('\n');
             document.getElementById('new-prep-modal').classList.remove('hidden');
         };
 
@@ -407,7 +449,7 @@
             document.getElementById('new-prep-modal').classList.add('hidden');
         };
 
-        window.createNewPreparation = function() {
+        window.savePreparationData = function() {
             const name = document.getElementById('new-prep-name').value.trim();
             const rawIngredients = document.getElementById('new-prep-ingredients').value.trim();
 
@@ -420,20 +462,32 @@
                 ? rawIngredients.split(/[\n,]+/).map(i => i.trim().toUpperCase()).filter(i => i.length > 0)
                 : ['INGREDIENTE 1'];
 
-            const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-            
-            if (preparations.some(p => p.id === newId)) {
-                alert('Esiste già una preparazione con questo nome.');
-                return;
+            if (isEditingMode) {
+                const prep = preparations.find(p => p.id === currentActivePrepId);
+                if (prep) {
+                    prep.name = name;
+                    prep.ingredients = ingredients;
+                    localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+                    closeNewPrepModal();
+                    renderPrepList();
+                    selectPreparation(currentActivePrepId);
+                }
+            } else {
+                const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                
+                if (preparations.some(p => p.id === newId)) {
+                    alert('Esiste già una preparazione con questo nome.');
+                    return;
+                }
+
+                const newPrep = { id: newId, name: name, ingredients: ingredients };
+                preparations.push(newPrep);
+                localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+
+                closeNewPrepModal();
+                renderPrepList();
+                selectPreparation(newId);
             }
-
-            const newPrep = { id: newId, name: name, ingredients: ingredients };
-            preparations.push(newPrep);
-            localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
-
-            closeNewPrepModal();
-            renderPrepList();
-            selectPreparation(newId);
         };
 
         window.deleteCurrentPreparation = function() {
@@ -475,7 +529,7 @@
             localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
 
             alert('Registrazione salvata con successo!');
-            switchTab('home'); // Torna alla home e aggiorna immediatamente gli allert del nuovo ultimo lotto
+            switchTab('home');
         };
 
         window.printCurrentCard = function() {
