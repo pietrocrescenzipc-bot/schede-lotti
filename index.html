@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Serali & Planner Ultra Leggibile</title>
+    <title>Gestione Turni Serali & Import Excel</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome per le icone -->
@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">Gestione Turni Serali</h1>
-                    <p class="text-xs text-indigo-200">Planner super leggibile • Sincronizzazione In&Out</p>
+                    <p class="text-xs text-indigo-200">Import Excel • Planner Leggibile • In&Out Sync</p>
                 </div>
             </div>
             <!-- Navigazione Tab -->
@@ -62,12 +62,17 @@
             <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Calendario Orario di Arrivo</h2>
-                    <p class="text-sm text-slate-500">Gestisci i turni o apri il nuovo Planner Mensile Ultra-Leggibile.</p>
+                    <p class="text-sm text-slate-500">Gestisci i turni, importa da Excel o apri il Planner Mensile.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
+                    <!-- Pulsante Importa Turni Excel -->
+                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md cursor-pointer transition flex items-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i> 📂 Importa Turni Excel
+                        <input type="file" id="excel-shifts-input" accept=".csv,.txt" onchange="importShiftsFromExcel(event)" class="hidden">
+                    </label>
                     <!-- Pulsante Planner Mensile Visivo -->
                     <button onclick="openColorPlannerModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2">
-                        <i class="fa-solid fa-table-cells-large"></i> 📅 Apri Planner Mensile
+                        <i class="fa-solid fa-table-cells-large"></i> 📅 Planner Mensile
                     </button>
                     <div class="bg-slate-100 p-1 rounded-xl flex gap-1 text-sm font-medium">
                         <button onclick="setViewMode('day')" id="v-day" class="px-3 py-1.5 rounded-lg transition text-slate-600">Giorno</button>
@@ -190,11 +195,9 @@
 
     </main>
 
-    <!-- PLANNER MENSILE ULTRA LEGGIBILE (MODALE A SCHERMO INTERO) -->
+    <!-- PLANNER MENSILE ULTRA LEGGIBILE (MODALE) -->
     <div id="color-planner-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-6">
         <div class="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh]">
-            
-            <!-- Header Modale -->
             <div class="bg-indigo-600 text-white p-5 flex justify-between items-center shadow-md">
                 <div class="flex items-center gap-3">
                     <div class="bg-white/20 p-2.5 rounded-xl text-xl">
@@ -207,8 +210,6 @@
                 </div>
                 <button onclick="closeColorPlannerModal()" class="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-xl transition text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
-            <!-- Legenda Colori Chiara e Pulita -->
             <div class="bg-slate-100 px-6 py-3 border-b flex flex-wrap gap-4 items-center text-xs font-semibold text-slate-700">
                 <span class="font-bold text-slate-900"><i class="fa-solid fa-palette mr-1"></i> Legenda Orari:</span>
                 <span class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold shadow-sm">17:30 (Anticipato)</span>
@@ -218,13 +219,7 @@
                 <span class="bg-rose-100 text-rose-900 px-3 py-1.5 rounded-lg border border-rose-300 font-bold shadow-sm">OFF (Riposo)</span>
                 <span class="bg-white text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 font-bold">- (Vuoto)</span>
             </div>
-
-            <!-- Griglia Tabella Planner (Scrollabile) -->
-            <div class="p-4 sm:p-6 overflow-auto flex-grow bg-slate-50/50" id="color-planner-grid-container">
-                <!-- Generato via JS -->
-            </div>
-
-            <!-- Footer Modale -->
+            <div class="p-4 sm:p-6 overflow-auto flex-grow bg-slate-50/50" id="color-planner-grid-container"></div>
             <div class="bg-white p-4 border-t flex justify-between items-center px-6">
                 <span class="text-xs text-slate-500 font-medium">Visualizzazione ottimizzata per PC e Smartphone</span>
                 <button onclick="closeColorPlannerModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold shadow transition">Chiudi Planner</button>
@@ -406,6 +401,40 @@
             if(shift === '19:00') return 'bg-purple-100 text-purple-900 border border-purple-300';
             if(shift === 'OFF') return 'bg-rose-100 text-rose-900 border border-rose-300';
             return 'bg-white text-slate-400 border border-slate-200';
+        }
+
+        // --- IMPORTA TURNI DA EXCEL / CSV ---
+        function importShiftsFromExcel(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                let count = 0;
+                // Formato atteso file: ID_DIPENDENTE, DATA (YYYY-MM-DD), ORARIO (es 18:00 o OFF) oppure NOME, DATA, ORARIO
+                for(let i=1; i<lines.length; i++) {
+                    let line = lines[i].trim();
+                    if(!line) continue;
+                    let cols = line.split(/[,;]/);
+                    if(cols.length >= 3) {
+                        let empIdentifier = cols[0].replace(/"/g, '').trim();
+                        let date = cols[1].replace(/"/g, '').trim();
+                        let time = cols[2].replace(/"/g, '').trim();
+
+                        // Trova dipendente per ID o per Nome
+                        let emp = employees.find(e => e.id == empIdentifier || e.name.toLowerCase() === empIdentifier.toLowerCase());
+                        if(emp && date && time) {
+                            shifts[`${emp.id}_${date}`] = time;
+                            count++;
+                        }
+                    }
+                }
+                localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
+                renderCalendar();
+                alert(`Importati con successo ${count} turni dal file Excel!`);
+            };
+            reader.readAsText(file);
         }
 
         // --- PLANNER MENSILE ULTRA LEGGIBILE POPUP ---
