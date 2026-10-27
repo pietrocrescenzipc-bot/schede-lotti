@@ -290,7 +290,6 @@
             switchTab('preparation');
         };
 
-        // Funzione ottimizzata per evitare blocchi e compressione sicura
         window.processImageWithGemini = async function(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
@@ -298,7 +297,6 @@
             document.getElementById('ai-loading').classList.remove('hidden');
 
             try {
-                // Ridimensionamento e compressione sicura per dispositivi mobili
                 const base64Data = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
@@ -337,13 +335,12 @@
                     reader.readAsDataURL(file);
                 });
 
-                // Timeout di sicurezza per evitare blocchi infiniti
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error("Tempo scaduto: la risposta dell'IA ha impiegato troppo tempo.")), 15000)
                 );
 
                 const apiPromise = ai.models.generateContent({
-                    model: 'gemini-3.8-flash',
+                    model: 'gemini-1.5-flash',
                     contents: [
                         {
                             text: "Sei un assistente esperto in HACCP e OCR di etichette alimentari. Analizza questa immagine con attenzione estrema. Trova: 1) Il codice lotto (cerca sigle come L., LOT., o codici alfanumerici complessi stampati sul sacco). 2) La data di scadenza (cercando SCAD., SCADENZA, o date in formato DD/MM/YYYY) o il nome del prodotto/fornitore. Restituisci un JSON puro senza markdown nel formato esatto: {\"lotto\": \"testo_lotto\", \"fornitore\": \"testo_scadenza_o_fornitore\"}"
