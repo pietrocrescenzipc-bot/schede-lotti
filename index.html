@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Serali & Planner Colorato</title>
+    <title>Gestione Turni Serali & Planner Ultra Leggibile</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome per le icone -->
@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">Gestione Turni Serali</h1>
-                    <p class="text-xs text-indigo-200">Planner a colori • Sincronizzazione In&Out</p>
+                    <p class="text-xs text-indigo-200">Planner super leggibile • Sincronizzazione In&Out</p>
                 </div>
             </div>
             <!-- Navigazione Tab -->
@@ -62,12 +62,12 @@
             <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Calendario Orario di Arrivo</h2>
-                    <p class="text-sm text-slate-500">Gestisci i turni e apri il planner visivo colorato di tutto il mese.</p>
+                    <p class="text-sm text-slate-500">Gestisci i turni o apri il nuovo Planner Mensile Ultra-Leggibile.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Pulsante speciale per aprire il Planner Visivo Colorato -->
-                    <button onclick="openColorPlannerModal()" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2">
-                        <i class="fa-solid fa-palette"></i> 📅 Planner Mensile Colorato
+                    <!-- Pulsante Planner Mensile Visivo -->
+                    <button onclick="openColorPlannerModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells-large"></i> 📅 Apri Planner Mensile
                     </button>
                     <div class="bg-slate-100 p-1 rounded-xl flex gap-1 text-sm font-medium">
                         <button onclick="setViewMode('day')" id="v-day" class="px-3 py-1.5 rounded-lg transition text-slate-600">Giorno</button>
@@ -190,40 +190,49 @@
 
     </main>
 
-    <!-- MODALE PLANNER MENSILE COLORATO -->
-    <div id="color-planner-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-4">
-        <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-palette text-xl"></i>
-                    <h3 class="font-bold text-lg">Planner Mensile Colorato (Panoramica Serate)</h3>
+    <!-- PLANNER MENSILE ULTRA LEGGIBILE (MODALE A SCHERMO INTERO) -->
+    <div id="color-planner-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-6">
+        <div class="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh]">
+            
+            <!-- Header Modale -->
+            <div class="bg-indigo-600 text-white p-5 flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 p-2.5 rounded-xl text-xl">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg sm:text-xl">Planner Mensile Dipendenti</h3>
+                        <p class="text-xs text-indigo-100">Clicca su qualsiasi casella per modificare l'orario all'istante</p>
+                    </div>
                 </div>
-                <button onclick="closeColorPlannerModal()" class="text-white hover:bg-indigo-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeColorPlannerModal()" class="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-xl transition text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <!-- Legenda Colori -->
-            <div class="bg-slate-50 p-3 border-b flex flex-wrap gap-3 items-center text-xs font-semibold">
-                <span class="text-slate-700 font-bold">Legenda Colori:</span>
-                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-md border border-amber-200">17:30 (Anticipato)</span>
-                <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md border border-emerald-200">18:00 (Standard)</span>
-                <span class="bg-sky-100 text-sky-800 px-2 py-1 rounded-md border border-sky-200">18:30</span>
-                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-md border border-purple-200">19:00</span>
-                <span class="bg-rose-100 text-rose-800 px-2 py-1 rounded-md border border-rose-200">OFF (Riposo)</span>
-                <span class="bg-slate-100 text-slate-400 px-2 py-1 rounded-md border border-slate-200">- (Non Assegnato)</span>
+            <!-- Legenda Colori Chiara e Pulita -->
+            <div class="bg-slate-100 px-6 py-3 border-b flex flex-wrap gap-4 items-center text-xs font-semibold text-slate-700">
+                <span class="font-bold text-slate-900"><i class="fa-solid fa-palette mr-1"></i> Legenda Orari:</span>
+                <span class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold shadow-sm">17:30 (Anticipato)</span>
+                <span class="bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-lg border border-emerald-300 font-bold shadow-sm">18:00 (Standard)</span>
+                <span class="bg-sky-100 text-sky-900 px-3 py-1.5 rounded-lg border border-sky-300 font-bold shadow-sm">18:30</span>
+                <span class="bg-purple-100 text-purple-900 px-3 py-1.5 rounded-lg border border-purple-300 font-bold shadow-sm">19:00</span>
+                <span class="bg-rose-100 text-rose-900 px-3 py-1.5 rounded-lg border border-rose-300 font-bold shadow-sm">OFF (Riposo)</span>
+                <span class="bg-white text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 font-bold">- (Vuoto)</span>
             </div>
 
-            <!-- Griglia Planner Colorata -->
-            <div class="p-4 overflow-auto flex-grow" id="color-planner-grid-container">
+            <!-- Griglia Tabella Planner (Scrollabile) -->
+            <div class="p-4 sm:p-6 overflow-auto flex-grow bg-slate-50/50" id="color-planner-grid-container">
                 <!-- Generato via JS -->
             </div>
 
-            <div class="bg-slate-50 p-3 border-t flex justify-end">
-                <button onclick="closeColorPlannerModal()" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-sm font-medium">Chiudi Planner</button>
+            <!-- Footer Modale -->
+            <div class="bg-white p-4 border-t flex justify-between items-center px-6">
+                <span class="text-xs text-slate-500 font-medium">Visualizzazione ottimizzata per PC e Smartphone</span>
+                <button onclick="closeColorPlannerModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold shadow transition">Chiudi Planner</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE ORARIO ARRIVO -->
+    <!-- MODALE ORARIO ARRIVO SINGOLO -->
     <div id="shift-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden p-6 space-y-4">
             <h3 class="font-bold text-lg text-slate-800" id="shift-modal-title">Orario Arrivo</h3>
@@ -231,7 +240,7 @@
             <input type="hidden" id="sm-date">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Orario di Arrivo Previsto</label>
-                <select id="sm-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none">
+                <select id="sm-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none">
                     <option value="17:30">17:30 (Anticipato)</option>
                     <option value="18:00">18:00 (Standard)</option>
                     <option value="18:30">18:30</option>
@@ -240,8 +249,8 @@
                 </select>
             </div>
             <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeShiftModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
-                <button onclick="saveShiftModal()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium shadow">Salva</button>
+                <button onclick="closeShiftModal()" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
+                <button onclick="saveShiftModal()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow">Salva</button>
             </div>
         </div>
     </div>
@@ -340,8 +349,8 @@
                     <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <div><h4 class="font-bold text-slate-800">${emp.name}</h4><span class="text-xs text-slate-500">${emp.contract}</span></div>
                         <div class="flex items-center gap-3">
-                            <span class="px-3 py-1.5 rounded-xl text-xs font-bold ${colorClass}">Arrivo: ${shift}</span>
-                            <button onclick="openShiftModal(${emp.id}, '${currentDate}')" class="bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold">Modifica</button>
+                            <span class="px-3.5 py-2 rounded-xl text-xs font-bold ${colorClass}">Arrivo: ${shift}</span>
+                            <button onclick="openShiftModal(${emp.id}, '${currentDate}')" class="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm">Modifica</button>
                         </div>
                     </div>`;
             });
@@ -355,16 +364,16 @@
                 let d = new Date(base); d.setDate(base.getDate() + i);
                 days.push(d.toISOString().slice(0, 10));
             }
-            let html = `<table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b bg-slate-50"><th class="p-3 sticky left-0 bg-slate-50 z-10">Dipendente</th>`;
-            days.forEach(d => html += `<th class="p-3 text-center">${d.slice(5)}</th>`);
+            let html = `<table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3.5 sticky left-0 bg-slate-100 z-10">Dipendente</th>`;
+            days.forEach(d => html += `<th class="p-3.5 text-center">${d.slice(5)}</th>`);
             html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
             employees.forEach(emp => {
-                html += `<tr><td class="p-3 font-semibold sticky left-0 bg-white z-10">${emp.name}</td>`;
+                html += `<tr><td class="p-3.5 font-bold text-slate-800 sticky left-0 bg-white z-10">${emp.name}</td>`;
                 days.forEach(d => {
                     let s = shifts[`${emp.id}_${d}`] || '-';
                     let colorClass = getShiftColorClass(s);
                     html += `<td class="p-2 text-center cursor-pointer hover:bg-slate-50 transition" onclick="openShiftModal(${emp.id}, '${d}')">`;
-                    html += `<span class="text-xs px-2.5 py-1.5 rounded-lg font-bold block ${colorClass}">${s}</span></td>`;
+                    html += `<span class="text-xs px-3 py-2 rounded-xl font-bold block shadow-sm ${colorClass}">${s}</span></td>`;
                 });
                 html += `</tr>`;
             });
@@ -373,34 +382,33 @@
 
         function renderMonthView(container) {
             let yearMonth = currentDate.slice(0, 7);
-            let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b bg-slate-50"><th class="p-2.5 sticky left-0 bg-slate-50 z-10 min-w-[130px]">Dipendente</th>`;
-            for(let d=1; d<=30; d++) html += `<th class="p-2 text-center">${d < 10 ? '0'+d : d}</th>`;
+            let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3 sticky left-0 bg-slate-100 z-10 min-w-[140px]">Dipendente</th>`;
+            for(let d=1; d<=30; d++) html += `<th class="p-2.5 text-center">${d < 10 ? '0'+d : d}</th>`;
             html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
             employees.forEach(emp => {
-                html += `<tr><td class="p-2.5 font-semibold sticky left-0 bg-white z-10">${emp.name}</td>`;
+                html += `<tr><td class="p-3 font-bold text-slate-800 sticky left-0 bg-white z-10 shadow-sm">${emp.name}</td>`;
                 for(let d=1; d<=30; d++) {
                     let fullDate = `${yearMonth}-${d < 10 ? '0'+d : d}`;
                     let s = shifts[`${emp.id}_${fullDate}`] || '-';
                     let colorClass = getShiftColorClass(s);
-                    html += `<td class="p-1 text-center cursor-pointer" onclick="openShiftModal(${emp.id}, '${fullDate}')">`;
-                    html += `<span class="px-1.5 py-1 rounded font-bold inline-block text-[10px] ${colorClass}">${s}</span></td>`;
+                    html += `<td class="p-1.5 text-center cursor-pointer" onclick="openShiftModal(${emp.id}, '${fullDate}')">`;
+                    html += `<span class="px-2 py-1.5 rounded-lg font-bold inline-block text-[11px] shadow-sm ${colorClass}">${s}</span></td>`;
                 }
                 html += `</tr>`;
             });
             container.innerHTML = html + `</tbody></table>`;
         }
 
-        // Funzione per assegnare i colori ai vari orari
         function getShiftColorClass(shift) {
-            if(shift === '17:30') return 'bg-amber-100 text-amber-800 border border-amber-200';
-            if(shift === '18:00') return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
-            if(shift === '18:30') return 'bg-sky-100 text-sky-800 border border-sky-200';
-            if(shift === '19:00') return 'bg-purple-100 text-purple-800 border border-purple-200';
-            if(shift === 'OFF') return 'bg-rose-100 text-rose-800 border border-rose-200';
-            return 'bg-slate-100 text-slate-400 border border-slate-200';
+            if(shift === '17:30') return 'bg-amber-100 text-amber-900 border border-amber-300';
+            if(shift === '18:00') return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
+            if(shift === '18:30') return 'bg-sky-100 text-sky-900 border border-sky-300';
+            if(shift === '19:00') return 'bg-purple-100 text-purple-900 border border-purple-300';
+            if(shift === 'OFF') return 'bg-rose-100 text-rose-900 border border-rose-300';
+            return 'bg-white text-slate-400 border border-slate-200';
         }
 
-        // --- PLANNER MENSILE COLORATO POPUP ---
+        // --- PLANNER MENSILE ULTRA LEGGIBILE POPUP ---
         function openColorPlannerModal() {
             document.getElementById('color-planner-modal').classList.remove('hidden');
             renderColorPlannerGrid();
@@ -414,21 +422,22 @@
             const container = document.getElementById('color-planner-grid-container');
             let yearMonth = currentDate.slice(0, 7);
             
-            let html = `<div class="overflow-x-auto"><table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b bg-indigo-50 text-indigo-900 font-bold">`;
-            html += `<th class="p-2 sticky left-0 bg-indigo-50 z-10 min-w-[140px]">Dipendente / Giorno</th>`;
+            let html = `<div class="overflow-x-auto"><table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b-2 border-indigo-200 bg-indigo-100/70 text-indigo-900 font-bold">`;
+            html += `<th class="p-3.5 sticky left-0 bg-indigo-100 z-10 min-w-[160px] shadow-sm">Dipendente</th>`;
             for(let d=1; d<=30; d++) {
-                html += `<th class="p-2 text-center min-w-[35px]">${d < 10 ? '0'+d : d}</th>`;
+                html += `<th class="p-3 text-center min-w-[45px]">${d < 10 ? '0'+d : d}</th>`;
             }
-            html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
+            html += `</tr></thead><tbody class="divide-y divide-slate-200">`;
 
-            employees.forEach(emp => {
-                html += `<tr><td class="p-2.5 font-bold text-slate-700 sticky left-0 bg-white z-10 shadow-sm">${emp.name}</td>`;
+            employees.forEach((emp, index) => {
+                let rowBg = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/80';
+                html += `<tr class="${rowBg}"><td class="p-3.5 font-bold text-slate-800 sticky left-0 ${rowBg} z-10 shadow-sm">${emp.name}</td>`;
                 for(let d=1; d<=30; d++) {
                     let fullDate = `${yearMonth}-${d < 10 ? '0'+d : d}`;
                     let s = shifts[`${emp.id}_${fullDate}`] || '-';
                     let badgeColor = getShiftColorClass(s);
-                    html += `<td class="p-1 text-center cursor-pointer" onclick="openShiftModal(${emp.id}, '${fullDate}'); closeColorPlannerModal();">`;
-                    html += `<span class="px-1.5 py-1 rounded-md font-bold inline-block text-[10px] shadow-sm ${badgeColor}">${s === '-' ? '-' : s}</span>`;
+                    html += `<td class="p-2 text-center cursor-pointer hover:bg-indigo-50/50 transition" onclick="openShiftModal(${emp.id}, '${fullDate}'); closeColorPlannerModal();">`;
+                    html += `<span class="px-2 py-1.5 rounded-xl font-bold inline-block text-xs shadow-sm transition transform hover:scale-105 ${badgeColor}">${s}</span>`;
                     html += `</td>`;
                 }
                 html += `</tr>`;
