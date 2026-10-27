@@ -3,738 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Serali & Mese Corrente</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome per le icone -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Controllo Lotti - Pizzeria</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .sticky-col {
-            position: sticky;
-            left: 0;
-            z-index: 20;
-            background-color: white;
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #d9534f;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        /* Pannello di inserimento grande e intuitivo */
+        .card-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .card-form h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #0275d8;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+        }
+        input:focus, select:focus {
+            border-color: #0275d8;
+            outline: none;
+        }
+        /* Pulsante enorme a prova di errore */
+        .btn-big {
+            width: 100%;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        .btn-big:active {
+            background-color: #4cae4c;
+            transform: scale(0.98);
+        }
+        /* Lista lotti */
+        .lotti-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        @media(min-width: 768px) {
+            .lotti-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .lotto-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border-left: 8px solid #5cb85c;
+            position: relative;
+        }
+        .lotto-card.scadenza-vicina {
+            border-left-color: #f0ad4e;
+            background-color: #fcf8e3;
+        }
+        .lotto-card.scaduto {
+            border-left-color: #d9534f;
+            background-color: #f2dede;
+        }
+        .lotto-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .lotto-info {
+            font-size: 15px;
+            margin: 3px 0;
+            color: #555;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            color: #fff;
+            background: #777;
+            margin-bottom: 8px;
+        }
+        .btn-delete {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            margin-top: -35px;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <!-- HEADER -->
-    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white text-indigo-600 p-2 rounded-xl font-bold text-xl shadow">
-                    <i class="fa-solid fa-moon"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold">Gestione Turni Serali</h1>
-                    <p class="text-xs text-indigo-200">Mese Corrente • Colonna Fissa • In&Out Sync</p>
-                </div>
-            </div>
-            <!-- Navigazione Tab -->
-            <nav class="flex flex-wrap gap-1 mt-2 sm:mt-0 bg-indigo-700/50 p-1 rounded-xl">
-                <button onclick="switchTab('tab-calendar')" id="btn-tab-calendar" class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-white text-indigo-600 shadow">
-                    <i class="fa-solid fa-calendar mr-1"></i> Calendario
-                </button>
-                <button onclick="switchTab('tab-staff')" id="btn-tab-staff" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-solid fa-users mr-1"></i> Dipendenti
-                </button>
-                <button onclick="switchTab('tab-availability')" id="btn-tab-availability" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-solid fa-clock mr-1"></i> Disponibilità
-                </button>
-                <button onclick="switchTab('tab-ai')" id="btn-tab-ai" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> IA Turni
-                </button>
-                <button onclick="switchTab('tab-punch')" id="btn-tab-punch" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-solid fa-fingerprint mr-1"></i> In&Out Sync
-                </button>
-                <button onclick="switchTab('tab-whatsapp')" id="btn-tab-whatsapp" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
-                </button>
-                <button onclick="switchTab('tab-ade')" id="btn-tab-ade" class="px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500">
-                    <i class="fa-solid fa-file-arrow-down mr-1"></i> File AdE
-                </button>
-            </nav>
-        </div>
-    </header>
+    <h1>🍕 Monitor Lotti Cucina & Pizzeria</h1>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-
-        <!-- 1. CALENDARIO -->
-        <section id="tab-calendar" class="space-y-4">
-            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Calendario & Mese Corrente</h2>
-                    <p class="text-sm text-slate-500">Importa la tua tabella Excel dei turni o apri il Planner Mensile.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <!-- Pulsante Importa Tabella Excel CSV -->
-                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md cursor-pointer transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-excel"></i> 📂 Importa Tabella Turni (CSV)
-                        <input type="file" id="excel-shifts-input" accept=".csv,.txt" onchange="importGridExcel(event)" class="hidden">
-                    </label>
-                    <!-- Pulsante Planner Mensile Visivo -->
-                    <button onclick="openColorPlannerModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-2">
-                        <i class="fa-solid fa-table-cells-large"></i> 📅 Planner Mensile
-                    </button>
-                    <!-- Pulsante Pulisci Turni -->
-                    <button onclick="clearAllShifts()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition" title="Cancella tutti i turni">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                    <div class="bg-slate-100 p-1 rounded-xl flex gap-1 text-sm font-medium">
-                        <button onclick="setViewMode('day')" id="v-day" class="px-3 py-1.5 rounded-lg transition text-slate-600">Giorno</button>
-                        <button onclick="setViewMode('week')" id="v-week" class="px-3 py-1.5 rounded-lg transition text-slate-600">Settimana</button>
-                        <button onclick="setViewMode('month')" id="v-month" class="px-3 py-1.5 rounded-lg transition bg-white text-indigo-600 shadow">Mese</button>
-                    </div>
-                    <input type="date" id="calendar-date-picker" onchange="changeDate(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none">
-                </div>
-            </div>
-            <div id="calendar-view-container" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-6 overflow-x-auto"></div>
-        </section>
-
-        <!-- 2. DIPENDENTI -->
-        <section id="tab-staff" class="space-y-4 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Anagrafica Dipendenti</h2>
-                    <p class="text-sm text-slate-500">I dipendenti vengono aggiornati automaticamente dal file Excel.</p>
-                </div>
-                <button onclick="openEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus"></i> Nuovo Dipendente
-                </button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="employee-cards-container"></div>
-        </section>
-
-        <!-- 3. DISPONIBILITÀ -->
-        <section id="tab-availability" class="space-y-4 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="text-xl font-bold text-slate-800">Disponibilità & Preferenze</h2>
-                <p class="text-sm text-slate-500">Indica i giorni liberi o le disponibilità per le serate.</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dipendente</label>
-                        <select id="avail-emp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Data</label>
-                        <input type="date" id="avail-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Preferenza</label>
-                        <select id="avail-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none">
-                            <option value="Disponibile Sera">Disponibile la Sera</option>
-                            <option value="Riposo Richiesto">Richiesta Riposo</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="saveAvailability()" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">Registra</button>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 mb-4">Elenco Disponibilità</h3>
-                <div id="availability-list" class="space-y-2"></div>
-            </div>
-        </section>
-
-        <!-- 4. IA PROMPT -->
-        <section id="tab-ai" class="space-y-4 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="text-xl font-bold text-slate-800">Generatore Turni IA</h2>
-                <p class="text-sm text-slate-500">Scrivi le istruzioni e compila gli orari di arrivo in automatico.</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <textarea id="ai-prompt-input" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none" placeholder="Es: Metti tutti alle 18:00 tranne il sabato alle 17:30..."></textarea>
-                <button onclick="runAIGenerator()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow transition">Genera Orari Arrivo</button>
-            </div>
-        </section>
-
-        <!-- 5. IN&OUT SYNC -->
-        <section id="tab-punch" class="space-y-4 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Sincronizzazione Timbrature In&Out</h2>
-                    <p class="text-sm text-slate-500">Importa il file esportato da In&Out per aggiornare in tempo reale presenze e ore.</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow cursor-pointer transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-arrow-up"></i> Carica File In&Out (CSV)
-                        <input type="file" id="inout-file-input" accept=".csv,.txt" onchange="syncInOutData(event)" class="hidden">
-                    </label>
-                    <button onclick="generatePayrollReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow transition">Esporta Buste Paga</button>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
-                <h3 class="font-bold text-slate-800 mb-4">Stato Presenze & Ore Calcolate</h3>
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 text-slate-600 border-b">
-                        <tr>
-                            <th class="p-3">Dipendente</th>
-                            <th class="p-3">Data</th>
-                            <th class="p-3">Ingresso (In&Out)</th>
-                            <th class="p-3">Uscita (In&Out)</th>
-                            <th class="p-3">Ore Lavorate (Calcolate)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="punch-table-body" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- 6. WHATSAPP -->
-        <section id="tab-whatsapp" class="space-y-4 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="text-xl font-bold text-slate-800">Invio WhatsApp & Conferme</h2>
-                <p class="text-sm text-slate-500">Invia l'orario di arrivo personale e dei colleghi con obbligo di conferma.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="whatsapp-dispatch-container"></div>
-        </section>
-
-        <!-- 7. FILE ADE -->
-        <section id="tab-ade" class="space-y-4 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h2 class="text-xl font-bold text-slate-800">Generazione File Telematico</h2>
-                <p class="text-sm text-slate-500">Scarica il file con anagrafica e orari di arrivo.</p>
-                <button onclick="downloadAdEFile()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow transition">Genera e Scarica File (.CSV)</button>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- PLANNER MENSILE ULTRA LEGGIBILE (MODALE) -->
-    <div id="color-planner-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-6">
-        <div class="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[95vh]">
-            <div class="bg-indigo-600 text-white p-5 flex justify-between items-center shadow-md">
-                <div class="flex items-center gap-3">
-                    <div class="bg-white/20 p-2.5 rounded-xl text-xl">
-                        <i class="fa-solid fa-table-cells-large"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg sm:text-xl">Planner Mensile Dipendenti</h3>
-                        <p class="text-xs text-indigo-100">La colonna dei nomi resta fissa mentre scorri i giorni a destra</p>
-                    </div>
-                </div>
-                <button onclick="closeColorPlannerModal()" class="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-xl transition text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="bg-slate-100 px-6 py-3 border-b flex flex-wrap gap-4 items-center text-xs font-semibold text-slate-700">
-                <span class="font-bold text-slate-900"><i class="fa-solid fa-palette mr-1"></i> Legenda Turni:</span>
-                <span class="bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-lg border border-emerald-300 font-bold shadow-sm">LAV (Lavorativo)</span>
-                <span class="bg-purple-100 text-purple-900 px-3 py-1.5 rounded-lg border border-purple-300 font-bold shadow-sm">TUTTI</span>
-                <span class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold shadow-sm">CHIAMATE</span>
-                <span class="bg-rose-100 text-rose-900 px-3 py-1.5 rounded-lg border border-rose-300 font-bold shadow-sm">OFF / Vuoto</span>
-            </div>
-            <div class="p-4 sm:p-6 overflow-auto flex-grow bg-slate-50/50" id="color-planner-grid-container"></div>
-            <div class="bg-white p-4 border-t flex justify-between items-center px-6">
-                <span class="text-xs text-slate-500 font-medium">Scorri in orizzontale per vedere tutto il mese</span>
-                <button onclick="closeColorPlannerModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold shadow transition">Chiudi Planner</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE ORARIO ARRIVO SINGOLO -->
-    <div id="shift-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden p-6 space-y-4">
-            <h3 class="font-bold text-lg text-slate-800" id="shift-modal-title">Orario Arrivo</h3>
-            <input type="hidden" id="sm-emp-id">
-            <input type="hidden" id="sm-date">
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Turno / Orario</label>
-                <select id="sm-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none">
-                    <option value="18:00">18:00 (Standard)</option>
-                    <option value="17:30">17:30 (Anticipato)</option>
-                    <option value="TUTTI">TUTTI</option>
-                    <option value="CHIAMATE">CHIAMATE</option>
-                    <option value="OFF">Riposo (OFF)</option>
+    <!-- FORM DI INSERIMENTO -->
+    <div class="card-form">
+        <h2>➕ Registra Nuovo Lotto / Preparazione</h2>
+        <form id="lottoForm" onsubmit="aggiungiLotto(event)">
+            <div class="form-group">
+                <label for="prodotto">Nome Prodotto o Preparazione:</label>
+                <select id="prodotto" required>
+                    <option value="" disabled selected>-- Seleziona cosa hai preparato/aperto --</option>
+                    <option value="Impasto Classico">Impasto Classico</option>
+                    <option value="Impasto Integrale">Impasto Integrale</option>
+                    <option value="Mozzarella / Fiordilatte">Mozzarella / Fiordilatte</option>
+                    <option value="Salsa di Pomodoro">Salsa di Pomodoro</option>
+                    <option value="Verdure Grigliate">Verdure Grigliate</option>
+                    <option value="Farina (Sacco nuovo)">Farina (Sacco nuovo)</option>
                 </select>
             </div>
-            <div class="flex justify-between gap-2 pt-2">
-                <button onclick="clearSingleShift()" class="px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold">Cancella</button>
-                <div class="flex gap-2">
-                    <button onclick="closeShiftModal()" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
-                    <button onclick="saveShiftModal()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow">Salva</button>
-                </div>
+
+            <div class="form-group">
+                <label for="numLotto">Numero Lotto (o Lettera Fornitore):</label>
+                <input type="text" id="numLotto" placeholder="Es. L-2026-03 o da bolla" required>
             </div>
-        </div>
+
+            <div class="form-group">
+                <label for="scadenza">Data e Ora di Scadenza:</label>
+                <input type="datetime-local" id="scadenza" required>
+            </div>
+
+            <button type="submit" class="btn-big">REGISTRA LOTTO</button>
+        </form>
     </div>
 
-    <!-- MODALE ANAGRAFICA -->
-    <div id="employee-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
-            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
-                <h3 class="font-bold text-lg" id="modal-title">Nuovo Dipendente</h3>
-                <button onclick="closeEmployeeModal()" class="text-white hover:bg-indigo-700 p-2 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <input type="hidden" id="emp-id">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome e Cognome</label>
-                    <input type="text" id="emp-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Codice Fiscale</label>
-                    <input type="text" id="emp-cf" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm uppercase outline-none" placeholder="RSSMRA80A01H501W">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">WhatsApp</label>
-                    <input type="text" id="emp-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none" placeholder="3331234567">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contratto</label>
-                    <select id="emp-contract" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none">
-                        <option value="Part-Time Serale">Part-Time Serale</option>
-                        <option value="Full-Time">Full-Time</option>
-                        <option value="Extra / Chiamata">Extra / Chiamata</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-3 pt-4">
-                    <button onclick="closeEmployeeModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
-                    <button onclick="saveEmployeeData()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium shadow">Salva</button>
-                </div>
-            </div>
-        </div>
+    <!-- LISTA DEI LOTTI ATTIVI -->
+    <h2>📋 Lotti Attivi in Cucina</h2>
+    <div id="listaLotti" class="lotti-container">
+        <!-- I lotti inseriti appariranno qui dinamicamente -->
     </div>
 
-    <!-- SCRIPT -->
     <script>
-        let employees = JSON.parse(localStorage.getItem('smart_turni_emps')) || [
-            { id: 1, name: 'LUIGI', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 2, name: 'ALESSIA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 3, name: 'ANDREA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 4, name: 'BADRE', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 5, name: 'AYA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 6, name: 'ORSOLA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 7, name: 'MAIMONA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 8, name: 'ANGORI', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
-            { id: 9, name: 'NAZIR', cf: '', phone: '3330000000', contract: 'Part-Time Serale' }
+        // Array di esempio iniziale per non lasciare la schermata vuota
+        let lotti = [
+            { id: 1, prodotto: "Salsa di Pomodoro", lotto: "LOTTO-889", scadenza: "2026-03-10T12:00" },
+            { id: 2, prodotto: "Impasto Classico", lotto: "IMPACT-01", scadenza: "2026-03-02T22:00" }
         ];
 
-        let shifts = JSON.parse(localStorage.getItem('smart_turni_shifts')) || {};
-        let availability = JSON.parse(localStorage.getItem('smart_turni_avail')) || [];
-        let confirmations = JSON.parse(localStorage.getItem('smart_turni_conf')) || {};
-        let punchData = JSON.parse(localStorage.getItem('smart_turni_punches')) || [];
+        function renderLotti() {
+            const container = document.getElementById('listaLotti');
+            container.innerHTML = '';
 
-        let currentView = 'month';
-        
-        // Imposta la data di default sul mese corrente reale (Ottobre 2026)
-        let now = new Date();
-        let defaultDateStr = now.toISOString().slice(0, 10);
-        let currentDate = document.getElementById('calendar-date-picker').value || defaultDateStr;
-        document.getElementById('calendar-date-picker').value = currentDate;
-
-        function switchTab(tabId) {
-            ['tab-calendar', 'tab-staff', 'tab-availability', 'tab-ai', 'tab-punch', 'tab-whatsapp', 'tab-ade'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-                document.getElementById('btn-' + id).className = "px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500";
-            });
-            document.getElementById(tabId).classList.remove('hidden');
-            document.getElementById('btn-' + tabId).className = "px-3 py-1.5 rounded-lg text-sm font-medium transition bg-white text-indigo-600 shadow";
-
-            if(tabId === 'tab-calendar') renderCalendar();
-            if(tabId === 'tab-staff') renderEmployees();
-            if(tabId === 'tab-availability') populateAvailabilityDropdown();
-            if(tabId === 'tab-whatsapp') renderWhatsAppSection();
-            if(tabId === 'tab-punch') renderPunchTable();
-        }
-
-        function setViewMode(mode) {
-            currentView = mode;
-            ['day', 'week', 'month'].forEach(m => {
-                document.getElementById('v-' + m).className = m === mode ? "px-3 py-1.5 rounded-lg transition bg-white text-indigo-600 shadow" : "px-3 py-1.5 rounded-lg transition text-slate-600";
-            });
-            renderCalendar();
-        }
-
-        function changeDate(val) { currentDate = val; renderCalendar(); }
-
-        function renderCalendar() {
-            const container = document.getElementById('calendar-view-container');
-            if(currentView === 'day') renderDayView(container);
-            else if(currentView === 'week') renderWeekView(container);
-            else renderMonthView(container);
-        }
-
-        function renderDayView(container) {
-            let html = `<h3 class="font-bold text-slate-800 text-base mb-4">Arrivi per il giorno: ${currentDate}</h3><div class="space-y-3">`;
-            employees.forEach(emp => {
-                let shift = shifts[`${emp.id}_${currentDate}`] || '-';
-                let colorClass = getShiftColorClass(shift);
-                html += `
-                    <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div><h4 class="font-bold text-slate-800">${emp.name}</h4><span class="text-xs text-slate-500">${emp.contract}</span></div>
-                        <div class="flex items-center gap-3">
-                            <span class="px-3.5 py-2 rounded-xl text-xs font-bold ${colorClass}">Turno: ${shift}</span>
-                            <button onclick="openShiftModal(${emp.id}, '${currentDate}')" class="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm">Modifica</button>
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = html + `</div>`;
-        }
-
-        function renderWeekView(container) {
-            let base = new Date(currentDate);
-            let days = [];
-            for(let i=0; i<7; i++) {
-                let d = new Date(base); d.setDate(base.getDate() + i);
-                days.push(d.toISOString().slice(0, 10));
+            if (lotti.length === 0) {
+                container.innerHTML = '<p style="color: #777;">Nessun lotto registrato al momento.</p>';
+                return;
             }
-            let html = `<table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3.5 sticky-col bg-slate-100 z-30">Dipendente</th>`;
-            days.forEach(d => html += `<th class="p-3.5 text-center">${d.slice(5)}</th>`);
-            html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
-            employees.forEach(emp => {
-                html += `<tr><td class="p-3.5 font-bold text-slate-800 sticky-col bg-white z-20 shadow-sm">${emp.name}</td>`;
-                days.forEach(d => {
-                    let s = shifts[`${emp.id}_${d}`] || '-';
-                    let colorClass = getShiftColorClass(s);
-                    html += `<td class="p-2 text-center cursor-pointer hover:bg-slate-50 transition" onclick="openShiftModal(${emp.id}, '${d}')">`;
-                    html += `<span class="text-xs px-3 py-2 rounded-xl font-bold block shadow-sm ${colorClass}">${s}</span></td>`;
-                });
-                html += `</tr>`;
+
+            const oraCorrente = new Date();
+
+            lotti.forEach((item, index) => {
+                const dataScad = new Date(item.scadenza);
+                const diffOre = (dataScad - oraCorrente) / (1000 * 60 * 60);
+
+                let statoClasse = '';
+                let statoTesto = '✅ Valido';
+
+                if (diffOre < 0) {
+                    statoClasse = 'scaduto';
+                    statoTesto = '❌ SCADUTO / DA BUTTARE';
+                } else if (diffOre < 12) {
+                    statoClasse = 'scadenza-vicina';
+                    statoTesto = '⚠️ In Scadenza a breve';
+                }
+
+                // Formattazione data visiva
+                const dataFormattata = dataScad.toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+
+                const card = document.createElement('div');
+                card.className = `lotto-card ${statoClasse}`;
+                card.innerHTML = `
+                    <div class="badge">${statoTesto}</div>
+                    <div class="lotto-title">${item.prodotto}</div>
+                    <div class="lotto-info"><strong>Lotto:</strong> ${item.lotto}</div>
+                    <div class="lotto-info"><strong>Scadenza:</strong> ${dataFormattata}</div>
+                    <button class="btn-delete" onclick="eliminaLotto(${index})">Elimina / Consumato</button>
+                `;
+                container.appendChild(card);
             });
-            container.innerHTML = html + `</tbody></table>`;
         }
 
-        function renderMonthView(container) {
-            let yearMonth = currentDate.slice(0, 7);
-            let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3 sticky-col bg-slate-100 z-30 min-w-[140px]">Dipendente</th>`;
-            for(let d=1; d<=31; d++) html += `<th class="p-2.5 text-center">${d < 10 ? '0'+d : d}</th>`;
-            html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
-            employees.forEach(emp => {
-                html += `<tr><td class="p-3 font-bold text-slate-800 sticky-col bg-white z-20 shadow-sm">${emp.name}</td>`;
-                for(let d=1; d<=31; d++) {
-                    let fullDate = `${yearMonth}-${d < 10 ? '0'+d : d}`;
-                    let s = shifts[`${emp.id}_${fullDate}`] || '-';
-                    let colorClass = getShiftColorClass(s);
-                    html += `<td class="p-1.5 text-center cursor-pointer" onclick="openShiftModal(${emp.id}, '${fullDate}')">`;
-                    html += `<span class="px-2 py-1.5 rounded-lg font-bold inline-block text-[11px] shadow-sm ${colorClass}">${s}</span></td>`;
-                }
-                html += `</tr>`;
-            });
-            container.innerHTML = html + `</tbody></table>`;
+        function aggiungiLotto(event) {
+            event.preventDefault();
+            const prodotto = document.getElementById('prodotto').value;
+            const numLotto = document.getElementById('numLotto').value;
+            const scadenza = document.getElementById('scadenza').value;
+
+            lotti.unshift({ id: Date.now(), prodotto, lotto: numLotto, scadenza });
+
+            // Reset form
+            document.getElementById('lottoForm').reset();
+            renderLotti();
         }
 
-        function getShiftColorClass(shift) {
-            if(shift === '17:30') return 'bg-amber-100 text-amber-900 border border-amber-300';
-            if(shift === '18:00' || shift === 'LAV') return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
-            if(shift === 'TUTTI') return 'bg-purple-100 text-purple-900 border border-purple-300';
-            if(shift === 'CHIAMATE') return 'bg-sky-100 text-sky-900 border border-sky-300';
-            if(shift === 'OFF' || shift === '-') return 'bg-white text-slate-400 border border-slate-200';
-            return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
-        }
-
-        // --- IMPORTA GRIGLIA EXCEL CORRETTO ---
-        function importGridExcel(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split('\n');
-                if(lines.length < 2) { alert('Il file sembra vuoto.'); return; }
-
-                let empColumns = {}; 
-                let headerLineIdx = 0;
-
-                for(let i=0; i<Math.min(5, lines.length); i++) {
-                    let cols = lines[i].split(/[,;]/).map(c => c.replace(/"/g, '').trim().toUpperCase());
-                    cols.forEach((colName, index) => {
-                        if(colName && colName !== 'OTTOBRE' && colName !== 'CUCINA' && !['GIO', 'VEN', 'SAB', 'DOM', 'LUN', 'MAR', 'MER'].includes(colName) && !/^\d+$/.test(colName) && !colName.startsWith('UNNAMED')) {
-                            headerLineIdx = i;
-                            let matchedEmp = employees.find(e => e.name.toUpperCase() === colName);
-                            if(!matchedEmp) {
-                                let newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
-                                matchedEmp = { id: newId, name: colName, cf: '', phone: '3330000000', contract: 'Part-Time Serale' };
-                                employees.push(matchedEmp);
-                            }
-                            empColumns[index] = matchedEmp.id;
-                        }
-                    });
-                    if(Object.keys(empColumns).length > 0) break;
-                }
-
-                localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
-
-                let count = 0;
-                let yearMonth = currentDate.slice(0, 7); 
-
-                for(let i = headerLineIdx + 1; i < lines.length; i++) {
-                    let line = lines[i].trim();
-                    if(!line) continue;
-                    let cols = lines[i].split(/[,;]/).map(c => c.replace(/"/g, '').trim());
-                    
-                    let dayNum = null;
-                    for(let c=0; c<Math.min(3, cols.length); c++) {
-                        let val = cols[c].replace('.0', '');
-                        let match = val.match(/^(\d{1,2})/);
-                        if(match) {
-                            let n = parseInt(match[1]);
-                            if(n >= 1 && n <= 31) {
-                                dayNum = n;
-                                break;
-                            }
-                        }
-                    }
-
-                    if(dayNum !== null) {
-                        let dayStr = dayNum < 10 ? `0${dayNum}` : dayNum;
-                        let rowDate = `${yearMonth}-${dayStr}`;
-
-                        for(let colIdx in empColumns) {
-                            let empId = empColumns[colIdx];
-                            if(cols[colIdx]) {
-                                let cellVal = cols[colIdx].replace(/"/g, '').trim();
-                                if(cellVal && cellVal !== '-' && cellVal.toUpperCase() !== 'NAN' && cellVal !== '') {
-                                    shifts[`${empId}_${rowDate}`] = cellVal;
-                                    count++;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
-                renderCalendar();
-                renderEmployees();
-                alert(`Importati con successo ${count} turni dalla tabella Excel!`);
-            };
-            reader.readAsText(file);
-        }
-
-        function clearAllShifts() {
-            if(confirm('Vuoi davvero cancellare tutti i turni impostati?')) {
-                shifts = {};
-                localStorage.removeItem('smart_turni_shifts');
-                renderCalendar();
-                alert('Tutti i turni sono stati cancellati.');
+        function eliminaLotto(index) {
+            if(confirm("Confermi di aver consumato o eliminato questo lotto?")) {
+                lotti.splice(index, 1);
+                renderLotti();
             }
         }
 
-        function clearSingleShift() {
-            let empId = document.getElementById('sm-emp-id').value;
-            let date = document.getElementById('sm-date').value;
-            delete shifts[`${empId}_${date}`];
-            localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
-            closeShiftModal();
-            renderCalendar();
-        }
-
-        function openColorPlannerModal() {
-            document.getElementById('color-planner-modal').classList.remove('hidden');
-            renderColorPlannerGrid();
-        }
-
-        function closeColorPlannerModal() {
-            document.getElementById('color-planner-modal').classList.add('hidden');
-        }
-
-        function renderColorPlannerGrid() {
-            const container = document.getElementById('color-planner-grid-container');
-            let yearMonth = currentDate.slice(0, 7);
-            
-            let html = `<div class="overflow-x-auto"><table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b-2 border-indigo-200 bg-indigo-100/70 text-indigo-900 font-bold">`;
-            html += `<th class="p-3.5 sticky-col bg-indigo-100 z-30 min-w-[160px] shadow-sm">Dipendente</th>`;
-            for(let d=1; d<=31; d++) {
-                html += `<th class="p-3 text-center min-w-[45px]">${d < 10 ? '0'+d : d}</th>`;
-            }
-            html += `</tr></thead><tbody class="divide-y divide-slate-200">`;
-
-            employees.forEach((emp, index) => {
-                let rowBg = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/80';
-                html += `<tr class="${rowBg}"><td class="p-3.5 font-bold text-slate-800 sticky-col ${rowBg} z-20 shadow-sm">${emp.name}</td>`;
-                for(let d=1; d<=31; d++) {
-                    let fullDate = `${yearMonth}-${d < 10 ? '0'+d : d}`;
-                    let s = shifts[`${emp.id}_${fullDate}`] || '-';
-                    let badgeColor = getShiftColorClass(s);
-                    html += `<td class="p-2 text-center cursor-pointer hover:bg-indigo-50/50 transition" onclick="openShiftModal(${emp.id}, '${fullDate}'); closeColorPlannerModal();">`;
-                    html += `<span class="px-2 py-1.5 rounded-xl font-bold inline-block text-xs shadow-sm transition transform hover:scale-105 ${badgeColor}">${s}</span>`;
-                    html += `</td>`;
-                }
-                html += `</tr>`;
-            });
-            html += `</tbody></table></div>`;
-            container.innerHTML = html;
-        }
-
-        function openShiftModal(empId, date) {
-            document.getElementById('shift-modal').classList.remove('hidden');
-            document.getElementById('sm-emp-id').value = empId;
-            document.getElementById('sm-date').value = date;
-            let emp = employees.find(e => e.id == empId);
-            document.getElementById('shift-modal-title').innerText = `Turno ${emp.name} (${date})`;
-        }
-        function closeShiftModal() { document.getElementById('shift-modal').classList.add('hidden'); }
-        function saveShiftModal() {
-            let empId = document.getElementById('sm-emp-id').value;
-            let date = document.getElementById('sm-date').value;
-            shifts[`${empId}_${date}`] = document.getElementById('sm-type').value;
-            localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
-            closeShiftModal(); renderCalendar();
-        }
-
-        function renderEmployees() {
-            const container = document.getElementById('employee-cards-container');
-            container.innerHTML = employees.map(emp => `
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-start mb-2"><h3 class="font-bold text-slate-800">${emp.name}</h3><span class="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-semibold">${emp.contract}</span></div>
-                        <p class="text-xs text-slate-500 mb-1"><strong>CF:</strong> ${emp.cf || '-'}</p>
-                        <p class="text-xs text-slate-500 mb-4"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> ${emp.phone}</p>
-                    </div>
-                    <div class="flex gap-2 pt-3 border-t border-slate-100">
-                        <button onclick="openEmployeeModal(${emp.id})" class="flex-1 bg-slate-100 hover:bg-slate-200 py-1.5 rounded-xl text-xs font-medium">Modifica</button>
-                        <button onclick="deleteEmployee(${emp.id})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-medium"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>`).join('');
-        }
-
-        function openEmployeeModal(id = null) {
-            document.getElementById('employee-modal').classList.remove('hidden');
-            if(id) {
-                let emp = employees.find(e => e.id === id);
-                document.getElementById('modal-title').innerText = "Modifica Dipendente";
-                document.getElementById('emp-id').value = emp.id;
-                document.getElementById('emp-name').value = emp.name;
-                document.getElementById('emp-cf').value = emp.cf || '';
-                document.getElementById('emp-phone').value = emp.phone;
-                document.getElementById('emp-contract').value = emp.contract;
-            } else {
-                document.getElementById('modal-title').innerText = "Nuovo Dipendente";
-                document.getElementById('emp-id').value = ''; document.getElementById('emp-name').value = ''; document.getElementById('emp-cf').value = ''; document.getElementById('emp-phone').value = '';
-            }
-        }
-        function closeEmployeeModal() { document.getElementById('employee-modal').classList.add('hidden'); }
-        function saveEmployeeData() {
-            let id = document.getElementById('emp-id').value;
-            let name = document.getElementById('emp-name').value;
-            let cf = document.getElementById('emp-cf').value.toUpperCase();
-            let phone = document.getElementById('emp-phone').value;
-            let contract = document.getElementById('emp-contract').value;
-            if(!name) { alert('Inserisci il nome'); return; }
-            if(id) { let emp = employees.find(e => e.id == id); emp.name = name; emp.cf = cf; emp.phone = phone; emp.contract = contract; }
-            else { employees.push({ id: employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1, name, cf, phone, contract }); }
-            localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
-            closeEmployeeModal(); renderEmployees();
-        }
-        function deleteEmployee(id) {
-            if(confirm('Eliminare?')) { employees = employees.filter(e => e.id !== id); localStorage.setItem('smart_turni_emps', JSON.stringify(employees)); renderEmployees(); }
-        }
-
-        function populateAvailabilityDropdown() {
-            document.getElementById('avail-emp').innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-            renderAvailabilityList();
-        }
-        function saveAvailability() {
-            let empId = document.getElementById('avail-emp').value, date = document.getElementById('avail-date').value, status = document.getElementById('avail-status').value;
-            if(!date) { alert('Seleziona una data'); return; }
-            availability.push({ empId, date, status }); localStorage.setItem('smart_turni_avail', JSON.stringify(availability)); renderAvailabilityList(); alert('Salvato!');
-        }
-        function renderAvailabilityList() {
-            document.getElementById('availability-list').innerHTML = availability.map((a, idx) => {
-                let emp = employees.find(e => e.id == a.empId);
-                return `<div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-sm"><div><strong>${emp ? emp.name : ''}</strong> - ${a.date}</div><span class="text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold">${a.status}</span></div>`;
-            }).join('');
-        }
-
-        function runAIGenerator() {
-            employees.forEach(emp => { for(let d=1; d<=15; d++) shifts[`${emp.id}_${currentDate.slice(0,8)}${d < 10 ? '0'+d : d}`] = '18:00'; });
-            localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts)); alert('IA: Orari di arrivo generati!'); switchTab('tab-calendar');
-        }
-
-        function syncInOutData(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split('\n');
-                punchData = [];
-                for(let i=1; i<lines.length; i++) {
-                    let line = lines[i].trim();
-                    if(!line) continue;
-                    let cols = line.split(/[,;]/);
-                    if(cols.length >= 4) {
-                        punchData.push({
-                            name: cols[0].replace(/"/g, '').trim(),
-                            date: cols[1].replace(/"/g, '').trim(),
-                            in: cols[2].replace(/"/g, '').trim(),
-                            out: cols[3].replace(/"/g, '').trim()
-                        });
-                    }
-                }
-                if(punchData.length === 0) {
-                    punchData = employees.map((emp, idx) => ({
-                        name: emp.name,
-                        date: currentDate.slice(0, 8) + '0' + (idx+1),
-                        in: '18:00',
-                        out: '01:15'
-                    }));
-                }
-                localStorage.setItem('smart_turni_punches', JSON.stringify(punchData));
-                renderPunchTable();
-                alert('Timbrature In&Out sincronizzate con successo!');
-            };
-            reader.readAsText(file);
-        }
-
-        function renderPunchTable() {
-            const tbody = document.getElementById('punch-table-body');
-            if(punchData.length === 0) {
-                punchData = employees.map((emp, idx) => ({
-                    name: emp.name,
-                    date: currentDate.slice(0, 8) + '0' + (idx+1),
-                    in: '18:02',
-                    out: '01:10'
-                }));
-            }
-            tbody.innerHTML = punchData.map(p => {
-                let [inH, inM] = p.in.split(':').map(Number);
-                let [outH, outM] = p.out.split(':').map(Number);
-                let totalMin = (outH * 60 + outM) - (inH * 60 + inM);
-                if(totalMin < 0) totalMin += 24 * 60;
-                let hours = Math.floor(totalMin / 60);
-                let mins = totalMin % 60;
-
-                return `
-                    <tr>
-                        <td class="p-3 font-semibold">${p.name}</td>
-                        <td class="p-3 text-slate-500">${p.date}</td>
-                        <td class="p-3 text-emerald-600 font-medium">${p.in}</td>
-                        <td class="p-3 text-rose-600 font-medium">${p.out}</td>
-                        <td class="p-3 font-bold text-indigo-600">${hours}h ${mins}m</td>
-                    </tr>`;
-            }).join('');
-        }
-
-        function generatePayrollReport() { alert('Report ore calcolato ed esportato per il consulente buste paga!'); }
-
-        function renderWhatsAppSection() {
-            document.getElementById('whatsapp-dispatch-container').innerHTML = employees.map(emp => `
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between space-y-4">
-                    <div>
-                        <div class="flex justify-between items-start mb-2"><h3 class="font-bold text-slate-800">${emp.name}</h3><span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">In attesa di conferma</span></div>
-                        <p class="text-xs text-slate-500 mb-3">WhatsApp: ${emp.phone}</p>
-                        <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl">Invia orario di arrivo personale + quadro colleghi con obbligo di conferma.</p>
-                    </div>
-                    <button onclick="window.open('https://wa.me/${emp.phone}?text=' + encodeURIComponent('Ciao ${emp.name}, ecco il tuo orario di arrivo e quello dei colleghi. Conferma la ricezione.'), '_blank')" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp"></i> Invia WhatsApp</button>
-                </div>`).join('');
-        }
-
-        function downloadAdEFile() {
-            let csv = "data:text/csv;charset=utf-8,ID;NOME;CF;CONTRATTO;DATA;ORARIO_ARRIVO\n";
-            for(let key in shifts) {
-                let [empId, date] = key.split('_');
-                let emp = employees.find(e => e.id == empId);
-                if(emp) csv += `${emp.id};"${emp.name}";"${emp.cf || ''}";"${emp.contract}";${date};"${shifts[key]}"\n`;
-            }
-            let link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", "orari_arrivo_ade.csv");
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
-
-        renderCalendar();
-        renderPunchTable();
+        // Carica la lista all'avvio
+        renderLotti();
     </script>
 </body>
 </html>
