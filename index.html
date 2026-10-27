@@ -81,7 +81,7 @@
                     <div class="space-y-2">
                         <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti</h2>
                         <p class="text-gray-600 text-base md:text-lg max-w-xl mx-auto">
-                            Copia il testo con Google Lens e incollalo con un solo tasto: il sistema dividerà automaticamente Lotto e Scadenza.
+                            Gestisci le tue preparazioni, incolla rapidamente i dati da Google Lens e tieni sotto controllo le scadenze.
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -93,6 +93,9 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Box degli Allert Scadenze (Controlla solo l'ultimo lotto inserito per ogni ingrediente) -->
+                <div id="expiry-alerts-container" class="space-y-3"></div>
             </div>
 
             <div id="tab-preparation" class="hidden space-y-6">
@@ -170,6 +173,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPrepList();
+            checkLatestExpiryAlerts();
             document.getElementById('prep-date').valueAsDate = new Date();
             
             document.getElementById('sidebar-toggle').addEventListener('click', () => {
@@ -187,7 +191,10 @@
             document.getElementById('tab-preparation').classList.add('hidden');
             document.getElementById('tab-report').classList.add('hidden');
 
-            if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
+            if (tabName === 'home') {
+                document.getElementById('tab-home').classList.remove('hidden');
+                checkLatestExpiryAlerts(); // Aggiorna gli allert quando si torna alla home
+            }
             else if (tabName === 'preparation') document.getElementById('tab-preparation').classList.remove('hidden');
             else if (tabName === 'report') {
                 document.getElementById('tab-report').classList.remove('hidden');
@@ -197,6 +204,99 @@
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
+            }
+        };
+
+        // Funzione per controllare ed estrarre SOLTANTO l'ultimo lotto inserito per ogni ingrediente nell'archivio
+        window.checkLatestExpiryAlerts = function() {
+            const container = document.getElementById('expiry-alerts-container');
+            container.innerHTML = '';
+
+            if (batchArchive.length === 0) return;
+
+            // Mappa per memorizzare l'ultimo inserimento di ciascun ingrediente univoco
+            const latestIngredientsMap = new Map();
+
+            // L'archivio è in ordine cronologico inverso (il più recente è in cima, indice 0)
+            batchArchive.forEach(entry => {
+                entry.ingredients.forEach(ing => {
+                    const normalizedName = ing.name.trim().toUpperCase();
+                    // Se non abbiamo ancora salvato questo ingrediente, prendiamo questo (che è l'ultimo in ordine di tempo)
+                    if (!latestIngredientsMap.has(normalizedName)) {
+                        latestIngredientsMap.set(normalizedName, {
+                            prepName: entry.prepName,
+                            dateSaved: entry.date,
+                            lotto: ing.lotto,
+                            fornitore: ing.fornitore
+                        });
+                    }
+                });
+            });
+
+            let alertsHtml = '';
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            latestIngredientsMap.forEach((data, ingName) => {
+                if (!data.fornitore) return;
+
+                // Cerca una data nel formato DD/MM/YYYY o DD-MM-YYYY dentro il campo fornitore/scadenza
+                const dateRegex = /\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/;
+                const match = data.fornitore.match(dateRegex);
+
+                if (match) {
+                    let day = parseInt(match[1], 10);
+                    let month = parseInt(match[2], 10) - 1;
+                    let year = parseInt(match[3], 10);
+                    if (year < 100) year += 2000;
+
+                    const expiryDate = new Date(year, month, day);
+                    expiryDate.setHours(0,0,0,0);
+
+                    const diffTime = expiryDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    // Allert se mancano 3 giorni o meno alla scadenza, oppure se è già scaduto (diffDays <= 3)
+                    if (diffDays <= 3) {
+                        let badgeColor = 'bg-amber-500 text-white';
+                        let statusText = `Scade tra ${diffDays} giorni`;
+                        if (diffDays < 0) {
+                            badgeColor = 'bg-red-600 text-white animate-pulse';
+                            statusText = `SCADUTO da ${Math.abs(diffDays)} giorni!`;
+                        } else if (diffDays === 0) {
+                            badgeColor = 'bg-red-600 text-white animate-pulse';
+                            statusText = 'Scade OGGI!';
+                        }
+
+                        alertsHtml += `
+                            <div class="bg-white border-2 border-red-200 rounded-3xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-black text-gray-900 text-base">Ultimo lotto inserito: <span class="text-red-600">${ingName}</span></h4>
+                                        <p class="text-xs text-gray-500 font-medium">Lotto: <b class="text-gray-800">${data.lotto || 'N/D'}</b> | Scadenza: <b class="text-gray-800">${data.fornitore}</b></p>
+                                    </div>
+                                </div>
+                                <span class="px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider ${badgeColor} shadow-sm w-full sm:w-auto text-center">
+                                    ${statusText}
+                                </span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+
+            if (alertsHtml) {
+                container.innerHTML = `
+                    <div class="space-y-3 pt-2">
+                        <h3 class="font-black text-gray-800 text-sm uppercase tracking-wider flex items-center gap-2 px-1">
+                            <i class="fa-solid fa-bell text-red-600 animate-bounce"></i> Avvisi Scadenza (Ultimi Lotti)
+                        </h3>
+                        ${alertsHtml}
+                    </div>
+                `;
             }
         };
 
@@ -264,7 +364,6 @@
             switchTab('preparation');
         };
 
-        // Funzione Smart: legge gli appunti copiati da Lens e li divide nei due campi separati
         window.smartPaste = async function(index) {
             try {
                 const text = await navigator.clipboard.readText();
@@ -277,17 +376,14 @@
                 let scadField = document.getElementById(`fornitore-${index}`);
                 const cleanText = text.trim();
 
-                // Cerca una data (es. DD/MM/YYYY o DD-MM-YYYY)
                 const dateRegex = /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/;
                 const dateMatch = cleanText.match(dateRegex);
 
                 if (dateMatch) {
                     scadField.value = dateMatch[0];
-                    // Il resto del testo viene messo nel lotto pulendolo un po'
                     let remaining = cleanText.replace(dateMatch[0], '').replace(/(scad|scadenza|exp|data)/gi, '').trim();
                     lottoField.value = remaining.replace(/[\n\r]+/g, ' ').trim();
                 } else {
-                    // Se non trova una data, divide per righe o mette tutto nel lotto
                     const lines = cleanText.split(/[\n\r]+/).filter(l => l.trim().length > 0);
                     if (lines.length >= 2) {
                         lottoField.value = lines[0].trim();
@@ -379,7 +475,7 @@
             localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
 
             alert('Registrazione salvata con successo!');
-            switchTab('report');
+            switchTab('home'); // Torna alla home e aggiorna immediatamente gli allert del nuovo ultimo lotto
         };
 
         window.printCurrentCard = function() {
@@ -414,6 +510,7 @@
                 batchArchive = [];
                 localStorage.removeItem('pizzeria_archive');
                 renderArchive();
+                checkLatestExpiryAlerts();
             }
         };
     </script>
