@@ -6,14 +6,6 @@
     <title>Registro Lotti Pizzeria AI</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SDK Ufficiale Google Gen AI per evitare errori di endpoint -->
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/genai": "https://esm.run/@google/genai"
-        }
-      }
-    </script>
     <style>
         @media print {
             body * { visibility: hidden; }
@@ -22,8 +14,8 @@
             .no-print { display: none !important; }
         }
         .btn-fancy-camera {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
             transition: all 0.2s ease;
         }
         .btn-fancy-camera:active {
@@ -43,7 +35,7 @@
                     <div class="w-10 h-10 bg-white/15 rounded-2xl flex items-center justify-center text-xl shadow-inner backdrop-blur-sm">
                         <i class="fa-solid fa-pizza-slice"></i>
                     </div>
-                    <h1 class="text-lg md:text-2xl font-black tracking-wide">Registro Lotti Pizzeria AI</h1>
+                    <h1 class="text-lg md:text-2xl font-black tracking-wide">Registro Lotti Pizzeria</h1>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -87,9 +79,9 @@
                         <i class="fa-solid fa-utensils"></i>
                     </div>
                     <div class="space-y-2">
-                        <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti AI</h2>
+                        <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti</h2>
                         <p class="text-gray-600 text-base md:text-lg max-w-xl mx-auto">
-                            Inquadra l'etichetta con la fotocamera: Google Gemini leggerà automaticamente il lotto e la scadenza.
+                            Usa Google Lens per copiare il testo dell'etichetta e incollalo rapidamente nei campi dei lotti.
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -165,43 +157,7 @@
         </main>
     </div>
 
-    <div id="ai-loading" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white space-y-4">
-        <div class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="font-black text-xl">Gemini sta leggendo l'etichetta...</p>
-        <p class="text-sm text-gray-300">Estrazione automatica Lotto e Fornitore/Scadenza</p>
-    </div>
-
-    <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6">
-            <div class="flex justify-between items-center pb-4 border-b border-gray-100">
-                <h3 class="font-black text-2xl text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus text-red-600"></i> Nuova Preparazione
-                </h3>
-                <button onclick="closeNewPrepModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2 text-sm">Nome Preparato:</label>
-                    <input type="text" id="new-prep-name" placeholder="Inserisci nome..." class="w-full border-2 border-gray-200 rounded-2xl p-4 font-bold text-lg focus:border-red-600 focus:outline-none shadow-sm">
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2 text-sm">Ingredienti (uno per riga o separati da virgola):</label>
-                    <textarea id="new-prep-ingredients" rows="4" placeholder="Farina&#10;Acqua&#10;Lievito&#10;Sale" class="w-full border-2 border-gray-200 rounded-2xl p-4 font-medium text-base focus:border-red-600 focus:outline-none shadow-sm"></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-2">
-                <button onclick="closeNewPrepModal()" class="py-3 px-6 bg-gray-100 hover:bg-gray-200 rounded-2xl font-bold text-gray-700 transition">Annulla</button>
-                <button onclick="createNewPreparation()" class="py-3 px-8 bg-red-600 hover:bg-red-700 rounded-2xl font-black text-white shadow-lg shadow-red-600/30 transition">Crea Scheda</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { GoogleGenAI } from "@google/genai";
-
-        const GEMINI_API_KEY = "AQ.Ab8RN6ICuVxi1JfdJv-7h72KWIcNSbVC9BUBSkGuoWKGu_nohw";
-        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
+    <script>
         const defaultPreparations = [
             { id: 'impasto-pizza', name: 'IMPASTO PIZZA', ingredients: ['FARINA', 'SOIA', 'LIEVITO', 'SALE'] },
             { id: 'impasto-pinsa', name: 'IMPASTO PINSA', ingredients: ['FARINA RISO', 'FARINA FRUMENTO', 'LIEVITO MADRE', 'ACQUA', 'SALE'] },
@@ -282,7 +238,27 @@
             prep.ingredients.forEach((ing, index) => {
                 const card = document.createElement('div');
                 card.className = 'bg-white border-2 border-gray-200/80 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow-md transition';
-                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithGemini(event, ' + index + ')"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Fornitore)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100">
+                        <span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-box-open text-red-500"></i> ${ing}
+                        </span>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button type="button" onclick="pasteFromClipboard(${index})" class="btn-fancy-camera text-white px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 text-xs shadow-md flex-1 sm:flex-initial">
+                                <i class="fa-solid fa-paste"></i> Incolla da Lens
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label>
+                            <input type="text" id="lotto-${index}" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label>
+                            <input type="text" id="fornitore-${index}" placeholder="Es. 11-03-2027" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition">
+                        </div>
+                    </div>`;
                 container.appendChild(card);
             });
 
@@ -290,95 +266,21 @@
             switchTab('preparation');
         };
 
-        window.processImageWithGemini = async function(event, rowIndex) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            document.getElementById('ai-loading').classList.remove('hidden');
-
+        // Funzione rapida: usi Google Lens, copi il testo e lo incolli direttamente nel campo
+        window.pasteFromClipboard = async function(index) {
             try {
-                const base64Data = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 800;
-                            const MAX_HEIGHT = 800;
-                            let width = img.width;
-                            let height = img.height;
-
-                            if (width > height) {
-                                if (width > MAX_WIDTH) {
-                                    height *= MAX_WIDTH / width;
-                                    width = MAX_WIDTH;
-                                }
-                            } else {
-                                if (height > MAX_HEIGHT) {
-                                    width *= MAX_HEIGHT / height;
-                                    height = MAX_HEIGHT;
-                                }
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
-                            resolve(dataUrl.split(',')[1]);
-                        };
-                        img.onerror = reject;
-                        img.src = e.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Tempo scaduto: la risposta dell'IA ha impiegato troppo tempo.")), 15000)
-                );
-
-                const apiPromise = ai.models.generateContent({
-                    model: 'gemini-1.5-flash',
-                    contents: [
-                        {
-                            text: "Sei un assistente esperto in HACCP e OCR di etichette alimentari. Analizza questa immagine con attenzione estrema. Trova: 1) Il codice lotto (cerca sigle come L., LOT., o codici alfanumerici complessi stampati sul sacco). 2) La data di scadenza (cercando SCAD., SCADENZA, o date in formato DD/MM/YYYY) o il nome del prodotto/fornitore. Restituisci un JSON puro senza markdown nel formato esatto: {\"lotto\": \"testo_lotto\", \"fornitore\": \"testo_scadenza_o_fornitore\"}"
-                        },
-                        {
-                            inlineData: {
-                                mimeType: "image/jpeg",
-                                data: base64Data
-                            }
-                        }
-                    ]
-                });
-
-                const response = await Promise.race([apiPromise, timeoutPromise]);
-
-                const textResult = response.text;
-                let jsonString = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
-                const firstBrace = jsonString.indexOf('{');
-                const lastBrace = jsonString.lastIndexOf('}');
-                if (firstBrace !== -1 && lastBrace !== -1) {
-                    jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    alert("Gli appunti sono vuoti. Copia prima il testo con Google Lens.");
+                    return;
                 }
-
-                const parsedData = JSON.parse(jsonString);
-
-                if (parsedData.lotto) {
-                    document.getElementById('lotto-' + rowIndex).value = parsedData.lotto;
-                }
-                if (parsedData.fornitore) {
-                    document.getElementById('fornitore-' + rowIndex).value = parsedData.fornitore;
-                }
-
-            } catch (error) {
-                console.error("Errore IA dettagliato:", error);
-                alert("Impossibile leggere l'etichetta: " + error.message);
-            } finally {
-                document.getElementById('ai-loading').classList.add('hidden');
-                event.target.value = '';
+                // Inserisce tutto il testo copiato nel campo del lotto o prova a dividerlo
+                document.getElementById(`lotto-${index}`).value = text.trim();
+                alert("Testo incollato con successo!");
+            } catch (err) {
+                // Se il browser blocca la lettura diretta degli appunti, mette il focus sul campo così puoi incollare manualmente tenendo premuto
+                document.getElementById(`lotto-${index}`).focus();
+                alert("Tieni premuto sul campo 'Numero Lotto' e seleziona 'Incolla'.");
             }
         };
 
