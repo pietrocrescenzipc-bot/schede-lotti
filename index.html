@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Serali & Import Excel</title>
+    <title>Gestione Turni Serali & Mese Corrente</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome per le icone -->
@@ -11,7 +11,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        /* Blocco fisso della colonna dipendenti nel planner */
         .sticky-col {
             position: sticky;
             left: 0;
@@ -31,7 +30,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">Gestione Turni Serali</h1>
-                    <p class="text-xs text-indigo-200">Import Griglia Perfetto • Colonna Fissa • In&Out Sync</p>
+                    <p class="text-xs text-indigo-200">Mese Corrente • Colonna Fissa • In&Out Sync</p>
                 </div>
             </div>
             <!-- Navigazione Tab -->
@@ -68,7 +67,7 @@
         <section id="tab-calendar" class="space-y-4">
             <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Calendario Orario di Arrivo</h2>
+                    <h2 class="text-xl font-bold text-slate-800">Calendario & Mese Corrente</h2>
                     <p class="text-sm text-slate-500">Importa la tua tabella Excel dei turni o apri il Planner Mensile.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -90,7 +89,7 @@
                         <button onclick="setViewMode('week')" id="v-week" class="px-3 py-1.5 rounded-lg transition text-slate-600">Settimana</button>
                         <button onclick="setViewMode('month')" id="v-month" class="px-3 py-1.5 rounded-lg transition bg-white text-indigo-600 shadow">Mese</button>
                     </div>
-                    <input type="date" id="calendar-date-picker" value="2026-10-01" onchange="changeDate(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none">
+                    <input type="date" id="calendar-date-picker" onchange="changeDate(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none">
                 </div>
             </div>
             <div id="calendar-view-container" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-6 overflow-x-auto"></div>
@@ -319,7 +318,12 @@
         let punchData = JSON.parse(localStorage.getItem('smart_turni_punches')) || [];
 
         let currentView = 'month';
-        let currentDate = document.getElementById('calendar-date-picker').value;
+        
+        // Imposta la data di default sul mese corrente reale (Ottobre 2026)
+        let now = new Date();
+        let defaultDateStr = now.toISOString().slice(0, 10);
+        let currentDate = document.getElementById('calendar-date-picker').value || defaultDateStr;
+        document.getElementById('calendar-date-picker').value = currentDate;
 
         function switchTab(tabId) {
             ['tab-calendar', 'tab-staff', 'tab-availability', 'tab-ai', 'tab-punch', 'tab-whatsapp', 'tab-ade'].forEach(id => {
@@ -421,7 +425,7 @@
             return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
         }
 
-        // --- IMPORTA GRIGLIA EXCEL AVANZATO (LEGGE TUTTE LE COLONNE) ---
+        // --- IMPORTA GRIGLIA EXCEL CORRETTO ---
         function importGridExcel(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -431,14 +435,13 @@
                 const lines = text.split('\n');
                 if(lines.length < 2) { alert('Il file sembra vuoto.'); return; }
 
-                let empColumns = {}; // Mappa indice colonna -> ID dipendente
+                let empColumns = {}; 
                 let headerLineIdx = 0;
 
-                // 1. Trova la riga di intestazione contenente i nomi dei dipendenti
                 for(let i=0; i<Math.min(5, lines.length); i++) {
                     let cols = lines[i].split(/[,;]/).map(c => c.replace(/"/g, '').trim().toUpperCase());
                     cols.forEach((colName, index) => {
-                        if(colName && colName !== 'OTTOBRE' && colName !== 'CUCINA' && !['GIO', 'VEN', 'SAB', 'DOM', 'LUN', 'MAR', 'MER'].includes(colName) && !/^\d+$/.test(colName) && colName !== 'UNNAMED: 2' && colName !== 'UNNAMED: 3' && colName !== 'UNNAMED: 4' && colName !== 'UNNAMED: 5' && colName !== 'UNNAMED: 6' && colName !== 'UNNAMED: 7' && colName !== 'UNNAMED: 8' && colName !== 'UNNAMED: 10') {
+                        if(colName && colName !== 'OTTOBRE' && colName !== 'CUCINA' && !['GIO', 'VEN', 'SAB', 'DOM', 'LUN', 'MAR', 'MER'].includes(colName) && !/^\d+$/.test(colName) && !colName.startsWith('UNNAMED')) {
                             headerLineIdx = i;
                             let matchedEmp = employees.find(e => e.name.toUpperCase() === colName);
                             if(!matchedEmp) {
@@ -455,9 +458,8 @@
                 localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
 
                 let count = 0;
-                let yearMonth = currentDate.slice(0, 7); // Anno e mese (es. 2026-10)
+                let yearMonth = currentDate.slice(0, 7); 
 
-                // 2. Leggi le righe dei giorni
                 for(let i = headerLineIdx + 1; i < lines.length; i++) {
                     let line = lines[i].trim();
                     if(!line) continue;
@@ -480,7 +482,6 @@
                         let dayStr = dayNum < 10 ? `0${dayNum}` : dayNum;
                         let rowDate = `${yearMonth}-${dayStr}`;
 
-                        // Controlla tutte le colonne associate ai dipendenti
                         for(let colIdx in empColumns) {
                             let empId = empColumns[colIdx];
                             if(cols[colIdx]) {
@@ -502,7 +503,6 @@
             reader.readAsText(file);
         }
 
-        // --- CANCELLA TUTTI I TURNI ---
         function clearAllShifts() {
             if(confirm('Vuoi davvero cancellare tutti i turni impostati?')) {
                 shifts = {};
@@ -512,7 +512,6 @@
             }
         }
 
-        // --- CANCELLA SINGOLO TURNO ---
         function clearSingleShift() {
             let empId = document.getElementById('sm-emp-id').value;
             let date = document.getElementById('sm-date').value;
@@ -522,7 +521,6 @@
             renderCalendar();
         }
 
-        // --- PLANNER MENSILE ULTRA LEGGIBILE POPUP ---
         function openColorPlannerModal() {
             document.getElementById('color-planner-modal').classList.remove('hidden');
             renderColorPlannerGrid();
@@ -669,7 +667,7 @@
                 if(punchData.length === 0) {
                     punchData = employees.map((emp, idx) => ({
                         name: emp.name,
-                        date: '2026-10-0' + (idx+1),
+                        date: currentDate.slice(0, 8) + '0' + (idx+1),
                         in: '18:00',
                         out: '01:15'
                     }));
@@ -686,7 +684,7 @@
             if(punchData.length === 0) {
                 punchData = employees.map((emp, idx) => ({
                     name: emp.name,
-                    date: '2026-10-0' + (idx+1),
+                    date: currentDate.slice(0, 8) + '0' + (idx+1),
                     in: '18:02',
                     out: '01:10'
                 }));
