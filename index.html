@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Serali & Import Tabella Excel</title>
+    <title>Gestione Turni Serali & Import Excel</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome per le icone -->
@@ -11,6 +11,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        /* Blocco fisso della colonna dipendenti nel planner */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            background-color: white;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -24,7 +31,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">Gestione Turni Serali</h1>
-                    <p class="text-xs text-indigo-200">Import Tabella Excel • Planner • In&Out Sync</p>
+                    <p class="text-xs text-indigo-200">Import Griglia Perfetto • Colonna Fissa • In&Out Sync</p>
                 </div>
             </div>
             <!-- Navigazione Tab -->
@@ -66,20 +73,24 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <!-- Pulsante Importa Tabella Excel CSV -->
-                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md cursor-pointer transition flex items-center gap-2">
+                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md cursor-pointer transition flex items-center gap-2">
                         <i class="fa-solid fa-file-excel"></i> 📂 Importa Tabella Turni (CSV)
                         <input type="file" id="excel-shifts-input" accept=".csv,.txt" onchange="importGridExcel(event)" class="hidden">
                     </label>
                     <!-- Pulsante Planner Mensile Visivo -->
-                    <button onclick="openColorPlannerModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2">
+                    <button onclick="openColorPlannerModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-2">
                         <i class="fa-solid fa-table-cells-large"></i> 📅 Planner Mensile
+                    </button>
+                    <!-- Pulsante Pulisci Turni -->
+                    <button onclick="clearAllShifts()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition" title="Cancella tutti i turni">
+                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                     <div class="bg-slate-100 p-1 rounded-xl flex gap-1 text-sm font-medium">
                         <button onclick="setViewMode('day')" id="v-day" class="px-3 py-1.5 rounded-lg transition text-slate-600">Giorno</button>
                         <button onclick="setViewMode('week')" id="v-week" class="px-3 py-1.5 rounded-lg transition text-slate-600">Settimana</button>
                         <button onclick="setViewMode('month')" id="v-month" class="px-3 py-1.5 rounded-lg transition bg-white text-indigo-600 shadow">Mese</button>
                     </div>
-                    <input type="date" id="calendar-date-picker" onchange="changeDate(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none">
+                    <input type="date" id="calendar-date-picker" value="2026-10-01" onchange="changeDate(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none">
                 </div>
             </div>
             <div id="calendar-view-container" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-6 overflow-x-auto"></div>
@@ -90,7 +101,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Anagrafica Dipendenti</h2>
-                    <p class="text-sm text-slate-500">I dipendenti vengono aggiunti automaticamente importando la tabella turni.</p>
+                    <p class="text-sm text-slate-500">I dipendenti vengono aggiornati automaticamente dal file Excel.</p>
                 </div>
                 <button onclick="openEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow transition flex items-center gap-2">
                     <i class="fa-solid fa-user-plus"></i> Nuovo Dipendente
@@ -205,23 +216,21 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-lg sm:text-xl">Planner Mensile Dipendenti</h3>
-                        <p class="text-xs text-indigo-100">Clicca su qualsiasi casella per modificare l'orario all'istante</p>
+                        <p class="text-xs text-indigo-100">La colonna dei nomi resta fissa mentre scorri i giorni a destra</p>
                     </div>
                 </div>
                 <button onclick="closeColorPlannerModal()" class="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-xl transition text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="bg-slate-100 px-6 py-3 border-b flex flex-wrap gap-4 items-center text-xs font-semibold text-slate-700">
-                <span class="font-bold text-slate-900"><i class="fa-solid fa-palette mr-1"></i> Legenda Orari:</span>
-                <span class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold shadow-sm">17:30 (Anticipato)</span>
-                <span class="bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-lg border border-emerald-300 font-bold shadow-sm">18:00 (Standard)</span>
-                <span class="bg-sky-100 text-sky-900 px-3 py-1.5 rounded-lg border border-sky-300 font-bold shadow-sm">18:30</span>
-                <span class="bg-purple-100 text-purple-900 px-3 py-1.5 rounded-lg border border-purple-300 font-bold shadow-sm">19:00</span>
-                <span class="bg-rose-100 text-rose-900 px-3 py-1.5 rounded-lg border border-rose-300 font-bold shadow-sm">OFF (Riposo)</span>
-                <span class="bg-white text-slate-400 px-3 py-1.5 rounded-lg border border-slate-200 font-bold">- (Vuoto)</span>
+                <span class="font-bold text-slate-900"><i class="fa-solid fa-palette mr-1"></i> Legenda Turni:</span>
+                <span class="bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-lg border border-emerald-300 font-bold shadow-sm">LAV (Lavorativo)</span>
+                <span class="bg-purple-100 text-purple-900 px-3 py-1.5 rounded-lg border border-purple-300 font-bold shadow-sm">TUTTI</span>
+                <span class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold shadow-sm">CHIAMATE</span>
+                <span class="bg-rose-100 text-rose-900 px-3 py-1.5 rounded-lg border border-rose-300 font-bold shadow-sm">OFF / Vuoto</span>
             </div>
             <div class="p-4 sm:p-6 overflow-auto flex-grow bg-slate-50/50" id="color-planner-grid-container"></div>
             <div class="bg-white p-4 border-t flex justify-between items-center px-6">
-                <span class="text-xs text-slate-500 font-medium">Visualizzazione ottimizzata per PC e Smartphone</span>
+                <span class="text-xs text-slate-500 font-medium">Scorri in orizzontale per vedere tutto il mese</span>
                 <button onclick="closeColorPlannerModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold shadow transition">Chiudi Planner</button>
             </div>
         </div>
@@ -234,18 +243,21 @@
             <input type="hidden" id="sm-emp-id">
             <input type="hidden" id="sm-date">
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Orario di Arrivo Previsto</label>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Turno / Orario</label>
                 <select id="sm-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none">
-                    <option value="17:30">17:30 (Anticipato)</option>
                     <option value="18:00">18:00 (Standard)</option>
-                    <option value="18:30">18:30</option>
-                    <option value="19:00">19:00</option>
+                    <option value="17:30">17:30 (Anticipato)</option>
+                    <option value="TUTTI">TUTTI</option>
+                    <option value="CHIAMATE">CHIAMATE</option>
                     <option value="OFF">Riposo (OFF)</option>
                 </select>
             </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeShiftModal()" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
-                <button onclick="saveShiftModal()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow">Salva</button>
+            <div class="flex justify-between gap-2 pt-2">
+                <button onclick="clearSingleShift()" class="px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold">Cancella</button>
+                <div class="flex gap-2">
+                    <button onclick="closeShiftModal()" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
+                    <button onclick="saveShiftModal()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow">Salva</button>
+                </div>
             </div>
         </div>
     </div>
@@ -307,8 +319,7 @@
         let punchData = JSON.parse(localStorage.getItem('smart_turni_punches')) || [];
 
         let currentView = 'month';
-        let currentDate = new Date().toISOString().slice(0, 10);
-        document.getElementById('calendar-date-picker').value = currentDate;
+        let currentDate = document.getElementById('calendar-date-picker').value;
 
         function switchTab(tabId) {
             ['tab-calendar', 'tab-staff', 'tab-availability', 'tab-ai', 'tab-punch', 'tab-whatsapp', 'tab-ade'].forEach(id => {
@@ -351,7 +362,7 @@
                     <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <div><h4 class="font-bold text-slate-800">${emp.name}</h4><span class="text-xs text-slate-500">${emp.contract}</span></div>
                         <div class="flex items-center gap-3">
-                            <span class="px-3.5 py-2 rounded-xl text-xs font-bold ${colorClass}">Arrivo: ${shift}</span>
+                            <span class="px-3.5 py-2 rounded-xl text-xs font-bold ${colorClass}">Turno: ${shift}</span>
                             <button onclick="openShiftModal(${emp.id}, '${currentDate}')" class="bg-white border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm">Modifica</button>
                         </div>
                     </div>`;
@@ -366,11 +377,11 @@
                 let d = new Date(base); d.setDate(base.getDate() + i);
                 days.push(d.toISOString().slice(0, 10));
             }
-            let html = `<table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3.5 sticky left-0 bg-slate-100 z-10">Dipendente</th>`;
+            let html = `<table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3.5 sticky-col bg-slate-100 z-30">Dipendente</th>`;
             days.forEach(d => html += `<th class="p-3.5 text-center">${d.slice(5)}</th>`);
             html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
             employees.forEach(emp => {
-                html += `<tr><td class="p-3.5 font-bold text-slate-800 sticky left-0 bg-white z-10">${emp.name}</td>`;
+                html += `<tr><td class="p-3.5 font-bold text-slate-800 sticky-col bg-white z-20 shadow-sm">${emp.name}</td>`;
                 days.forEach(d => {
                     let s = shifts[`${emp.id}_${d}`] || '-';
                     let colorClass = getShiftColorClass(s);
@@ -384,12 +395,12 @@
 
         function renderMonthView(container) {
             let yearMonth = currentDate.slice(0, 7);
-            let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3 sticky left-0 bg-slate-100 z-10 min-w-[140px]">Dipendente</th>`;
-            for(let d=1; d<=30; d++) html += `<th class="p-2.5 text-center">${d < 10 ? '0'+d : d}</th>`;
+            let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b bg-slate-100 text-slate-700 font-bold"><th class="p-3 sticky-col bg-slate-100 z-30 min-w-[140px]">Dipendente</th>`;
+            for(let d=1; d<=31; d++) html += `<th class="p-2.5 text-center">${d < 10 ? '0'+d : d}</th>`;
             html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
             employees.forEach(emp => {
-                html += `<tr><td class="p-3 font-bold text-slate-800 sticky left-0 bg-white z-10 shadow-sm">${emp.name}</td>`;
-                for(let d=1; d<=30; d++) {
+                html += `<tr><td class="p-3 font-bold text-slate-800 sticky-col bg-white z-20 shadow-sm">${emp.name}</td>`;
+                for(let d=1; d<=31; d++) {
                     let fullDate = `${yearMonth}-${d < 10 ? '0'+d : d}`;
                     let s = shifts[`${emp.id}_${fullDate}`] || '-';
                     let colorClass = getShiftColorClass(s);
@@ -403,12 +414,14 @@
 
         function getShiftColorClass(shift) {
             if(shift === '17:30') return 'bg-amber-100 text-amber-900 border border-amber-300';
-            if(shift === '18:00' || shift !== '-') return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
-            if(shift === 'OFF') return 'bg-rose-100 text-rose-900 border border-rose-300';
-            return 'bg-white text-slate-400 border border-slate-200';
+            if(shift === '18:00' || shift === 'LAV') return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
+            if(shift === 'TUTTI') return 'bg-purple-100 text-purple-900 border border-purple-300';
+            if(shift === 'CHIAMATE') return 'bg-sky-100 text-sky-900 border border-sky-300';
+            if(shift === 'OFF' || shift === '-') return 'bg-white text-slate-400 border border-slate-200';
+            return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
         }
 
-        // --- IMPORTA GRIGLIA EXCEL (PARSER INTELLIGENTE) ---
+        // --- IMPORTA GRIGLIA EXCEL AVANZATO (LEGGE TUTTE LE COLONNE) ---
         function importGridExcel(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -418,41 +431,38 @@
                 const lines = text.split('\n');
                 if(lines.length < 2) { alert('Il file sembra vuoto.'); return; }
 
-                // Cerca la riga di intestazione con i nomi dei dipendenti
-                let empColumns = {}; // Mappa colonna -> ID dipendente
+                let empColumns = {}; // Mappa indice colonna -> ID dipendente
                 let headerLineIdx = 0;
 
+                // 1. Trova la riga di intestazione contenente i nomi dei dipendenti
                 for(let i=0; i<Math.min(5, lines.length); i++) {
                     let cols = lines[i].split(/[,;]/).map(c => c.replace(/"/g, '').trim().toUpperCase());
-                    if(cols.includes('LUIGI') || cols.includes('ALESSIA') || cols.includes('ORSOLA')) {
-                        headerLineIdx = i;
-                        cols.forEach((colName, index) => {
-                            if(colName && colName !== 'OTTOBRE' && colName !== 'CUCINA' && colName !== 'GIO' && colName !== 'VEN' && colName !== 'SAB' && colName !== 'DOM' && colName !== 'LUN' && colName !== 'MAR' && colName !== 'MER' && !/^\d+$/.test(colName)) {
-                                let matchedEmp = employees.find(e => e.name.toUpperCase() === colName);
-                                if(!matchedEmp) {
-                                    let newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
-                                    matchedEmp = { id: newId, name: colName, cf: '', phone: '3330000000', contract: 'Part-Time Serale' };
-                                    employees.push(matchedEmp);
-                                }
-                                empColumns[index] = matchedEmp.id;
+                    cols.forEach((colName, index) => {
+                        if(colName && colName !== 'OTTOBRE' && colName !== 'CUCINA' && !['GIO', 'VEN', 'SAB', 'DOM', 'LUN', 'MAR', 'MER'].includes(colName) && !/^\d+$/.test(colName) && colName !== 'UNNAMED: 2' && colName !== 'UNNAMED: 3' && colName !== 'UNNAMED: 4' && colName !== 'UNNAMED: 5' && colName !== 'UNNAMED: 6' && colName !== 'UNNAMED: 7' && colName !== 'UNNAMED: 8' && colName !== 'UNNAMED: 10') {
+                            headerLineIdx = i;
+                            let matchedEmp = employees.find(e => e.name.toUpperCase() === colName);
+                            if(!matchedEmp) {
+                                let newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                                matchedEmp = { id: newId, name: colName, cf: '', phone: '3330000000', contract: 'Part-Time Serale' };
+                                employees.push(matchedEmp);
                             }
-                        });
-                        break;
-                    }
+                            empColumns[index] = matchedEmp.id;
+                        }
+                    });
+                    if(Object.keys(empColumns).length > 0) break;
                 }
 
                 localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
 
                 let count = 0;
-                let yearMonth = currentDate.slice(0, 7); // Anno e mese corrente
+                let yearMonth = currentDate.slice(0, 7); // Anno e mese (es. 2026-10)
 
-                // Leggi le righe dei giorni partendo da dopo l'intestazione
+                // 2. Leggi le righe dei giorni
                 for(let i = headerLineIdx + 1; i < lines.length; i++) {
                     let line = lines[i].trim();
                     if(!line) continue;
                     let cols = lines[i].split(/[,;]/).map(c => c.replace(/"/g, '').trim());
                     
-                    // Cerca il numero del giorno (es. "1.0", "1", "2VEN", ecc.)
                     let dayNum = null;
                     for(let c=0; c<Math.min(3, cols.length); c++) {
                         let val = cols[c].replace('.0', '');
@@ -470,15 +480,13 @@
                         let dayStr = dayNum < 10 ? `0${dayNum}` : dayNum;
                         let rowDate = `${yearMonth}-${dayStr}`;
 
-                        // Scansiona le colonne assegnate ai dipendenti
+                        // Controlla tutte le colonne associate ai dipendenti
                         for(let colIdx in empColumns) {
                             let empId = empColumns[colIdx];
                             if(cols[colIdx]) {
                                 let cellVal = cols[colIdx].replace(/"/g, '').trim();
-                                // Se la cella contiene un nome (es. ALESSIA, LUIGI) o un orario
-                                if(cellVal && cellVal !== '-' && cellVal.toUpperCase() !== 'NaN') {
-                                    let shiftTime = cellVal.includes(':') ? cellVal : '18:00';
-                                    shifts[`${empId}_${rowDate}`] = shiftTime;
+                                if(cellVal && cellVal !== '-' && cellVal.toUpperCase() !== 'NAN' && cellVal !== '') {
+                                    shifts[`${empId}_${rowDate}`] = cellVal;
                                     count++;
                                 }
                             }
@@ -492,6 +500,26 @@
                 alert(`Importati con successo ${count} turni dalla tabella Excel!`);
             };
             reader.readAsText(file);
+        }
+
+        // --- CANCELLA TUTTI I TURNI ---
+        function clearAllShifts() {
+            if(confirm('Vuoi davvero cancellare tutti i turni impostati?')) {
+                shifts = {};
+                localStorage.removeItem('smart_turni_shifts');
+                renderCalendar();
+                alert('Tutti i turni sono stati cancellati.');
+            }
+        }
+
+        // --- CANCELLA SINGOLO TURNO ---
+        function clearSingleShift() {
+            let empId = document.getElementById('sm-emp-id').value;
+            let date = document.getElementById('sm-date').value;
+            delete shifts[`${empId}_${date}`];
+            localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
+            closeShiftModal();
+            renderCalendar();
         }
 
         // --- PLANNER MENSILE ULTRA LEGGIBILE POPUP ---
@@ -509,21 +537,21 @@
             let yearMonth = currentDate.slice(0, 7);
             
             let html = `<div class="overflow-x-auto"><table class="w-full text-left border-collapse text-sm"><thead><tr class="border-b-2 border-indigo-200 bg-indigo-100/70 text-indigo-900 font-bold">`;
-            html += `<th class="p-3.5 sticky left-0 bg-indigo-100 z-10 min-w-[160px] shadow-sm">Dipendente</th>`;
-            for(let d=1; d<=30; d++) {
+            html += `<th class="p-3.5 sticky-col bg-indigo-100 z-30 min-w-[160px] shadow-sm">Dipendente</th>`;
+            for(let d=1; d<=31; d++) {
                 html += `<th class="p-3 text-center min-w-[45px]">${d < 10 ? '0'+d : d}</th>`;
             }
             html += `</tr></thead><tbody class="divide-y divide-slate-200">`;
 
             employees.forEach((emp, index) => {
                 let rowBg = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/80';
-                html += `<tr class="${rowBg}"><td class="p-3.5 font-bold text-slate-800 sticky left-0 ${rowBg} z-10 shadow-sm">${emp.name}</td>`;
-                for(let d=1; d<=30; d++) {
+                html += `<tr class="${rowBg}"><td class="p-3.5 font-bold text-slate-800 sticky-col ${rowBg} z-20 shadow-sm">${emp.name}</td>`;
+                for(let d=1; d<=31; d++) {
                     let fullDate = `${yearMonth}-${d < 10 ? '0'+d : d}`;
                     let s = shifts[`${emp.id}_${fullDate}`] || '-';
                     let badgeColor = getShiftColorClass(s);
                     html += `<td class="p-2 text-center cursor-pointer hover:bg-indigo-50/50 transition" onclick="openShiftModal(${emp.id}, '${fullDate}'); closeColorPlannerModal();">`;
-                    html += `<span class="px-2 py-1.5 rounded-xl font-bold inline-block text-xs shadow-sm transition transform hover:scale-105 ${badgeColor}">${s === '18:00' ? 'LAV' : s}</span>`;
+                    html += `<span class="px-2 py-1.5 rounded-xl font-bold inline-block text-xs shadow-sm transition transform hover:scale-105 ${badgeColor}">${s}</span>`;
                     html += `</td>`;
                 }
                 html += `</tr>`;
@@ -537,7 +565,7 @@
             document.getElementById('sm-emp-id').value = empId;
             document.getElementById('sm-date').value = date;
             let emp = employees.find(e => e.id == empId);
-            document.getElementById('shift-modal-title').innerText = `Arrivo ${emp.name} (${date})`;
+            document.getElementById('shift-modal-title').innerText = `Turno ${emp.name} (${date})`;
         }
         function closeShiftModal() { document.getElementById('shift-modal').classList.add('hidden'); }
         function saveShiftModal() {
@@ -641,7 +669,7 @@
                 if(punchData.length === 0) {
                     punchData = employees.map((emp, idx) => ({
                         name: emp.name,
-                        date: '2026-07-0' + (idx+1),
+                        date: '2026-10-0' + (idx+1),
                         in: '18:00',
                         out: '01:15'
                     }));
@@ -658,7 +686,7 @@
             if(punchData.length === 0) {
                 punchData = employees.map((emp, idx) => ({
                     name: emp.name,
-                    date: '2026-07-0' + (idx+1),
+                    date: '2026-10-0' + (idx+1),
                     in: '18:02',
                     out: '01:10'
                 }));
