@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controllo Lotti - Pizzeria</title>
+    <title>Tracciabilità HACCP Pizzeria con OCR</title>
+    <!-- Libreria OCR per leggere le foto delle etichette -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -21,7 +23,33 @@
             font-size: 24px;
             margin-bottom: 20px;
         }
-        /* Pannello di inserimento grande e intuitivo */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        .tab-btn.active {
+            background: #0275d8;
+            color: white;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        .section-panel {
+            display: none;
+        }
+        .section-panel.active {
+            display: block;
+        }
         .card-form {
             background: #fff;
             padding: 20px;
@@ -55,7 +83,7 @@
             border-color: #0275d8;
             outline: none;
         }
-        /* Pulsante enorme a prova di errore */
+        /* Pulsanti dedicati */
         .btn-big {
             width: 100%;
             background-color: #5cb85c;
@@ -68,11 +96,66 @@
             cursor: pointer;
             box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
-        .btn-big:active {
-            background-color: #4cae4c;
-            transform: scale(0.98);
+        .btn-camera {
+            width: 100%;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
-        /* Lista lotti */
+        .btn-secondary {
+            background-color: #f0ad4e;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        /* Stato caricamento foto */
+        #loadingOCR {
+            display: none;
+            background: #e2e8f0;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #0275d8;
+        }
+        .ingrediente-row {
+            background: #fdfdfd;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+        @media(max-width: 768px) {
+            .ingrediente-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .btn-remove-ing {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
         .lotti-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -130,120 +213,310 @@
             float: right;
             margin-top: -35px;
         }
+        .ingredienti-box {
+            margin-top: 10px;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🍕 Monitor Lotti Cucina & Pizzeria</h1>
+    <h1>🍕 Sistema Tracciabilità Cucina + OCR</h1>
 
-    <!-- FORM DI INSERIMENTO -->
-    <div class="card-form">
-        <h2>➕ Registra Nuovo Lotto / Preparazione</h2>
-        <form id="lottoForm" onsubmit="aggiungiLotto(event)">
-            <div class="form-group">
-                <label for="prodotto">Nome Prodotto o Preparazione:</label>
-                <select id="prodotto" required>
-                    <option value="" disabled selected>-- Seleziona cosa hai preparato/aperto --</option>
-                    <option value="Impasto Classico">Impasto Classico</option>
-                    <option value="Impasto Integrale">Impasto Integrale</option>
-                    <option value="Mozzarella / Fiordilatte">Mozzarella / Fiordilatte</option>
-                    <option value="Salsa di Pomodoro">Salsa di Pomodoro</option>
-                    <option value="Verdure Grigliate">Verdure Grigliate</option>
-                    <option value="Farina (Sacco nuovo)">Farina (Sacco nuovo)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="numLotto">Numero Lotto (o Lettera Fornitore):</label>
-                <input type="text" id="numLotto" placeholder="Es. L-2026-03 o da bolla" required>
-            </div>
-
-            <div class="form-group">
-                <label for="scadenza">Data e Ora di Scadenza:</label>
-                <input type="datetime-local" id="scadenza" required>
-            </div>
-
-            <button type="submit" class="btn-big">REGISTRA LOTTO</button>
-        </form>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="cambiaTab('prodotti')">📦 Prodotti / Materie Prime</button>
+        <button class="tab-btn" onclick="cambiaTab('preparazioni')">🥣 Preparazioni (Impasti)</button>
     </div>
 
-    <!-- LISTA DEI LOTTI ATTIVI -->
-    <h2>📋 Lotti Attivi in Cucina</h2>
-    <div id="listaLotti" class="lotti-container">
-        <!-- I lotti inseriti appariranno qui dinamicamente -->
+    <!-- SEZIONE PRODOTTI -->
+    <div id="panel-prodotti" class="section-panel active">
+        <div class="card-form">
+            <h2>➕ Registra Arrivo Prodotto</h2>
+            
+            <!-- PULSANTE FOTOCAMERA / SCANSIONE -->
+            <button type="button" class="btn-camera" onclick="document.getElementById('fileEtichetta').click()">
+                📸 FOTOGRAFA ETICHETTA (Compila Automaticamente)
+            </button>
+            <input type="file" id="fileEtichetta" accept="image/*" capture="environment" style="display:none;" onchange="scansionaEtichetta(event)">
+            
+            <div id="loadingOCR">⏳ Lettura etichetta in corso... Attendere qualche secondo.</div>
+
+            <form id="prodottoForm" onsubmit="aggiungiProdotto(event)">
+                <div class="form-group">
+                    <label for="nomeProdotto">Nome Prodotto:</label>
+                    <input type="text" id="nomeProdotto" placeholder="Es. Farina tipo 00, Mozzarella..." required>
+                </div>
+                <div class="form-group">
+                    <label for="fornitoreProdotto">Fornitore:</label>
+                    <input type="text" id="fornitoreProdotto" placeholder="Es. Molino Rossi" required>
+                </div>
+                <div class="form-group">
+                    <label for="lottoProdotto">Numero Lotto:</label>
+                    <input type="text" id="lottoProdotto" placeholder="Rilevato da foto o digitato" required>
+                </div>
+                <div class="form-group">
+                    <label for="scadenzaProdotto">Data di Scadenza:</label>
+                    <input type="datetime-local" id="scadenzaProdotto" required>
+                </div>
+                <button type="submit" class="btn-big">REGISTRA PRODOTTO</button>
+            </form>
+        </div>
+
+        <h2>📋 Prodotti / Scorte Attive</h2>
+        <div id="listaProdotti" class="lotti-container"></div>
+    </div>
+
+    <!-- SEZIONE PREPARAZIONI -->
+    <div id="panel-preparazioni" class="section-panel">
+        <div class="card-form">
+            <h2>➕ Crea Nuova Preparazione</h2>
+            <form id="preparazioneForm" onsubmit="aggiungiPreparazione(event)">
+                <div class="form-group">
+                    <label for="nomePreparazione">Nome Preparazione:</label>
+                    <input type="text" id="nomePreparazione" placeholder="Es. Impasto Pizza Classico" required>
+                </div>
+                <div class="form-group">
+                    <label for="dataPrep">Data e Ora Preparazione:</label>
+                    <input type="datetime-local" id="dataPrep" required>
+                </div>
+                <div class="form-group">
+                    <label for="scadenzaPrep">Data e Ora di Scadenza Fine:</label>
+                    <input type="datetime-local" id="scadenzaPrep" required>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+                
+                <label>Ingredienti Utilizzati e Lotti:</label>
+                <div id="containerIngredienti"></div>
+                <button type="button" class="btn-secondary" onclick="aggiungiRigaIngrediente()">+ Aggiungi Ingrediente</button>
+                
+                <br><br>
+                <button type="submit" class="btn-big">REGISTRA PREPARAZIONE</button>
+            </form>
+        </div>
+
+        <h2>📋 Preparazioni Attive</h2>
+        <div id="listaPreparazioni" class="lotti-container"></div>
     </div>
 
     <script>
-        // Array di esempio iniziale per non lasciare la schermata vuota
-        let lotti = [
-            { id: 1, prodotto: "Salsa di Pomodoro", lotto: "LOTTO-889", scadenza: "2026-03-10T12:00" },
-            { id: 2, prodotto: "Impasto Classico", lotto: "IMPACT-01", scadenza: "2026-03-02T22:00" }
+        let prodotti = [
+            { id: 1, nome: "Farina Tipo 00", fornitore: "Molino Spadoni", lotto: "F-554", scadenza: "2026-12-31T23:59" }
         ];
 
-        function renderLotti() {
-            const container = document.getElementById('listaLotti');
-            container.innerHTML = '';
+        let preparazioni = [];
 
-            if (lotti.length === 0) {
-                container.innerHTML = '<p style="color: #777;">Nessun lotto registrato al momento.</p>';
+        function cambiaTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+
+            if(tab === 'prodotti') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('panel-prodotti').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('panel-preparazioni').classList.add('active');
+            }
+        }
+
+        // --- FUNZIONE INTELLIGENTE DI SCANSIONE FOTO (OCR) ---
+        function scansionaEtichetta(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loadingDiv = document.getElementById('loadingOCR');
+            loadingDiv.style.display = 'block';
+
+            // Utilizzo di Tesseract per analizzare l'immagine direttamente nel browser
+            Tesseract.recognize(
+                file,
+                'ita+eng', // Riconosce italiano e inglese
+                { logger: m => console.log(m) }
+            ).then(({ data: { text } }) => {
+                loadingDiv.style.display = 'none';
+                console.log("Testo estratto:", text);
+
+                // Tentativo di estrazione intelligente del lotto
+                // Cerca parole come "Lotto", "L.", "LOT" seguite da lettere/numeri
+                const matchLotto = text.match(/(?:lotto|l\.|lot)[:\s]*([a-zA-Z0-9\-_/]+)/i);
+                if (matchLotto && matchLotto[1]) {
+                    document.getElementById('lottoProdotto').value = matchLotto[1].trim();
+                }
+
+                alert("Scansione completata! Controlla se il lotto è corretto e compila il resto se necessario.");
+            }).catch(err => {
+                loadingDiv.style.display = 'none';
+                alert("Errore nella lettura dell'immagine. Riprova con una foto più nitida.");
+                console.error(err);
+            });
+        }
+
+        // --- FUNZIONI PRODOTTI ---
+        function renderProdotti() {
+            const container = document.getElementById('listaProdotti');
+            container.innerHTML = '';
+            if (prodotti.length === 0) {
+                container.innerHTML = '<p style="color: #777;">Nessun prodotto registrato.</p>';
                 return;
             }
 
-            const oraCorrente = new Date();
-
-            lotti.forEach((item, index) => {
+            const ora = new Date();
+            prodotti.forEach((item, index) => {
                 const dataScad = new Date(item.scadenza);
-                const diffOre = (dataScad - oraCorrente) / (1000 * 60 * 60);
-
+                const diffOre = (dataScad - ora) / (1000 * 60 * 60);
                 let statoClasse = '';
                 let statoTesto = '✅ Valido';
 
-                if (diffOre < 0) {
-                    statoClasse = 'scaduto';
-                    statoTesto = '❌ SCADUTO / DA BUTTARE';
-                } else if (diffOre < 12) {
-                    statoClasse = 'scadenza-vicina';
-                    statoTesto = '⚠️ In Scadenza a breve';
-                }
-
-                // Formattazione data visiva
-                const dataFormattata = dataScad.toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+                if (diffOre < 0) { statoClasse = 'scaduto'; statoTesto = '❌ SCADUTO'; }
+                else if (diffOre < 24) { statoClasse = 'scadenza-vicina'; statoTesto = '⚠️ In Scadenza'; }
 
                 const card = document.createElement('div');
                 card.className = `lotto-card ${statoClasse}`;
                 card.innerHTML = `
                     <div class="badge">${statoTesto}</div>
-                    <div class="lotto-title">${item.prodotto}</div>
+                    <div class="lotto-title">${item.nome}</div>
+                    <div class="lotto-info"><strong>Fornitore:</strong> ${item.fornitore}</div>
                     <div class="lotto-info"><strong>Lotto:</strong> ${item.lotto}</div>
-                    <div class="lotto-info"><strong>Scadenza:</strong> ${dataFormattata}</div>
-                    <button class="btn-delete" onclick="eliminaLotto(${index})">Elimina / Consumato</button>
+                    <div class="lotto-info"><strong>Scadenza:</strong> ${dataScad.toLocaleString('it-IT')}</div>
+                    <button class="btn-delete" onclick="eliminaProdotto(${index})">Elimina</button>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function aggiungiLotto(event) {
-            event.preventDefault();
-            const prodotto = document.getElementById('prodotto').value;
-            const numLotto = document.getElementById('numLotto').value;
-            const scadenza = document.getElementById('scadenza').value;
+        function aggiungiProdotto(e) {
+            e.preventDefault();
+            const nome = document.getElementById('nomeProdotto').value;
+            const fornitore = document.getElementById('fornitoreProdotto').value;
+            const lotto = document.getElementById('lottoProdotto').value;
+            const scadenza = document.getElementById('scadenzaProdotto').value;
 
-            lotti.unshift({ id: Date.now(), prodotto, lotto: numLotto, scadenza });
-
-            // Reset form
-            document.getElementById('lottoForm').reset();
-            renderLotti();
+            prodotti.unshift({ id: Date.now(), nome, fornitore, lotto, scadenza });
+            document.getElementById('prodottoForm').reset();
+            renderProdotti();
         }
 
-        function eliminaLotto(index) {
-            if(confirm("Confermi di aver consumato o eliminato questo lotto?")) {
-                lotti.splice(index, 1);
-                renderLotti();
+        function eliminaProdotto(index) {
+            if(confirm("Eliminare questo prodotto?")) {
+                prodotti.splice(index, 1);
+                renderProdotti();
             }
         }
 
-        // Carica la lista all'avvio
-        renderLotti();
+        // --- FUNZIONI PREPARAZIONI ---
+        function aggiungiRigaIngrediente(nomeVal = "", lottoVal = "", scadVal = "", fornVal = "") {
+            const container = document.getElementById('containerIngredienti');
+            const row = document.createElement('div');
+            row.className = 'ingrediente-row';
+            row.innerHTML = `
+                <div>
+                    <label style="font-size:13px;">Ingrediente:</label>
+                    <input type="text" class="ing-nome" value="${nomeVal}" required>
+                </div>
+                <div>
+                    <label style="font-size:13px;">N. Lotto:</label>
+                    <input type="text" class="ing-lotto" value="${lottoVal}" required>
+                </div>
+                <div>
+                    <label style="font-size:13px;">Scadenza:</label>
+                    <input type="text" class="ing-scad" value="${scadVal}" required>
+                </div>
+                <div>
+                    <label style="font-size:13px;">Fornitore:</label>
+                    <input type="text" class="ing-forn" value="${fornVal}" required>
+                </div>
+                <div>
+                    <button type="button" class="btn-remove-ing" onclick="this.parentElement.parentElement.remove()">X</button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function renderPreparazioni() {
+            const container = document.getElementById('listaPreparazioni');
+            container.innerHTML = '';
+            if (preparazioni.length === 0) {
+                container.innerHTML = '<p style="color: #777;">Nessuna preparazione registrata.</p>';
+                return;
+            }
+
+            const ora = new Date();
+            preparazioni.forEach((item, index) => {
+                const dataScad = new Date(item.scadenza);
+                const diffOre = (dataScad - ora) / (1000 * 60 * 60);
+                let statoClasse = '';
+                let statoTesto = '✅ Valido';
+
+                if (diffOre < 0) { statoClasse = 'scaduto'; statoTesto = '❌ SCADUTO'; }
+                else if (diffOre < 6) { statoClasse = 'scadenza-vicina'; statoTesto = '⚠️ In Scadenza'; }
+
+                let htmlIngredienti = '<div class="ingredienti-box"><strong>Ingredienti usati:</strong><ul>';
+                item.ingredienti.forEach(ing => {
+                    htmlIngredienti += `<li>${ing.nome} - Lotto: <strong>${ing.lotto}</strong></li>`;
+                });
+                htmlIngredienti += '</ul></div>';
+
+                const card = document.createElement('div');
+                card.className = `lotto-card ${statoClasse}`;
+                card.innerHTML = `
+                    <div class="badge">${statoTesto}</div>
+                    <div class="lotto-title">${item.nome}</div>
+                    <div class="lotto-info"><strong>Preparazione:</strong> ${new Date(item.dataPrep).toLocaleString('it-IT')}</div>
+                    ${htmlIngredienti}
+                    <button class="btn-delete" onclick="eliminaPreparazione(${index})">Elimina</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function aggiungiPreparazione(e) {
+            e.preventDefault();
+            const nomePreparazione = document.getElementById('nomePreparazione').value;
+            const dataPrep = document.getElementById('dataPrep').value;
+            const scadenzaPrep = document.getElementById('scadenzaPrep').value;
+
+            const righeIng = document.querySelectorAll('.ingrediente-row');
+            if(righeIng.length === 0) {
+                alert("Inserisci almeno un ingrediente!");
+                return;
+            }
+
+            let ingredientiList = [];
+            righeIng.forEach(riga => {
+                ingredientiList.push({
+                    nome: riga.querySelector('.ing-nome').value,
+                    lotto: riga.querySelector('.ing-lotto').value,
+                    scad: riga.querySelector('.ing-scad').value,
+                    fornitore: riga.querySelector('.ing-forn').value
+                });
+            });
+
+            preparazioni.unshift({
+                id: Date.now(),
+                nome: nomePreparazione,
+                dataPrep: dataPrep,
+                scadenza: scadenzaPrep,
+                ingredienti: ingredientiList
+            });
+
+            document.getElementById('preparazioneForm').reset();
+            document.getElementById('containerIngredienti').innerHTML = '';
+            renderPreparazioni();
+        }
+
+        function eliminaPreparazione(index) {
+            if(confirm("Eliminare questa preparazione?")) {
+                preparazioni.splice(index, 1);
+                renderPreparazioni();
+            }
+        }
+
+        renderProdotti();
+        renderPreparazioni();
+        aggiungiRigaIngrediente("Farina 00", "F-554", "31/12/2026", "Molino Spadoni");
     </script>
 </body>
 </html>
