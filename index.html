@@ -290,7 +290,7 @@
             switchTab('preparation');
         };
 
-        // Funzione aggiornata con il modello supportato gemini-2.0-flash
+        // Funzione aggiornata con il modello corretto gemini-3.8-flash
         window.processImageWithGemini = async function(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
@@ -336,9 +336,9 @@
                     reader.readAsDataURL(file);
                 });
 
-                // Chiamata aggiornata al modello gemini-2.0-flash
+                // Chiamata aggiornata al modello gemini-3.8-flash
                 const response = await ai.models.generateContent({
-                    model: 'gemini-2.0-flash',
+                    model: 'gemini-3.8-flash',
                     contents: [
                         {
                             text: "Sei un assistente esperto in HACCP e OCR di etichette alimentari. Analizza questa immagine con attenzione estrema. Trova: 1) Il codice lotto (cerca sigle come L., LOT., o codici alfanumerici complessi stampati sul sacco). 2) La data di scadenza (cercando SCAD., SCADENZA, o date in formato DD/MM/YYYY) o il nome del prodotto/fornitore. Restituisci un JSON puro senza markdown nel formato esatto: {\"lotto\": \"testo_lotto\", \"fornitore\": \"testo_scadenza_o_fornitore\"}"
