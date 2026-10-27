@@ -1,522 +1,779 @@
+```html
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracciabilità HACCP Pizzeria con OCR</title>
-    <!-- Libreria OCR per leggere le foto delle etichette -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <title>Registro Lotti HACCP - Cucina & Pizzeria</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .print-only { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            .printable-card, .printable-card * { visibility: visible; }
+            .printable-card { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
         }
-        body {
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 15px;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            color: #d9534f;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-        .tab-btn.active {
-            background: #0275d8;
-            color: white;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-        }
-        .section-panel {
-            display: none;
-        }
-        .section-panel.active {
-            display: block;
-        }
-        .card-form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-        }
-        .card-form h2 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #0275d8;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            font-size: 18px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            background: #fff;
-        }
-        input:focus, select:focus {
-            border-color: #0275d8;
-            outline: none;
-        }
-        /* Pulsanti dedicati */
-        .btn-big {
-            width: 100%;
-            background-color: #5cb85c;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-        }
-        .btn-camera {
-            width: 100%;
-            background-color: #f0ad4e;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 15px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-        }
-        .btn-secondary {
-            background-color: #f0ad4e;
-            color: white;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        /* Stato caricamento foto */
-        #loadingOCR {
-            display: none;
-            background: #e2e8f0;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            color: #0275d8;
-        }
-        .ingrediente-row {
-            background: #fdfdfd;
-            border: 1px solid #ddd;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 10px;
-            align-items: end;
-        }
-        @media(max-width: 768px) {
-            .ingrediente-row {
-                grid-template-columns: 1fr;
-            }
-        }
-        .btn-remove-ing {
-            background: #d9534f;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .lotti-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        @media(min-width: 768px) {
-            .lotti-container {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        .lotto-card {
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            border-left: 8px solid #5cb85c;
-            position: relative;
-        }
-        .lotto-card.scadenza-vicina {
-            border-left-color: #f0ad4e;
-            background-color: #fcf8e3;
-        }
-        .lotto-card.scaduto {
-            border-left-color: #d9534f;
-            background-color: #f2dede;
-        }
-        .lotto-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .lotto-info {
-            font-size: 15px;
-            margin: 3px 0;
-            color: #555;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            font-size: 12px;
-            font-weight: bold;
-            border-radius: 4px;
-            color: #fff;
-            background: #777;
-            margin-bottom: 8px;
-        }
-        .btn-delete {
-            background: #d9534f;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            float: right;
-            margin-top: -35px;
-        }
-        .ingredienti-box {
-            margin-top: 10px;
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 13px;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-900 h-full flex flex-col md:flex-row overflow-hidden select-none">
 
-    <h1>🍕 Sistema Tracciabilità Cucina + OCR</h1>
-
-    <div class="tabs">
-        <button class="tab-btn active" onclick="cambiaTab('prodotti')">📦 Prodotti / Materie Prime</button>
-        <button class="tab-btn" onclick="cambiaTab('preparazioni')">🥣 Preparazioni (Impasti)</button>
-    </div>
-
-    <!-- SEZIONE PRODOTTI -->
-    <div id="panel-prodotti" class="section-panel active">
-        <div class="card-form">
-            <h2>➕ Registra Arrivo Prodotto</h2>
-            
-            <!-- PULSANTE FOTOCAMERA / SCANSIONE -->
-            <button type="button" class="btn-camera" onclick="document.getElementById('fileEtichetta').click()">
-                📸 FOTOGRAFA ETICHETTA (Compila Automaticamente)
+    <!-- Mobile Top Navigation Bar -->
+    <header class="bg-slate-900 text-white md:hidden px-4 py-3 flex justify-between items-center z-30 shrink-0 shadow-md">
+        <div class="flex items-center gap-2.5">
+            <button onclick="toggleSidebar()" class="p-2 text-amber-400 hover:bg-slate-800 rounded-xl">
+                <i class="fa-solid fa-bars text-xl"></i>
             </button>
-            <input type="file" id="fileEtichetta" accept="image/*" capture="environment" style="display:none;" onchange="scansionaEtichetta(event)">
+            <span class="font-extrabold text-base">HACCP Pizzeria</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="switchTab('home')" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-extrabold text-xs rounded-xl">Compila</button>
+            <button onclick="switchTab('report')" class="px-3 py-1.5 bg-slate-800 text-slate-200 font-extrabold text-xs rounded-xl">Report (<span id="mobile-report-count">0</span>)</button>
+        </div>
+    </header>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-80 bg-slate-950 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl md:static shrink-0 border-r border-slate-800">
+        <!-- Sidebar Header -->
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 text-slate-950 p-2.5 rounded-2xl font-black text-xl shadow">
+                    <i class="fa-solid fa-pizza-slice"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base tracking-tight">Registro Lotti</h1>
+                    <p class="text-[11px] text-slate-400">Cucina & Pizzeria Touch</p>
+                </div>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Action: New Recipe Button -->
+        <div class="p-4 border-b border-slate-800/80 bg-slate-900/50">
+            <button onclick="openRecipeModal()" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-sm rounded-2xl shadow transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus-circle text-base"></i> Nuova Preparazione
+            </button>
+        </div>
+
+        <!-- Search Bar for Recipes -->
+        <div class="px-4 pt-4 pb-2">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+                <input type="text" id="recipe-search" oninput="renderSidebarRecipes()" placeholder="Cerca preparazione..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none">
+            </div>
+        </div>
+
+        <!-- Recipe List Container -->
+        <div id="sidebar-recipe-list" class="flex-grow overflow-y-auto p-4 space-y-2">
+            <!-- Populated dynamically -->
+        </div>
+
+        <!-- Sidebar Footer: Report Tab Button -->
+        <div class="p-4 border-t border-slate-800 bg-slate-900/80">
+            <button onclick="switchTab('report')" id="sidebar-report-btn" class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-2xl font-bold text-sm transition flex items-center justify-between">
+                <span class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-file-lines text-amber-400 text-lg"></i> Report & Storico
+                </span>
+                <span id="sidebar-report-badge" class="bg-amber-500 text-slate-950 px-2.5 py-0.5 rounded-full font-black text-xs">0</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Backdrop for mobile sidebar -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-30 hidden md:hidden"></div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-grow flex flex-col h-full overflow-hidden bg-slate-100">
+        
+        <!-- Desktop Header Bar -->
+        <header class="bg-white border-b border-slate-200 px-8 py-4 hidden md:flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-4">
+                <h2 id="current-header-title" class="text-xl font-black text-slate-900 uppercase tracking-tight">Seleziona una preparazione dal menu</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="switchTab('home')" id="desktop-tab-home" class="px-4 py-2 bg-amber-500 text-slate-950 rounded-xl font-extrabold text-xs shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Compila Lotto
+                </button>
+                <button onclick="switchTab('report')" id="desktop-tab-report" class="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-extrabold text-xs transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines"></i> Storico & Report (<span id="desktop-report-count">0</span>)
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Workspace -->
+        <div class="flex-grow overflow-y-auto p-4 sm:p-8">
+
+            <!-- VIEW 1: HOME / COMPILAZIONE SCHEDA LOTTO -->
+            <section id="view-home" class="max-w-3xl mx-auto space-y-6">
+                
+                <!-- Unselected State Notice -->
+                <div id="no-selection-notice" class="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-sm">
+                    <div class="w-20 h-20 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                    </div>
+                    <div class="max-w-md mx-auto">
+                        <h3 class="text-xl font-black text-slate-900">Nessuna preparazione selezionata</h3>
+                        <p class="text-sm text-slate-500 mt-1">Scegli una preparazione dal menu laterale (o crea una nuova) per compilare la scheda dei lotti HACCP.</p>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden mt-2 px-6 py-3 bg-slate-900 text-white font-extrabold rounded-2xl text-sm shadow">
+                        Apri Menu Preparazioni
+                    </button>
+                </div>
+
+                <!-- Active Form Container -->
+                <div id="active-lot-container" class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6 hidden">
+                    <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <span class="text-xs font-extrabold text-amber-800 uppercase tracking-wider block">Scheda Preparazione:</span>
+                            <h3 id="active-recipe-title" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">IMPASTO PIZZA</h3>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-2xl border border-slate-300 shadow-sm w-full sm:w-auto">
+                            <label class="text-[10px] font-extrabold uppercase text-slate-500 block mb-1">Data Preparazione / Lotto Interno</label>
+                            <input type="date" id="current-prep-date" class="font-black text-slate-900 text-base focus:outline-none bg-transparent w-full">
+                        </div>
+                    </div>
+
+                    <!-- Ingredients List -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-1">
+                            <h4 class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Ingredienti & Lotti Fornitore</h4>
+                            <span class="text-xs text-amber-700 font-bold"><i class="fa-solid fa-camera"></i> Fotocamera IA per compilazione automatica</span>
+                        </div>
+
+                        <div id="ingredients-list-container" class="space-y-4">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                        <button onclick="saveAndPrintLot()" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-black text-lg rounded-2xl shadow-lg transition flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-print text-xl"></i> Salva e Stampa Scheda
+                        </button>
+                        <button onclick="saveLotOnly()" class="px-6 py-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-extrabold text-base rounded-2xl shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-lg"></i> Solo Salva
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- VIEW 2: REPORT / STORICO -->
+            <section id="view-report" class="max-w-4xl mx-auto space-y-6 hidden">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg"><i class="fa-solid fa-file-lines"></i></span>
+                                Report & Storico Registrazioni
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">Consulta tutte le schede salvate in precedenza per i controlli HACCP.</p>
+                        </div>
+                        <div class="w-full sm:w-72">
+                            <input type="text" id="report-search-input" oninput="renderReportList()" placeholder="Cerca preparazione o lotto..." class="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl p-3.5 text-sm font-semibold focus:border-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div id="report-list-container" class="space-y-6">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ROBUST CAMERA & AI SCANNER MODAL -->
+    <div id="scanner-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shrink-0">
+                <h3 class="font-extrabold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-camera-retro text-amber-400 text-xl"></i> Scansiona Etichetta con Fotocamera
+                </h3>
+                <button onclick="closeScannerModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
             
-            <div id="loadingOCR">⏳ Lettura etichetta in corso... Attendere qualche secondo.</div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-grow flex flex-col items-center justify-center">
+                <!-- Video stream container -->
+                <div id="camera-view-container" class="relative w-full bg-black rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center shadow-inner">
+                    <video id="camera-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                    <canvas id="camera-canvas" class="hidden"></canvas>
+                    
+                    <!-- Viewfinder Guides -->
+                    <div class="absolute inset-6 border-2 border-dashed border-amber-400/80 rounded-xl pointer-events-none flex items-center justify-center">
+                        <span class="bg-black/60 text-amber-300 text-xs px-3 py-1.5 rounded-lg font-bold">Inquadra l'etichetta qui</span>
+                    </div>
 
-            <form id="prodottoForm" onsubmit="aggiungiProdotto(event)">
-                <div class="form-group">
-                    <label for="nomeProdotto">Nome Prodotto:</label>
-                    <input type="text" id="nomeProdotto" placeholder="Es. Farina tipo 00, Mozzarella..." required>
+                    <!-- AI Processing Overlay -->
+                    <div id="camera-processing-overlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-500 border-t-transparent"></div>
+                        <p class="text-white font-extrabold text-sm tracking-wide">Analisi IA in corso...</p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="fornitoreProdotto">Fornitore:</label>
-                    <input type="text" id="fornitoreProdotto" placeholder="Es. Molino Rossi" required>
+
+                <!-- Fallback / Direct file input option -->
+                <div class="w-full text-center">
+                    <p class="text-xs text-slate-500 mb-2">La fotocamera live non si avvia? Usa lo scatto nativo:</p>
+                    <label class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl cursor-pointer w-full transition">
+                        <i class="fa-solid fa-camera text-base text-amber-600"></i> Apri Fotocamera Dispositivo / Galleria
+                        <input type="file" id="fallback-file-input" accept="image/*" capture="environment" onchange="handleFileFallback(event)" class="hidden">
+                    </label>
                 </div>
-                <div class="form-group">
-                    <label for="lottoProdotto">Numero Lotto:</label>
-                    <input type="text" id="lottoProdotto" placeholder="Rilevato da foto o digitato" required>
-                </div>
-                <div class="form-group">
-                    <label for="scadenzaProdotto">Data di Scadenza:</label>
-                    <input type="datetime-local" id="scadenzaProdotto" required>
-                </div>
-                <button type="submit" class="btn-big">REGISTRA PRODOTTO</button>
-            </form>
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-between items-center shrink-0">
+                <button onclick="closeScannerModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold text-sm transition">Annulla</button>
+                <button onclick="captureAndAnalyzeFrame()" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-sm rounded-xl shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-base"></i> Scatta e Compila
+                </button>
+            </div>
         </div>
-
-        <h2>📋 Prodotti / Scorte Attive</h2>
-        <div id="listaProdotti" class="lotti-container"></div>
     </div>
 
-    <!-- SEZIONE PREPARAZIONI -->
-    <div id="panel-preparazioni" class="section-panel">
-        <div class="card-form">
-            <h2>➕ Crea Nuova Preparazione</h2>
-            <form id="preparazioneForm" onsubmit="aggiungiPreparazione(event)">
-                <div class="form-group">
-                    <label for="nomePreparazione">Nome Preparazione:</label>
-                    <input type="text" id="nomePreparazione" placeholder="Es. Impasto Pizza Classico" required>
+    <!-- NEW PREPARATION MODAL -->
+    <div id="recipe-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-extrabold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-utensils text-amber-400"></i> Nuova Preparazione
+                </h3>
+                <button onclick="closeRecipeModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form onsubmit="saveNewRecipe(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nome Preparazione</label>
+                    <input type="text" id="new-recipe-name" required placeholder="Es. IMPASTO PINSA" class="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl p-3.5 text-base font-bold uppercase focus:border-amber-500 focus:outline-none">
                 </div>
-                <div class="form-group">
-                    <label for="dataPrep">Data e Ora Preparazione:</label>
-                    <input type="datetime-local" id="dataPrep" required>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Ingredienti (separati da virgola)</label>
+                    <textarea id="new-recipe-ingredients" rows="4" required placeholder="FARINA, LIEVITO, SALE, ACQUA" class="w-full bg-slate-50 border-2 border-slate-300 rounded-2xl p-3.5 text-sm font-semibold uppercase focus:border-amber-500 focus:outline-none"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="scadenzaPrep">Data e Ora di Scadenza Fine:</label>
-                    <input type="datetime-local" id="scadenzaPrep" required>
+                <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                    <button type="button" onclick="closeRecipeModal()" class="px-5 py-3 bg-slate-200 text-slate-800 font-bold rounded-xl text-sm">Annulla</button>
+                    <button type="submit" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-sm shadow">Crea Preparazione</button>
                 </div>
-
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
-                
-                <label>Ingredienti Utilizzati e Lotti:</label>
-                <div id="containerIngredienti"></div>
-                <button type="button" class="btn-secondary" onclick="aggiungiRigaIngrediente()">+ Aggiungi Ingrediente</button>
-                
-                <br><br>
-                <button type="submit" class="btn-big">REGISTRA PREPARAZIONE</button>
             </form>
         </div>
-
-        <h2>📋 Preparazioni Attive</h2>
-        <div id="listaPreparazioni" class="lotti-container"></div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 border border-slate-800">
+        <div class="text-amber-400 text-xl"><i class="fa-solid fa-circle-check"></i></div>
+        <div id="toast-text" class="font-bold text-sm">Operazione completata!</div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        let prodotti = [
-            { id: 1, nome: "Farina Tipo 00", fornitore: "Molino Spadoni", lotto: "F-554", scadenza: "2026-12-31T23:59" }
+        let defaultRecipes = [
+            {
+                name: "IMPASTO PIZZA",
+                ingredients: ["FARINA", "SOIA", "LIEVITO", "SALE"]
+            },
+            {
+                name: "IMPASTO PANE",
+                ingredients: ["FARINA DI GRANO TENERO", "LIEVITO MADRE", "ACQUA", "SALE"]
+            },
+            {
+                name: "CONDIMENTO POMODORO",
+                ingredients: ["PASSATA DI POMODORO", "OLIO", "SALE", "BASILICO"]
+            },
+            {
+                name: "IMPASTO PINSA ROMANA",
+                ingredients: ["FARINA DI FRUMENTO", "FARINA DI RISO", "FARINA DI SOIA", "LIEVITO", "SALE", "ACQUA"]
+            },
+            {
+                name: "IMPASTO FOCACCIA",
+                ingredients: ["FARINA 0", "LIEVITO DI BIRRA", "OLIO EVO", "SALE", "ACQUA"]
+            }
         ];
 
-        let preparazioni = [];
+        let recipes = JSON.parse(localStorage.getItem('haccp_touch_recipes')) || defaultRecipes;
+        let logs = JSON.parse(localStorage.getItem('haccp_touch_logs')) || [];
+        
+        let currentSelectedRecipe = null;
+        let activeScannerIndex = null;
+        let mediaStream = null;
 
-        function cambiaTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+        window.onload = function() {
+            document.getElementById('current-prep-date').valueAsDate = new Date();
+            renderSidebarRecipes();
+            renderReportList();
+            updateReportBadges();
+        };
 
-            if(tab === 'prodotti') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('panel-prodotti').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('panel-preparazioni').classList.add('active');
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        function switchTab(viewName) {
+            ['home', 'report'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+
+            if(viewName === 'report') {
+                renderReportList();
             }
         }
 
-        // --- FUNZIONE INTELLIGENTE DI SCANSIONE FOTO (OCR) ---
-        function scansionaEtichetta(event) {
+        function renderSidebarRecipes() {
+            const container = document.getElementById('sidebar-recipe-list');
+            const query = document.getElementById('recipe-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = recipes.filter(r => r.name.toLowerCase().includes(query));
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nessuna preparazione trovata</p>`;
+                return;
+            }
+
+            filtered.forEach(rec => {
+                const isSelected = currentSelectedRecipe && currentSelectedRecipe.name === rec.name;
+                const btn = document.createElement('button');
+                btn.onclick = () => selectRecipe(rec.name);
+                btn.className = `w-full text-left p-3.5 rounded-2xl font-bold text-sm transition flex items-center justify-between group ${isSelected ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-900/60 hover:bg-slate-900 text-slate-200 border border-slate-800'}`;
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3 truncate">
+                        <i class="fa-solid fa-utensils ${isSelected ? 'text-slate-950' : 'text-amber-500'}"></i>
+                        <span class="truncate">${rec.name}</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectRecipe(name) {
+            currentSelectedRecipe = recipes.find(r => r.name === name);
+            if(!currentSelectedRecipe) return;
+
+            renderSidebarRecipes();
+            switchTab('home');
+
+            document.getElementById('no-selection-notice').classList.add('hidden');
+            document.getElementById('active-lot-container').classList.remove('hidden');
+            document.getElementById('active-recipe-title').textContent = currentSelectedRecipe.name;
+            document.getElementById('current-header-title').textContent = currentSelectedRecipe.name;
+
+            const listContainer = document.getElementById('ingredients-list-container');
+            listContainer.innerHTML = '';
+
+            currentSelectedRecipe.ingredients.forEach((ing, index) => {
+                const row = document.createElement('div');
+                row.className = "bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4";
+                row.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs">${index + 1}</span>
+                            <span class="text-base font-black text-slate-900 uppercase">${ing}</span>
+                            <input type="hidden" name="ing_name_${index}" value="${ing}">
+                        </div>
+                        <button type="button" onclick="openScannerModal(${index})" class="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-camera text-lg"></i> Fotocamera / Leggi Etichetta IA
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Codice Lotto</label>
+                            <input type="text" name="ing_lot_${index}" placeholder="Es. LMF2625A" class="w-full bg-white border-2 border-slate-300 rounded-xl p-3 text-sm font-mono font-bold uppercase focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Scadenza Ingrediente</label>
+                            <input type="date" name="ing_expiry_${index}" class="w-full bg-white border-2 border-slate-300 rounded-xl p-3 text-sm font-bold focus:border-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Fornitore</label>
+                            <input type="text" name="ing_supplier_${index}" placeholder="Es. VIVA PIZZA" class="w-full bg-white border-2 border-slate-300 rounded-xl p-3 text-sm font-bold uppercase focus:border-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        // Camera Management & getUserMedia
+        async function openScannerModal(index) {
+            activeScannerIndex = index;
+            document.getElementById('scanner-processing-overlay').classList.add('hidden');
+            document.getElementById('scanner-modal').classList.remove('hidden');
+
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: false
+                });
+                const videoEl = document.getElementById('camera-video');
+                videoEl.srcObject = mediaStream;
+            } catch (err) {
+                console.warn('getUserMedia non disponibile o negato, usa il fallback nativo.', err);
+            }
+        }
+
+        function closeScannerModal() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            const videoEl = document.getElementById('camera-video');
+            videoEl.srcObject = null;
+            document.getElementById('scanner-modal').classList.add('hidden');
+            activeScannerIndex = null;
+        }
+
+        async function captureAndAnalyzeFrame() {
+            const videoEl = document.getElementById('camera-video');
+            const canvasEl = document.getElementById('camera-canvas');
+            
+            if (!videoEl.srcObject && videoEl.videoWidth === 0) {
+                showToast('Nessun flusso video attivo. Usa il pulsante di scatto nativo sotto.', 'error');
+                return;
+            }
+
+            canvasEl.width = videoEl.videoWidth || 1280;
+            canvasEl.height = videoEl.videoHeight || 720;
+            const ctx = canvasEl.getContext('2d');
+            ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+
+            const base64FullData = canvasEl.toDataURL('image/jpeg', 0.85);
+            const base64Data = base64FullData.split(',')[1];
+
+            document.getElementById('scanner-processing-overlay').classList.remove('hidden');
+            await processAIImageData(base64Data, 'image/jpeg');
+        }
+
+        async function handleFileFallback(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if(!file) return;
 
-            const loadingDiv = document.getElementById('loadingOCR');
-            loadingDiv.style.display = 'block';
-
-            // Utilizzo di Tesseract per analizzare l'immagine direttamente nel browser
-            Tesseract.recognize(
-                file,
-                'ita+eng', // Riconosce italiano e inglese
-                { logger: m => console.log(m) }
-            ).then(({ data: { text } }) => {
-                loadingDiv.style.display = 'none';
-                console.log("Testo estratto:", text);
-
-                // Tentativo di estrazione intelligente del lotto
-                // Cerca parole come "Lotto", "L.", "LOT" seguite da lettere/numeri
-                const matchLotto = text.match(/(?:lotto|l\.|lot)[:\s]*([a-zA-Z0-9\-_/]+)/i);
-                if (matchLotto && matchLotto[1]) {
-                    document.getElementById('lottoProdotto').value = matchLotto[1].trim();
-                }
-
-                alert("Scansione completata! Controlla se il lotto è corretto e compila il resto se necessario.");
-            }).catch(err => {
-                loadingDiv.style.display = 'none';
-                alert("Errore nella lettura dell'immagine. Riprova con una foto più nitida.");
+            document.getElementById('scanner-processing-overlay').classList.remove('hidden');
+            try {
+                const base64Data = await fileToBase64(file);
+                await processAIImageData(base64Data, file.type || 'image/jpeg');
+            } catch (err) {
                 console.error(err);
+                showToast('Errore lettura file.', 'error');
+                document.getElementById('scanner-processing-overlay').classList.add('hidden');
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
             });
         }
 
-        // --- FUNZIONI PRODOTTI ---
-        function renderProdotti() {
-            const container = document.getElementById('listaProdotti');
+        async function processAIImageData(base64Data, mimeType) {
+            try {
+                const extracted = await callGeminiAPI(base64Data, mimeType);
+
+                if(extracted && activeScannerIndex !== null) {
+                    if(extracted.lot) {
+                        document.querySelector(`[name="ing_lot_${activeScannerIndex}"]`).value = extracted.lot;
+                    }
+                    if(extracted.expiry) {
+                        document.querySelector(`[name="ing_expiry_${activeScannerIndex}"]`).value = extracted.expiry;
+                    }
+                    if(extracted.supplier) {
+                        document.querySelector(`[name="ing_supplier_${activeScannerIndex}"]`).value = extracted.supplier;
+                    }
+                    showToast('Etichetta scansionata e compilata con successo!');
+                } else {
+                    showToast('Impossibile estrarre i dati. Riprova.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Errore durante la scansione IA.', 'error');
+            } finally {
+                closeScannerModal();
+            }
+        }
+
+        async function callGeminiAPI(base64Data, mimeType) {
+            const systemPrompt = `Sei un assistente AI specializzato nella lettura di etichette di lotti alimentari (HACCP) per cucine e pizzerie.
+Analizza l'immagine fornita ed estrai:
+1. Il codice lotto (lot)
+2. La data di scadenza (expiry in formato YYYY-MM-DD se possibile)
+3. Il fornitore (supplier).
+
+Restituisci ESCLUSIVAMENTE un oggetto JSON valido con chiavi: "lot", "expiry", "supplier". Se un campo non è trovato, metti stringa vuota "".`;
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: "Estrai lotto, scadenza e fornitore da questa etichetta alimentare." },
+                            { inlineData: { mimeType: mimeType, data: base64Data } }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            lot: { type: "STRING" },
+                            expiry: { type: "STRING" },
+                            supplier: { type: "STRING" }
+                        },
+                        propertyOrdering: ["lot", "expiry", "supplier"]
+                    }
+                },
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        return JSON.parse(candidate.content.parts[0].text);
+                    }
+                } catch(e) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+                }
+            }
+            return null;
+        }
+
+        // Saving and Reporting Logic
+        function collectFormData() {
+            if(!currentSelectedRecipe) return null;
+            const prepDate = document.getElementById('current-prep-date').value;
+            let items = [];
+
+            currentSelectedRecipe.ingredients.forEach((ing, index) => {
+                items.push({
+                    ingredient: ing,
+                    lot: document.querySelector(`[name="ing_lot_${index}"]`).value.trim(),
+                    expiry: document.querySelector(`[name="ing_expiry_${index}"]`).value,
+                    supplier: document.querySelector(`[name="ing_supplier_${index}"]`).value.trim()
+                });
+            });
+
+            return {
+                id: 'LOT-' + Date.now().toString().slice(-6),
+                recipeName: currentSelectedRecipe.name,
+                prepDate,
+                items,
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        function saveLotOnly() {
+            const data = collectFormData();
+            if(!data) return;
+
+            logs.unshift(data);
+            localStorage.setItem('haccp_touch_logs', JSON.stringify(logs));
+            updateReportBadges();
+            showToast('Scheda lotto salvata con successo!');
+            switchTab('report');
+        }
+
+        function saveAndPrintLot() {
+            const data = collectFormData();
+            if(!data) return;
+
+            logs.unshift(data);
+            localStorage.setItem('haccp_touch_logs', JSON.stringify(logs));
+            updateReportBadges();
+            
+            renderReportList();
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        function updateReportBadges() {
+            document.getElementById('mobile-report-count').textContent = logs.length;
+            document.getElementById('desktop-report-count').textContent = logs.length;
+            document.getElementById('sidebar-report-badge').textContent = logs.length;
+        }
+
+        function renderReportList() {
+            const container = document.getElementById('report-list-container');
+            const search = document.getElementById('report-search-input').value.toLowerCase();
             container.innerHTML = '';
-            if (prodotti.length === 0) {
-                container.innerHTML = '<p style="color: #777;">Nessun prodotto registrato.</p>';
+
+            const filtered = logs.filter(l => 
+                l.recipeName.toLowerCase().includes(search) || 
+                l.prepDate.includes(search) || 
+                l.items.some(i => i.lot.toLowerCase().includes(search) || i.ingredient.toLowerCase().includes(search))
+            );
+
+            if(filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                        <i class="fa-solid fa-folder-open text-slate-300 text-5xl mb-3"></i>
+                        <p class="text-slate-500 font-bold text-base">Nessuna registrazione trovata nello storico.</p>
+                    </div>
+                `;
                 return;
             }
 
-            const ora = new Date();
-            prodotti.forEach((item, index) => {
-                const dataScad = new Date(item.scadenza);
-                const diffOre = (dataScad - ora) / (1000 * 60 * 60);
-                let statoClasse = '';
-                let statoTesto = '✅ Valido';
-
-                if (diffOre < 0) { statoClasse = 'scaduto'; statoTesto = '❌ SCADUTO'; }
-                else if (diffOre < 24) { statoClasse = 'scadenza-vicina'; statoTesto = '⚠️ In Scadenza'; }
-
+            filtered.forEach(log => {
                 const card = document.createElement('div');
-                card.className = `lotto-card ${statoClasse}`;
+                card.className = "bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden printable-card mb-6";
+                
+                let rowsHtml = '';
+                log.items.forEach(it => {
+                    rowsHtml += `
+                        <tr class="border-b border-slate-300">
+                            <td class="p-3.5 font-black text-slate-900 text-sm uppercase border-r border-slate-300">${it.ingredient}</td>
+                            <td class="p-3.5 font-mono font-extrabold text-slate-800 text-sm border-r border-slate-300">${it.lot || '-'}</td>
+                            <td class="p-3.5 text-slate-800 text-sm font-semibold">${formatDate(it.expiry) || '-'} ${it.supplier ? `<br><span class="text-xs text-slate-500 font-bold uppercase">${it.supplier}</span>` : ''}</td>
+                        </tr>
+                    `;
+                });
+
                 card.innerHTML = `
-                    <div class="badge">${statoTesto}</div>
-                    <div class="lotto-title">${item.nome}</div>
-                    <div class="lotto-info"><strong>Fornitore:</strong> ${item.fornitore}</div>
-                    <div class="lotto-info"><strong>Lotto:</strong> ${item.lotto}</div>
-                    <div class="lotto-info"><strong>Scadenza:</strong> ${dataScad.toLocaleString('it-IT')}</div>
-                    <button class="btn-delete" onclick="eliminaProdotto(${index})">Elimina</button>
+                    <div class="bg-slate-900 text-white px-6 py-3.5 flex justify-between items-center no-print">
+                        <span class="text-xs font-mono font-bold text-slate-400">ID: ${log.id}</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.print()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> Stampa Scheda
+                            </button>
+                            <button onclick="deleteLog('${log.id}')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-extrabold rounded-xl text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-trash"></i> Elimina
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="border-3 border-slate-900 rounded-2xl overflow-hidden bg-white">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 bg-slate-100 border-b-3 border-slate-900 p-4 gap-2">
+                                <div>
+                                    <span class="text-xs font-extrabold text-slate-500 uppercase block">Preparato:</span>
+                                    <span class="text-xl font-black text-slate-900 tracking-wider">${log.recipeName}</span>
+                                </div>
+                                <div class="flex flex-col sm:items-end justify-center">
+                                    <span class="text-xs font-extrabold text-slate-500 uppercase">Data Preparazione / Lotto Interno:</span>
+                                    <span class="text-base font-black text-slate-900 font-mono">${formatDate(log.prepDate)}</span>
+                                </div>
+                            </div>
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-200 border-b-2 border-slate-900 text-slate-900 text-xs uppercase tracking-wider font-black">
+                                        <th class="p-3.5 border-r-2 border-slate-900 w-1/3">Ingredienti</th>
+                                        <th class="p-3.5 border-r-2 border-slate-900 w-1/3">Lotti</th>
+                                        <th class="p-3.5 w-1/3">Fornitore / Scadenza</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function aggiungiProdotto(e) {
-            e.preventDefault();
-            const nome = document.getElementById('nomeProdotto').value;
-            const fornitore = document.getElementById('fornitoreProdotto').value;
-            const lotto = document.getElementById('lottoProdotto').value;
-            const scadenza = document.getElementById('scadenzaProdotto').value;
-
-            prodotti.unshift({ id: Date.now(), nome, fornitore, lotto, scadenza });
-            document.getElementById('prodottoForm').reset();
-            renderProdotti();
+        function formatDate(dateStr) {
+            if(!dateStr) return '';
+            const p = dateStr.split('-');
+            if(p.length === 3) return `${p[2]}-${p[1]}-${p[0]}`;
+            return dateStr;
         }
 
-        function eliminaProdotto(index) {
-            if(confirm("Eliminare questo prodotto?")) {
-                prodotti.splice(index, 1);
-                renderProdotti();
+        function deleteLog(id) {
+            if(confirm('Eliminare questa scheda dall\'archivio?')) {
+                logs = logs.filter(l => l.id !== id);
+                localStorage.setItem('haccp_touch_logs', JSON.stringify(logs));
+                renderReportList();
+                updateReportBadges();
+                showToast('Scheda eliminata.');
             }
         }
 
-        // --- FUNZIONI PREPARAZIONI ---
-        function aggiungiRigaIngrediente(nomeVal = "", lottoVal = "", scadVal = "", fornVal = "") {
-            const container = document.getElementById('containerIngredienti');
-            const row = document.createElement('div');
-            row.className = 'ingrediente-row';
-            row.innerHTML = `
-                <div>
-                    <label style="font-size:13px;">Ingrediente:</label>
-                    <input type="text" class="ing-nome" value="${nomeVal}" required>
-                </div>
-                <div>
-                    <label style="font-size:13px;">N. Lotto:</label>
-                    <input type="text" class="ing-lotto" value="${lottoVal}" required>
-                </div>
-                <div>
-                    <label style="font-size:13px;">Scadenza:</label>
-                    <input type="text" class="ing-scad" value="${scadVal}" required>
-                </div>
-                <div>
-                    <label style="font-size:13px;">Fornitore:</label>
-                    <input type="text" class="ing-forn" value="${fornVal}" required>
-                </div>
-                <div>
-                    <button type="button" class="btn-remove-ing" onclick="this.parentElement.parentElement.remove()">X</button>
-                </div>
-            `;
-            container.appendChild(row);
+        function openRecipeModal() {
+            document.getElementById('new-recipe-name').value = '';
+            document.getElementById('new-recipe-ingredients').value = '';
+            document.getElementById('recipe-modal').classList.remove('hidden');
         }
 
-        function renderPreparazioni() {
-            const container = document.getElementById('listaPreparazioni');
-            container.innerHTML = '';
-            if (preparazioni.length === 0) {
-                container.innerHTML = '<p style="color: #777;">Nessuna preparazione registrata.</p>';
+        function closeRecipeModal() {
+            document.getElementById('recipe-modal').classList.add('hidden');
+        }
+
+        function saveNewRecipe(event) {
+            event.preventDefault();
+            const name = document.getElementById('new-recipe-name').value.trim().toUpperCase();
+            const rawIngs = document.getElementById('new-recipe-ingredients').value;
+            const ingredients = rawIngs.split(/[,]+/).map(i => i.trim().toUpperCase()).filter(i => i.length > 0);
+
+            if(recipes.some(r => r.name === name)) {
+                alert('Esiste già una preparazione con questo nome.');
                 return;
             }
 
-            const ora = new Date();
-            preparazioni.forEach((item, index) => {
-                const dataScad = new Date(item.scadenza);
-                const diffOre = (dataScad - ora) / (1000 * 60 * 60);
-                let statoClasse = '';
-                let statoTesto = '✅ Valido';
-
-                if (diffOre < 0) { statoClasse = 'scaduto'; statoTesto = '❌ SCADUTO'; }
-                else if (diffOre < 6) { statoClasse = 'scadenza-vicina'; statoTesto = '⚠️ In Scadenza'; }
-
-                let htmlIngredienti = '<div class="ingredienti-box"><strong>Ingredienti usati:</strong><ul>';
-                item.ingredienti.forEach(ing => {
-                    htmlIngredienti += `<li>${ing.nome} - Lotto: <strong>${ing.lotto}</strong></li>`;
-                });
-                htmlIngredienti += '</ul></div>';
-
-                const card = document.createElement('div');
-                card.className = `lotto-card ${statoClasse}`;
-                card.innerHTML = `
-                    <div class="badge">${statoTesto}</div>
-                    <div class="lotto-title">${item.nome}</div>
-                    <div class="lotto-info"><strong>Preparazione:</strong> ${new Date(item.dataPrep).toLocaleString('it-IT')}</div>
-                    ${htmlIngredienti}
-                    <button class="btn-delete" onclick="eliminaPreparazione(${index})">Elimina</button>
-                `;
-                container.appendChild(card);
-            });
+            recipes.push({ name, ingredients });
+            localStorage.setItem('haccp_touch_recipes', JSON.stringify(recipes));
+            
+            closeRecipeModal();
+            renderSidebarRecipes();
+            selectRecipe(name);
+            showToast('Nuova preparazione creata!');
         }
 
-        function aggiungiPreparazione(e) {
-            e.preventDefault();
-            const nomePreparazione = document.getElementById('nomePreparazione').value;
-            const dataPrep = document.getElementById('dataPrep').value;
-            const scadenzaPrep = document.getElementById('scadenzaPrep').value;
-
-            const righeIng = document.querySelectorAll('.ingrediente-row');
-            if(righeIng.length === 0) {
-                alert("Inserisci almeno un ingrediente!");
-                return;
-            }
-
-            let ingredientiList = [];
-            righeIng.forEach(riga => {
-                ingredientiList.push({
-                    nome: riga.querySelector('.ing-nome').value,
-                    lotto: riga.querySelector('.ing-lotto').value,
-                    scad: riga.querySelector('.ing-scad').value,
-                    fornitore: riga.querySelector('.ing-forn').value
-                });
-            });
-
-            preparazioni.unshift({
-                id: Date.now(),
-                nome: nomePreparazione,
-                dataPrep: dataPrep,
-                scadenza: scadenzaPrep,
-                ingredienti: ingredientiList
-            });
-
-            document.getElementById('preparazioneForm').reset();
-            document.getElementById('containerIngredienti').innerHTML = '';
-            renderPreparazioni();
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = msg;
+            t.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                t.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
         }
-
-        function eliminaPreparazione(index) {
-            if(confirm("Eliminare questa preparazione?")) {
-                preparazioni.splice(index, 1);
-                renderPreparazioni();
-            }
-        }
-
-        renderProdotti();
-        renderPreparazioni();
-        aggiungiRigaIngrediente("Farina 00", "F-554", "31/12/2026", "Molino Spadoni");
     </script>
 </body>
 </html>
+```
