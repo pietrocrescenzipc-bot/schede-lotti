@@ -15,10 +15,9 @@
             #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
         }
-        /* Stili extra per pulsanti grandi e comodi al tatto */
         .btn-touch {
-            min-height: 52px;
-            font-size: 1rem;
+            min-height: 54px;
+            font-size: 1.05rem;
         }
     </style>
 </head>
@@ -52,8 +51,8 @@
     <!-- Layout Principale -->
     <div class="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden relative shadow-2xl">
         
-        <!-- Sidebar Laterale (Lista Preparazioni con Colori e Ricerca) -->
-        <aside id="sidebar" class="bg-white w-81 shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 absolute md:relative z-20 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 no-print h-full">
+        <!-- Sidebar Laterale -->
+        <aside id="sidebar" class="bg-white w-80 shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 absolute md:relative z-20 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 no-print h-full">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/80">
                 <h2 class="font-black text-gray-800 text-base flex items-center gap-2">
                     <i class="fa-solid fa-list-check text-red-600"></i> Preparazioni
@@ -62,7 +61,6 @@
                     <i class="fa-solid fa-plus"></i> Nuova
                 </button>
             </div>
-            <!-- Barra di Ricerca -->
             <div class="p-3 border-b border-gray-100 bg-white">
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
@@ -71,9 +69,8 @@
                     <input type="text" id="search-prep" placeholder="Cerca preparazione..." oninput="filterPreparations()" class="w-full pl-10 pr-3.5 py-2.5 border-2 border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:border-red-600 bg-gray-50/50">
                 </div>
             </div>
-            <!-- Lista Dinamica -->
             <div id="prep-list-container" class="flex-1 overflow-y-auto divide-y divide-gray-100">
-                <!-- Inserito via JS -->
+                <!-- Dinamico -->
             </div>
         </aside>
 
@@ -83,7 +80,7 @@
         <!-- Contenuto Principale -->
         <main class="flex-1 p-4 md:p-8 overflow-y-auto">
             
-            <!-- Tab Home / Benvenuto -->
+            <!-- Tab Home -->
             <div id="tab-home" class="space-y-6 max-w-3xl mx-auto">
                 <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl border border-gray-100 p-8 md:p-12 text-center space-y-6">
                     <div class="w-24 h-24 bg-gradient-to-tr from-red-600 to-red-500 text-white rounded-3xl shadow-lg flex items-center justify-center text-4xl mx-auto transform rotate-3 hover:rotate-0 transition">
@@ -104,34 +101,11 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Info Box -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start gap-4">
-                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-camera"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-gray-800 text-base mb-1">Fotocamera Istantanea</h3>
-                            <p class="text-sm text-gray-500">Inquadra l'etichetta del fornitore: l'app compilerà automaticamente lotto e scadenza nei campi giusti.</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start gap-4">
-                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-shield-halved"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-gray-800 text-base mb-1">Conformità HACCP</h3>
-                            <p class="text-sm text-gray-500">Stampa schede pulite in formato carta o consulta l'archivio digitale in qualsiasi momento.</p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Tab Scheda Preparazione -->
             <div id="tab-preparation" class="hidden space-y-6">
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
-                    <!-- Intestazione Scheda -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-gray-100 gap-4">
                         <div>
                             <span class="text-xs uppercase tracking-widest text-red-600 font-black bg-red-50 px-3 py-1 rounded-full border border-red-100">Scheda di Produzione</span>
@@ -147,9 +121,8 @@
                         </div>
                     </div>
 
-                    <!-- Area Stampabile (Formato Carta Identico alla FOTO del cliente) -->
+                    <!-- Area Stampabile -->
                     <div id="printable-area" class="mt-6 space-y-6">
-                        <!-- Data e Lotto Interno -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/80 p-5 rounded-2xl border border-gray-200">
                             <div>
                                 <label class="block text-xs font-black text-gray-600 uppercase mb-2">Data Preparazione / Lotto Interno:</label>
@@ -161,7 +134,6 @@
                             </div>
                         </div>
 
-                        <!-- Card Ingredienti (Grandi, Colorate, Con tasto fotocamera ben visibile) -->
                         <div>
                             <h3 class="font-black text-gray-800 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-solid fa-boxes-stacked text-red-600"></i> Ingredienti e Lotti Fornitori
@@ -172,7 +144,6 @@
                         </div>
                     </div>
 
-                    <!-- Pulsante Salva -->
                     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end no-print">
                         <button onclick="saveCurrentBatchLog()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white px-8 rounded-2xl font-black shadow-xl transition flex items-center gap-3">
                             <i class="fa-solid fa-floppy-disk text-xl"></i> Salva Registrazione Lotto
@@ -228,7 +199,7 @@
         </div>
     </div>
 
-    <!-- Script Logica Applicativa -->
+    <!-- Script Logica -->
     <script>
         const defaultPreparations = [
             { id: 'impasto-pizza', name: 'IMPASTO PIZZA', ingredients: ['FARINA', 'SOIA', 'LIEVITO', 'SALE'] },
@@ -244,7 +215,6 @@
             renderPrepList();
             document.getElementById('prep-date').valueAsDate = new Date();
             
-            // Gestione Menu Mobile
             document.getElementById('sidebar-toggle').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.toggle('hidden');
@@ -345,12 +315,10 @@
             switchTab('preparation');
         }
 
-        // Funzione di acquisizione foto e compilazione separata dei campi
         function handleImageCaptured(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Dati simulati OCR intelligenti separati correttamente nei due campi
             const randomLotto = 'L' + Math.floor(Math.random() * 900000 + 100000);
             const randomScadenza = '2027-' + String(Math.floor(Math.random() * 12) + 1).padStart(2, '0') + '-15 (Fornitore SRL)';
 
