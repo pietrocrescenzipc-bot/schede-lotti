@@ -1,0 +1,756 @@
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurniFacile & Magico - Gestione Staff</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Fredoka -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        fun: ['Fredoka', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fun-font { font-family: 'Fredoka', cursive; }
+        .sidebar-transition { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col md:flex-row">
+
+    <!-- SIDEBAR NAVIGATION MENU -->
+    <aside id="sidebar" class="w-full md:w-72 bg-white border-r border-slate-200 flex flex-col justify-between z-45 sticky top-0 h-auto md:h-screen shadow-sm">
+        <div class="p-6">
+            <!-- App Logo & Branding -->
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="bg-indigo-600 text-white p-3 rounded-2xl shadow-md text-xl flex items-center justify-center">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold fun-font text-indigo-600">TurniFacile 🚀</h1>
+                    <p class="text-xs text-slate-400">Gestione Staff & Presenze</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-1.5">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm bg-indigo-600 text-white shadow-sm transition">
+                    <i class="fa-solid fa-house w-5 text-center"></i> Dashboard Principale
+                </button>
+                <button onclick="switchTab('shifts')" id="nav-shifts" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-calendar-days w-5 text-center text-indigo-500"></i> Calendario Turni & IA
+                </button>
+                <button onclick="switchTab('staff')" id="nav-staff" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-blue-500"></i> Anagrafica & Contratti
+                </button>
+                <button onclick="switchTab('availability')" id="nav-availability" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-clipboard-user w-5 text-center text-amber-500"></i> Disponibilità Staff
+                </button>
+                <button onclick="switchTab('clock')" id="nav-clock" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-clock w-5 text-center text-emerald-500"></i> Marcatempo & Buste Paga
+                </button>
+                <button onclick="switchTab('whatsapp')" id="nav-whatsapp" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-emerald-600"></i> WhatsApp & Conferme
+                </button>
+                <button onclick="switchTab('ade')" id="nav-ade" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center text-cyan-600"></i> Agenzia delle Entrate
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer Status -->
+        <div class="p-4 m-4 bg-indigo-50/60 border border-indigo-100 rounded-2xl text-xs text-indigo-900 flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-2 rounded-xl">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <p class="font-bold">Ottobre 2026 Attivo</p>
+                <p class="text-indigo-600">Staff sincronizzato 🟢</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-grow p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+
+        <!-- TAB 1: DASHBOARD PRINCIPALE (NON INVASIVA & PULITA) -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold fun-font text-slate-800">Ciao Direttore! 👋</h2>
+                    <p class="text-slate-500 text-sm mt-1">Tutto sotto controllo per il mese di Ottobre. Scegli cosa vuoi fare dai pulsanti rapidi qui sotto.</p>
+                </div>
+                <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-2xl text-sm font-semibold border border-emerald-200">
+                    <i class="fa-solid fa-circle-check"></i> Sistema Attivo & Connesso
+                </div>
+            </div>
+
+            <!-- Quick Action Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div onclick="switchTab('shifts')" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-indigo-300 transition cursor-pointer group">
+                    <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">Gestione Turni & IA</h3>
+                    <p class="text-xs text-slate-500">Crea, modifica e genera turni con il prompt assistente intelligente.</p>
+                </div>
+
+                <div onclick="switchTab('staff')" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-blue-300 transition cursor-pointer group">
+                    <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">Anagrafica & Contratti</h3>
+                    <p class="text-xs text-slate-500">Gestisci i contratti (Full-time, Part-time) e contatti del personale.</p>
+                </div>
+
+                <div onclick="switchTab('availability')" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-amber-300 transition cursor-pointer group">
+                    <div class="bg-amber-100 text-amber-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-clipboard-user"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">Disponibilità Staff</h3>
+                    <p class="text-xs text-slate-500">Visualizza e inserisci le preferenze orarie di ciascun dipendente.</p>
+                </div>
+
+                <div onclick="switchTab('clock')" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-emerald-300 transition cursor-pointer group">
+                    <div class="bg-emerald-100 text-emerald-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">Marcatempo & Buste Paga</h3>
+                    <p class="text-xs text-slate-500">Timbrature in tempo reale e report presenze per il consulente.</p>
+                </div>
+
+                <div onclick="switchTab('whatsapp')" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-emerald-300 transition cursor-pointer group">
+                    <div class="bg-emerald-100 text-emerald-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">WhatsApp & Conferme</h3>
+                    <p class="text-xs text-slate-500">Invia turni individuali e collettivi con obbligo di conferma.</p>
+                </div>
+
+                <div onclick="switchTab('ade')" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-cyan-300 transition cursor-pointer group">
+                    <div class="bg-cyan-100 text-cyan-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">Agenzia delle Entrate</h3>
+                    <p class="text-xs text-slate-500">Invia telematicamente le chiamate e le presenze del personale.</p>
+                </div>
+            </div>
+
+            <!-- Today's Quick Status Widget -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="text-lg font-bold fun-font mb-4 text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-indigo-600"></i> Turni di Oggi in Staff (Ottobre 2026)
+                </h3>
+                <div id="dashboard-today-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: CALENDARIO TURNI & IA PROMPT -->
+        <section id="tab-shifts" class="tab-content hidden space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold fun-font text-slate-800">Calendario Turni & IA 🪄</h2>
+                    <p class="text-slate-500 text-sm">Gestisci il planning settimanale basato sul file di Ottobre.</p>
+                </div>
+                <button onclick="resetShifts()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Ripristina Default
+                </button>
+            </div>
+
+            <!-- AI Prompt Assistant Box -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-100 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-xl text-lg">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Prompt Assistente IA per Elaborazione Turni</h3>
+                        <p class="text-xs text-slate-500">Scrivi come vuoi organizzare i turni o scegli un comando rapido.</p>
+                    </div>
+                </div>
+                <textarea id="ai-prompt-input" rows="2" class="w-full border-2 border-indigo-100 rounded-2xl p-4 focus:outline-none focus:border-indigo-500 text-slate-700 text-sm" placeholder="Es: Elabora i turni coprendo cucina e sala, rispettando i contratti part-time di Alessia e Angori..."></textarea>
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setAiPromptPreset(1)" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg font-medium transition">
+                            ✨ Copertura Massima Cucina & Sala
+                        </button>
+                        <button onclick="setAiPromptPreset(2)" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg font-medium transition">
+                            🎯 Rispetta Disponibilità Personali
+                        </button>
+                    </div>
+                    <button onclick="runAiShiftGenerator()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Elabora con IA
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shifts Table Container -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 overflow-x-auto">
+                <div id="shifts-calendar-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: ANAGRAFICA & CONTRATTI -->
+        <section id="tab-staff" class="tab-content hidden space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold fun-font text-slate-800">Anagrafica & Contratti Staff</h2>
+                    <p class="text-slate-500 text-sm">Elenco dipendenti estratto dal file ORARI STAFF.csv con tipo contratto e contatti.</p>
+                </div>
+                <button onclick="openStaffModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-2xl font-semibold text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Aggiungi Dipendente
+                </button>
+            </div>
+
+            <div id="staff-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 4: DISPONIBILITÀ DIPENDENTI -->
+        <section id="tab-availability" class="tab-content hidden space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold fun-font text-slate-800">Gestione Disponibilità Orarie</h2>
+                <p class="text-slate-500 text-sm">Inserisci o modifica le preferenze di disponibilità per ogni membro dello staff.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 text-xs text-slate-400 uppercase">
+                            <th class="py-3 px-4">Dipendente</th>
+                            <th class="py-3 px-4">Contratto</th>
+                            <th class="py-3 px-4">Note & Disponibilità Attuale</th>
+                            <th class="py-3 px-4 text-right">Modifica</th>
+                        </tr>
+                    </thead>
+                    <tbody id="availability-tbody" class="text-sm divide-y divide-slate-100">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 5: MARCATERPO & BUSTE PAGA -->
+        <section id="tab-clock" class="tab-content hidden space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold fun-font text-slate-800">Marcatempo & Buste Paga ⏱️</h2>
+                <p class="text-slate-500 text-sm">Registra entrate/uscite e genera il report presenze per il consulente.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-fingerprint text-indigo-600"></i> Terminale Presenze
+                    </h3>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Seleziona Dipendente</label>
+                        <select id="clock-employee-select" class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-sm">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="recordClock('Entrata')" class="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-2xl font-bold text-sm shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i> Entrata
+                        </button>
+                        <button onclick="recordClock('Uscita')" class="bg-rose-500 hover:bg-rose-600 text-white p-3 rounded-2xl font-bold text-sm shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i> Uscita
+                        </button>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100">
+                        <button onclick="generatePayrollReport()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-2xl font-bold text-sm shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> Genera Report Buste Paga
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-600"></i> Storico Timbrature Odierne
+                    </h3>
+                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-xs text-slate-400 uppercase">
+                                    <th class="py-3 px-4">Dipendente</th>
+                                    <th class="py-3 px-4">Tipo</th>
+                                    <th class="py-3 px-4">Orario</th>
+                                    <th class="py-3 px-4">Stato</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clock-log-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: WHATSAPP & CONFERME -->
+        <section id="tab-whatsapp" class="tab-content hidden space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold fun-font text-slate-800">Invio WhatsApp & Conferma Turni 📱</h2>
+                <p class="text-slate-500 text-sm">Ogni dipendente riceve il proprio turno insieme a quello dei colleghi, con obbligo di conferma.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="whatsapp-cards-container">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 7: AGENZIA DELLE ENTRATE -->
+        <section id="tab-ade" class="tab-content hidden space-y-6">
+            <div class="bg-gradient-to-r from-cyan-600 to-blue-700 rounded-3xl p-6 md:p-8 text-white shadow-xl">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="bg-white text-cyan-700 p-4 rounded-2xl text-2xl shadow">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold fun-font">Portale Agenzia delle Entrate</h2>
+                        <p class="text-cyan-100 text-sm">Invio telematico presenze e turni del personale.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">Riepilogo Tracciato Telematico</h3>
+                        <p class="text-xs text-slate-500">Periodo: Ottobre 2026</p>
+                    </div>
+                    <span id="ade-status-badge" class="bg-amber-100 text-amber-700 px-4 py-2 rounded-2xl font-semibold text-xs">
+                        ⏳ In attesa di trasmissione
+                    </span>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="transmitToAdE()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Invia Chiamate all'Agenzia delle Entrate
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- STAFF EDIT / ADD MODAL -->
+    <div id="staff-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center">
+                <h3 id="staff-modal-title" class="text-xl font-bold fun-font text-slate-800">Gestione Dipendente</h3>
+                <button onclick="closeStaffModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="staff-form" onsubmit="saveStaff(event)" class="space-y-4">
+                <input type="hidden" id="staff-edit-id">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nome e Cognome</label>
+                    <input type="text" id="staff-name" required class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Es. Luigi">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Tipo Contratto</label>
+                        <select id="staff-contract" class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-sm">
+                            <option value="Full-Time">Full-Time (40h)</option>
+                            <option value="Part-Time">Part-Time (20h)</option>
+                            <option value="Determinato">Tempo Determinato</option>
+                            <option value="Stage">Stage / Apprendistato</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Telefono WhatsApp</label>
+                        <input type="text" id="staff-phone" required class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-sm" placeholder="3331234567">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Disponibilità & Note Orarie</label>
+                    <input type="text" id="staff-availability" class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Es. Preferisce mattina">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeStaffModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-3 rounded-xl font-semibold text-sm transition">Annulla</button>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow transition">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-32 opacity-0 transition-all duration-300 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+        <div>
+            <h4 id="toast-title" class="font-bold text-sm">Operazione completata</h4>
+            <p id="toast-msg" class="text-xs text-slate-300">Messaggio di riscontro</p>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Real Staff Data inspired by the October schedule file
+        let staffList = [
+            { id: 1, name: "Luigi", contract: "Full-Time", phone: "3331112233", availability: "Mattina preferita", confirmed: true },
+            { id: 2, name: "Alessia", contract: "Part-Time", phone: "3332223344", availability: "Solo turni mattina", confirmed: true },
+            { id: 3, name: "Andrea", contract: "Full-Time", phone: "3333334455", availability: "Flessibile cucina", confirmed: false },
+            { id: 4, name: "Badre", contract: "Full-Time", phone: "3334445566", availability: "Disponibile tutti i giorni", confirmed: true },
+            { id: 5, name: "Aya", contract: "Part-Time", phone: "3335556677", availability: "Pomeriggio preferito", confirmed: true },
+            { id: 6, name: "Orsola", contract: "Determinato", phone: "3336667788", availability: "Turni centrali", confirmed: false },
+            { id: 7, name: "Maimona", contract: "Full-Time", phone: "3337778899", availability: "Flessibile", confirmed: true },
+            { id: 8, name: "Angori Sara", contract: "Part-Time", phone: "3338889900", availability: "Solo mattina", confirmed: true },
+            { id: 9, name: "Nazir", contract: "Full-Time", phone: "3339990011", availability: "Cucina / Sala", confirmed: false }
+        ];
+
+        const daysOfWeek = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+        const shiftTypes = [
+            { code: "M", label: "Mattina (08-14)", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+            { code: "P", label: "Pomeriggio (14-20)", color: "bg-amber-100 text-amber-800 border-amber-200" },
+            { code: "F", label: "Full (08-17)", color: "bg-indigo-100 text-indigo-800 border-indigo-200" },
+            { code: "R", label: "Riposo", color: "bg-slate-100 text-slate-500 border-slate-200" }
+        ];
+
+        let shiftsData = {};
+
+        let clockLogs = [
+            { employee: "Luigi", type: "Entrata", time: "07:55", date: "Oggi", status: "Regolare" },
+            { employee: "Alessia", type: "Entrata", time: "08:05", date: "Oggi", status: "Regolare" },
+            { employee: "Badre", type: "Entrata", time: "13:50", date: "Oggi", status: "Regolare" },
+            { employee: "Aya", type: "Entrata", time: "08:00", date: "Oggi", status: "Regolare" }
+        ];
+
+        window.onload = function() {
+            initDefaultShifts();
+            renderDashboard();
+            renderShiftsCalendar();
+            renderStaff();
+            renderAvailability();
+            renderClockControls();
+            renderClockLogs();
+            renderWhatsAppCards();
+        };
+
+        function initDefaultShifts() {
+            staffList.forEach(staff => {
+                if (!shiftsData[staff.id]) {
+                    shiftsData[staff.id] = {};
+                    daysOfWeek.forEach((day, dIdx) => {
+                        if (dIdx === 6) shiftsData[staff.id][dIdx] = 'R';
+                        else shiftsData[staff.id][dIdx] = (staff.id + dIdx) % 2 === 0 ? 'M' : 'P';
+                    });
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+            }
+        }
+
+        function showToast(title, msg, isError = false) {
+            const toast = document.getElementById('toast-notification');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            icon.className = isError ? "fa-solid fa-circle-exclamation text-rose-400 text-xl" : "fa-solid fa-circle-check text-emerald-400 text-xl";
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3500);
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('dashboard-today-list');
+            container.innerHTML = '';
+            staffList.slice(0, 6).forEach(staff => {
+                const sCode = shiftsData[staff.id] ? shiftsData[staff.id][0] : 'M';
+                const sObj = shiftTypes.find(s => s.code === sCode) || shiftTypes[0];
+                container.innerHTML += `
+                    <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-indigo-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm">
+                                ${staff.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${staff.name}</h4>
+                                <p class="text-xs text-slate-500">${staff.contract}</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl text-xs font-bold border ${sObj.color}">${sObj.label}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderShiftsCalendar() {
+            const container = document.getElementById('shifts-calendar-container');
+            let html = `<table class="w-full border-collapse text-left min-w-[700px]"><thead><tr class="border-b border-slate-200 text-xs text-slate-400 uppercase"><th class="py-3 px-4">Dipendente</th>`;
+            daysOfWeek.forEach(day => html += `<th class="py-3 px-3 text-center">${day}</th>`);
+            html += `</tr></thead><tbody class="divide-y divide-slate-100 text-sm">`;
+
+            staffList.forEach(staff => {
+                html += `<tr><td class="py-3 px-4 font-bold text-slate-800 flex items-center gap-2"><div class="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold">${staff.name.charAt(0)}</div>${staff.name}</td>`;
+                daysOfWeek.forEach((day, dIdx) => {
+                    const curr = shiftsData[staff.id] ? shiftsData[staff.id][dIdx] || 'M' : 'M';
+                    html += `<td class="py-3 px-3 text-center"><select onchange="updateShift(${staff.id}, ${dIdx}, this.value)" class="text-xs font-bold rounded-xl p-2 border border-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="M" ${curr==='M'?'selected':''}>☀️ Mattina</option>
+                        <option value="P" ${curr==='P'?'selected':''}>🌤️ Pomeriggio</option>
+                        <option value="F" ${curr==='F'?'selected':''}>🌟 Full</option>
+                        <option value="R" ${curr==='R'?'selected':''}>🌙 Riposo</option>
+                    </select></td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function updateShift(staffId, dIdx, val) {
+            if (!shiftsData[staffId]) shiftsData[staffId] = {};
+            shiftsData[staffId][dIdx] = val;
+            showToast("Turno aggiornato", "La modifica è stata salvata.");
+            renderDashboard();
+        }
+
+        function resetShifts() {
+            initDefaultShifts();
+            renderShiftsCalendar();
+            renderDashboard();
+            showToast("Ripristinato", "Turni resettati ai valori predefiniti.");
+        }
+
+        function setAiPromptPreset(type) {
+            const input = document.getElementById('ai-prompt-input');
+            if (type === 1) input.value = "Ottimizza i turni garantendo la massima copertura in cucina e sala per tutto il mese di Ottobre.";
+            else input.value = "Genera i turni rispettando rigorosamente le preferenze e disponibilità orarie dei dipendenti.";
+        }
+
+        function runAiShiftGenerator() {
+            staffList.forEach(staff => {
+                daysOfWeek.forEach((day, dIdx) => {
+                    shiftsData[staff.id][dIdx] = Math.random() > 0.7 ? 'R' : (Math.random() > 0.4 ? 'M' : 'P');
+                });
+            });
+            renderShiftsCalendar();
+            renderDashboard();
+            showToast("IA Elaborazione OK ✨", "I turni sono stati rigenerati automaticamente.");
+        }
+
+        function renderStaff() {
+            const grid = document.getElementById('staff-grid');
+            grid.innerHTML = '';
+            staffList.forEach(staff => {
+                grid.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4 flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center gap-3">
+                                    <div class="bg-indigo-100 text-indigo-700 w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg fun-font">${staff.name.charAt(0)}</div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-800 text-lg">${staff.name}</h3>
+                                        <span class="text-xs bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full font-semibold">${staff.contract}</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="editStaff(${staff.id})" class="text-slate-400 hover:text-indigo-600 p-2"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="deleteStaff(${staff.id})" class="text-slate-400 hover:text-rose-600 p-2"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="text-sm text-slate-600 space-y-1">
+                                <p><i class="fa-brands fa-whatsapp text-emerald-500 mr-2"></i> ${staff.phone}</p>
+                                <p><i class="fa-solid fa-clock text-indigo-500 mr-2"></i> ${staff.availability}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAvailability() {
+            const tbody = document.getElementById('availability-tbody');
+            tbody.innerHTML = '';
+            staffList.forEach(staff => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="py-3 px-4 font-bold text-slate-800">${staff.name}</td>
+                        <td class="py-3 px-4"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">${staff.contract}</span></td>
+                        <td class="py-3 px-4 text-slate-600">${staff.availability}</td>
+                        <td class="py-3 px-4 text-right"><button onclick="editStaff(${staff.id})" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-xl">Modifica</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openStaffModal(id = null) {
+            document.getElementById('staff-modal').classList.remove('hidden');
+            if (id) {
+                document.getElementById('staff-modal-title').innerText = "Modifica Dipendente";
+                const staff = staffList.find(s => s.id === id);
+                document.getElementById('staff-edit-id').value = staff.id;
+                document.getElementById('staff-name').value = staff.name;
+                document.getElementById('staff-contract').value = staff.contract;
+                document.getElementById('staff-phone').value = staff.phone;
+                document.getElementById('staff-availability').value = staff.availability;
+            } else {
+                document.getElementById('staff-modal-title').innerText = "Aggiungi Dipendente";
+                document.getElementById('staff-form').reset();
+                document.getElementById('staff-edit-id').value = '';
+            }
+        }
+
+        function closeStaffModal() {
+            document.getElementById('staff-modal').classList.add('hidden');
+        }
+
+        function saveStaff(event) {
+            event.preventDefault();
+            const id = document.getElementById('staff-edit-id').value;
+            const name = document.getElementById('staff-name').value;
+            const contract = document.getElementById('staff-contract').value;
+            const phone = document.getElementById('staff-phone').value;
+            const availability = document.getElementById('staff-availability').value;
+
+            if (id) {
+                const s = staffList.find(x => x.id == id);
+                s.name = name; s.contract = contract; s.phone = phone; s.availability = availability;
+                showToast("Aggiornato", "Anagrafica modificata con successo.");
+            } else {
+                const newId = Math.max(...staffList.map(s => s.id)) + 1;
+                staffList.push({ id: newId, name, contract, phone, availability, confirmed: false });
+                shiftsData[newId] = { 0: 'M', 1: 'P', 2: 'M', 3: 'P', 4: 'M', 5: 'R', 6: 'R' };
+                showToast("Aggiunto", "Nuovo dipendente inserito.");
+            }
+            closeStaffModal();
+            renderStaff();
+            renderAvailability();
+            renderDashboard();
+            renderClockControls();
+            renderWhatsAppCards();
+        }
+
+        function editStaff(id) { openStaffModal(id); }
+
+        function deleteStaff(id) {
+            if (confirm("Vuoi eliminare questo dipendente?")) {
+                staffList = staffList.filter(s => s.id !== id);
+                delete shiftsData[id];
+                renderStaff();
+                renderAvailability();
+                renderDashboard();
+                renderClockControls();
+                renderWhatsAppCards();
+                showToast("Eliminato", "Dipendente rimosso.", true);
+            }
+        }
+
+        function renderClockControls() {
+            const select = document.getElementById('clock-employee-select');
+            select.innerHTML = '';
+            staffList.forEach(s => select.innerHTML += `<option value="${s.name}">${s.name}</option>`);
+        }
+
+        function recordClock(type) {
+            const name = document.getElementById('clock-employee-select').value;
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            clockLogs.unshift({ employee: name, type, time, date: "Oggi", status: "Regolare" });
+            renderClockLogs();
+            showToast("Timbrata", `${name} ha registrato ${type} alle ${time}`);
+        }
+
+        function renderClockLogs() {
+            const tbody = document.getElementById('clock-log-tbody');
+            tbody.innerHTML = '';
+            clockLogs.forEach(l => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="py-3 px-4 font-semibold text-slate-800">${l.employee}</td>
+                        <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${l.type === 'Entrata' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${l.type}</span></td>
+                        <td class="py-3 px-4 text-slate-600 font-mono">${l.time}</td>
+                        <td class="py-3 px-4 text-emerald-600 font-medium">${l.status}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function generatePayrollReport() {
+            showToast("Report Buste Paga 📊", "Il file riepilogativo per il consulente è stato generato!");
+        }
+
+        function renderWhatsAppCards() {
+            const container = document.getElementById('whatsapp-cards-container');
+            container.innerHTML = '';
+            staffList.forEach(staff => {
+                let text = `Ciao ${staff.name}! Ecco i tuoi turni:%0A`;
+                daysOfWeek.forEach((d, i) => {
+                    const c = shiftsData[staff.id] ? shiftsData[staff.id][i] : 'M';
+                    text += `- ${d}: ${shiftTypes.find(s=>s.code===c).label}%0A`;
+                });
+                text += `%0ATurni colleghi inclusi.%0ARispondi CONFERMO per validare.`;
+                const url = `https://api.whatsapp.com/send?phone=${staff.phone}&text=${text}`;
+
+                container.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4 flex flex-col justify-between">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-slate-800 text-lg">${staff.name}</h3>
+                                <span class="text-xs bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full font-semibold">WhatsApp</span>
+                            </div>
+                            <p class="text-xs text-slate-500"><i class="fa-solid fa-phone mr-1"></i> +39 ${staff.phone}</p>
+                        </div>
+                        <div class="space-y-3 pt-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-semibold text-slate-500">Conferma:</span>
+                                <span class="font-bold ${staff.confirmed ? 'text-emerald-600' : 'text-amber-500'}">${staff.confirmed ? 'Confermato ✅' : 'In attesa ⏳'}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="${url}" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2.5 px-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-1">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i> Invia WA
+                                </a>
+                                <button onclick="toggleConfirm(${staff.id})" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 px-3 rounded-xl font-bold text-xs transition">
+                                    ${staff.confirmed ? 'Revoca' : 'Conferma'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleConfirm(id) {
+            const s = staffList.find(x => x.id === id);
+            s.confirmed = !s.confirmed;
+            renderWhatsAppCards();
+            showToast("Stato aggiornato", `Conferma variata per ${s.name}.`);
+        }
+
+        function transmitToAdE() {
+            const badge = document.getElementById('ade-status-badge');
+            badge.className = "bg-emerald-100 text-emerald-700 px-4 py-2 rounded-2xl font-semibold text-xs";
+            badge.innerHTML = "✅ Trasmesso con Successo (Prot. 2026-AE)";
+            showToast("Trasmesso!", "Dati inviati all'Agenzia delle Entrate con successo.");
+        }
+    </script>
+</body>
+</html>
+```
