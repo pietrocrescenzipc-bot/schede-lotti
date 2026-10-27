@@ -271,7 +271,8 @@
             prep.ingredients.forEach((ing, index) => {
                 const card = document.createElement('div');
                 card.className = 'bg-white border-2 border-gray-200/80 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow-md transition';
-                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithGemini(event, ' + index + ')"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Fornitore)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
+                // Rimozione di capture="environment" per permettere una messa a fuoco perfetta o scelta pulita della foto
+                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta o Seleziona<input type="file" accept="image/*" class="hidden" onchange="processImageWithGemini(event, ' + index + ')"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Fornitore)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
                 container.appendChild(card);
             });
 
@@ -279,7 +280,7 @@
             switchTab('preparation');
         }
 
-        // Funzione Gemini ottimizzata e super robusta con compressione immagine
+        // Funzione Gemini con prompt avanzato e ottimizzato per etichette alimentari
         async function processImageWithGemini(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
@@ -287,15 +288,14 @@
             document.getElementById('ai-loading').classList.remove('hidden');
 
             try {
-                // Comprimi e ridimensiona l'immagine via Canvas per evitare file troppo pesanti
                 const base64Image = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const img = new Image();
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 1024;
-                            const MAX_HEIGHT = 1024;
+                            const MAX_WIDTH = 1280;
+                            const MAX_HEIGHT = 1280;
                             let width = img.width;
                             let height = img.height;
 
@@ -316,8 +316,7 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
                             
-                            // Esporta in JPEG ottimizzato
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
                             resolve(dataUrl.split(',')[1]);
                         };
                         img.onerror = reject;
@@ -333,7 +332,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "Analizza questa foto di un'etichetta alimentare. Estrai ESATTAMENTE due informazioni: 1) Il numero di lotto (spesso preceduto da L., LOT., LOTTO). 2) La data di scadenza (spesso preceduta da SCAD., SCADENZA) o il nome del fornitore/prodotto. Rispondi ESCLUSIVAMENTE in formato JSON con questo schema esatto, senza markdown o testo aggiuntivo: {\"lotto\": \"valore\", \"fornitore\": \"valore\"}" },
+                                { text: "Sei un assistente esperto in HACCP e OCR di etichette alimentari. Analizza questa immagine con attenzione estrema. Trova: 1) Il codice lotto (cerca sigle come L., LOT., o codici alfanumerici complessi stampati sul sacco). 2) La data di scadenza (cercando SCAD., SCADENZA, o date in formato DD/MM/YYYY) o il nome del prodotto/fornitore. Restituisci un JSON puro senza markdown nel formato esatto: {\"lotto\": \"testo_lotto\", \"fornitore\": \"testo_scadenza_o_fornitore\"}" },
                                 { inline_data: { mime_type: "image/jpeg", data: base64Image } }
                             ]
                         }]
@@ -348,7 +347,6 @@
 
                 const textResult = data.candidates[0].content.parts[0].text;
                 
-                // Pulizia intelligente del JSON estratto dalla risposta dell'IA
                 let jsonString = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
                 const firstBrace = jsonString.indexOf('{');
                 const lastBrace = jsonString.lastIndexOf('}');
@@ -367,7 +365,7 @@
 
             } catch (error) {
                 console.error("Errore IA:", error);
-                alert("Impossibile leggere l'etichetta. Assicurati che la foto sia a fuoco e riprova.");
+                alert("Impossibile leggere l'etichetta. Fai una foto ben illuminata e riprova.");
             } finally {
                 document.getElementById('ai-loading').classList.add('hidden');
                 event.target.value = '';
