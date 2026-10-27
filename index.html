@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni Serali & Import Excel</title>
+    <title>Gestione Turni Serali & Import Griglia Excel</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome per le icone -->
@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">Gestione Turni Serali</h1>
-                    <p class="text-xs text-indigo-200">Import Excel • Planner Leggibile • In&Out Sync</p>
+                    <p class="text-xs text-indigo-200">Importa Griglia Excel • Planner • In&Out Sync</p>
                 </div>
             </div>
             <!-- Navigazione Tab -->
@@ -62,13 +62,13 @@
             <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Calendario Orario di Arrivo</h2>
-                    <p class="text-sm text-slate-500">Gestisci i turni, importa da Excel o apri il Planner Mensile.</p>
+                    <p class="text-sm text-slate-500">Importa la tua tabella Excel a griglia o apri il Planner Mensile.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Pulsante Importa Turni Excel -->
+                    <!-- Pulsante Importa Griglia Excel -->
                     <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md cursor-pointer transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-excel"></i> 📂 Importa Turni Excel
-                        <input type="file" id="excel-shifts-input" accept=".csv,.txt" onchange="importShiftsFromExcel(event)" class="hidden">
+                        <i class="fa-solid fa-file-excel"></i> 📂 Importa Tabella Excel (CSV)
+                        <input type="file" id="excel-shifts-input" accept=".csv,.txt" onchange="importGridExcel(event)" class="hidden">
                     </label>
                     <!-- Pulsante Planner Mensile Visivo -->
                     <button onclick="openColorPlannerModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2">
@@ -90,7 +90,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Anagrafica Dipendenti</h2>
-                    <p class="text-sm text-slate-500">Gestisci contratti, codice fiscale e recapiti.</p>
+                    <p class="text-sm text-slate-500">Assicurati che i nomi dei dipendenti corrispondano a quelli nel file Excel.</p>
                 </div>
                 <button onclick="openEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow transition flex items-center gap-2">
                     <i class="fa-solid fa-user-plus"></i> Nuovo Dipendente
@@ -291,7 +291,11 @@
     <script>
         let employees = JSON.parse(localStorage.getItem('smart_turni_emps')) || [
             { id: 1, name: 'Mario Rossi', cf: 'RSSMRA80A01H501W', phone: '3331122334', contract: 'Part-Time Serale' },
-            { id: 2, name: 'Giulia Bianchi', cf: 'BNCGLI85B41Z100Y', phone: '3389988776', contract: 'Extra / Chiamata' }
+            { id: 2, name: 'Giulia Bianchi', cf: 'BNCGLI85B41Z100Y', phone: '3389988776', contract: 'Extra / Chiamata' },
+            { id: 3, name: 'ALESSIA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
+            { id: 4, name: 'ANDREA', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
+            { id: 5, name: 'LUIGI', cf: '', phone: '3330000000', contract: 'Part-Time Serale' },
+            { id: 6, name: 'BADRE', cf: '', phone: '3330000000', contract: 'Part-Time Serale' }
         ];
 
         let shifts = JSON.parse(localStorage.getItem('smart_turni_shifts')) || {};
@@ -403,36 +407,70 @@
             return 'bg-white text-slate-400 border border-slate-200';
         }
 
-        // --- IMPORTA TURNI DA EXCEL / CSV ---
-        function importShiftsFromExcel(event) {
+        // --- IMPORTA GRIGLIA EXCEL (CSV A TABELLA) ---
+        function importGridExcel(event) {
             const file = event.target.files[0];
             if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const text = e.target.result;
                 const lines = text.split('\n');
+                if(lines.length < 2) { alert('Il file sembra vuoto.'); return; }
+
+                // 1. Leggi la prima riga per trovare i nomi dei dipendenti (colonne)
+                let headerCols = lines[0].split(/[,;]/).map(c => c.replace(/"/g, '').trim());
+                let empColumns = {}; // Mappa l'indice della colonna al nome del dipendente
+
+                headerCols.forEach((colName, index) => {
+                    if(index > 0 && colName) { // Salta la prima colonna (giorni)
+                        let matchedEmp = employees.find(e => e.name.toLowerCase() === colName.toLowerCase());
+                        if(!matchedEmp) {
+                            // Se il dipendente non esiste in anagrafica, lo creiamo al volo!
+                            let newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                            matchedEmp = { id: newId, name: colName.toUpperCase(), cf: '', phone: '3330000000', contract: 'Part-Time Serale' };
+                            employees.push(matchedEmp);
+                        }
+                        empColumns[index] = matchedEmp.id;
+                    }
+                });
+
+                localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
+
                 let count = 0;
-                // Formato atteso file: ID_DIPENDENTE, DATA (YYYY-MM-DD), ORARIO (es 18:00 o OFF) oppure NOME, DATA, ORARIO
+                let yearMonth = currentDate.slice(0, 7); // Anno e mese corrente (es. 2026-10)
+
+                // 2. Leggi le righe successive (i giorni)
                 for(let i=1; i<lines.length; i++) {
                     let line = lines[i].trim();
                     if(!line) continue;
-                    let cols = line.split(/[,;]/);
-                    if(cols.length >= 3) {
-                        let empIdentifier = cols[0].replace(/"/g, '').trim();
-                        let date = cols[1].replace(/"/g, '').trim();
-                        let time = cols[2].replace(/"/g, '').trim();
+                    let cols = line.split(/[,;]/).map(c => c.replace(/"/g, '').trim());
+                    
+                    let dayCell = cols[0]; // Es: "1", "1GIO", "2VEN" oppure una data
+                    let dayNum = parseInt(dayCell.replace(/\D/g, '')); // Estrae solo il numero del giorno
 
-                        // Trova dipendente per ID o per Nome
-                        let emp = employees.find(e => e.id == empIdentifier || e.name.toLowerCase() === empIdentifier.toLowerCase());
-                        if(emp && date && time) {
-                            shifts[`${emp.id}_${date}`] = time;
-                            count++;
+                    if(!isNaN(dayNum) && dayNum >= 1 && dayNum <= 31) {
+                        let dayStr = dayNum < 10 ? `0${dayNum}` : dayNum;
+                        let rowDate = `${yearMonth}-${dayStr}`;
+
+                        // Controlla ogni colonna dei dipendenti per questa riga
+                        for(let colIdx in empColumns) {
+                            let empId = empColumns[colIdx];
+                            let cellValue = cols[colIdx] ? cols[colIdx].trim() : '';
+
+                            if(cellValue && cellValue !== '-') {
+                                // Se nella cella c'è il nome del dipendente (es. "ALESSIA"), significa che lavora all'orario standard serale, oppure c'è già un orario scritto (es. "18:00")
+                                let shiftTime = (cellValue.includes(':')) ? cellValue : '18:00'; 
+                                shifts[`${empId}_${rowDate}`] = shiftTime;
+                                count++;
+                            }
                         }
                     }
                 }
+
                 localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
                 renderCalendar();
-                alert(`Importati con successo ${count} turni dal file Excel!`);
+                renderEmployees();
+                alert(`Importati con successo ${count} turni dalla tabella Excel!`);
             };
             reader.readAsText(file);
         }
