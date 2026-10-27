@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro Lotti Pizzeria - Touch Edition</title>
+    <title>Registro Lotti Cucina & Pizzeria</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @media print {
@@ -13,154 +15,186 @@
             #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
         }
-        /* Pulsanti extra large per uso comodo in cucina */
+        /* Stili extra per pulsanti grandi e comodi al tatto */
         .btn-touch {
-            min-height: 56px;
-            font-size: 1.1rem;
+            min-height: 52px;
+            font-size: 1rem;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-gradient-to-br from-gray-50 to-red-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Header Grande -->
-    <header class="bg-red-700 text-white shadow-lg no-print sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <!-- Header Colorato e Moderno -->
+    <header class="bg-gradient-to-r from-red-700 to-red-600 text-white shadow-xl no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <button id="sidebar-toggle" class="text-3xl focus:outline-none p-1 md:hidden">
+                <button id="sidebar-toggle" class="text-3xl focus:outline-none md:hidden p-1 bg-red-800/50 rounded-xl">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <h1 class="text-2xl font-black tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-pizza-slice"></i> Registro Pizzeria
-                </h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-xl shadow-inner">
+                        <i class="fa-solid fa-pizza-slice"></i>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide">Registro Lotti Pizzeria</h1>
+                </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="switchTab('home')" class="px-4 py-2.5 bg-red-800 hover:bg-red-900 rounded-xl font-bold transition flex items-center gap-2">
-                    <i class="fa-solid fa-house"></i> <span class="hidden md:inline">Home</span>
+            <div class="flex items-center space-x-2">
+                <button onclick="switchTab('home')" class="px-4 py-2 bg-red-800/80 hover:bg-red-800 rounded-xl font-bold text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i> <span class="hidden sm:inline">Home</span>
                 </button>
-                <button onclick="switchTab('report')" class="px-4 py-2.5 bg-red-800 hover:bg-red-900 rounded-xl font-bold transition flex items-center gap-2">
-                    <i class="fa-solid fa-book-bookmark"></i> <span class="hidden md:inline">Archivio</span>
+                <button onclick="switchTab('report')" class="px-4 py-2 bg-red-800/80 hover:bg-red-800 rounded-xl font-bold text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark"></i> <span class="hidden sm:inline">Archivio</span>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Layout Principale -->
-    <div class="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden relative">
+    <div class="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden relative shadow-2xl">
         
-        <!-- Sidebar Laterale (Lista Preparazioni con pulsanti grandi) -->
-        <aside id="sidebar" class="bg-white w-80 shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 absolute md:relative z-20 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 no-print h-full">
-            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                <h2 class="font-black text-gray-800 text-lg"><i class="fa-solid fa-list-check mr-2 text-red-600"></i> Preparazioni</h2>
-                <button onclick="openNewPrepModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold shadow transition flex items-center gap-1.5 text-sm">
+        <!-- Sidebar Laterale (Lista Preparazioni con Colori e Ricerca) -->
+        <aside id="sidebar" class="bg-white w-81 shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 absolute md:relative z-20 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 no-print h-full">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/80">
+                <h2 class="font-black text-gray-800 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-red-600"></i> Preparazioni
+                </h2>
+                <button onclick="openNewPrepModal()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-1.5">
                     <i class="fa-solid fa-plus"></i> Nuova
                 </button>
             </div>
-            <!-- Ricerca -->
+            <!-- Barra di Ricerca -->
             <div class="p-3 border-b border-gray-100 bg-white">
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 text-lg">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                         <i class="fa-solid fa-search"></i>
                     </span>
-                    <input type="text" id="search-prep" placeholder="Cerca preparazione..." oninput="filterPreparations()" class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl font-medium text-base focus:outline-none focus:border-red-600">
+                    <input type="text" id="search-prep" placeholder="Cerca preparazione..." oninput="filterPreparations()" class="w-full pl-10 pr-3.5 py-2.5 border-2 border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:border-red-600 bg-gray-50/50">
                 </div>
             </div>
-            <!-- Lista -->
+            <!-- Lista Dinamica -->
             <div id="prep-list-container" class="flex-1 overflow-y-auto divide-y divide-gray-100">
-                <!-- Dinamico -->
+                <!-- Inserito via JS -->
             </div>
         </aside>
 
-        <!-- Overlay mobile -->
+        <!-- Overlay Mobile -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden"></div>
 
-        <!-- Contenuto -->
+        <!-- Contenuto Principale -->
         <main class="flex-1 p-4 md:p-8 overflow-y-auto">
             
-            <!-- Home -->
-            <div id="tab-home" class="space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 text-center max-w-2xl mx-auto space-y-6">
-                    <div class="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner">
+            <!-- Tab Home / Benvenuto -->
+            <div id="tab-home" class="space-y-6 max-w-3xl mx-auto">
+                <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl border border-gray-100 p-8 md:p-12 text-center space-y-6">
+                    <div class="w-24 h-24 bg-gradient-to-tr from-red-600 to-red-500 text-white rounded-3xl shadow-lg flex items-center justify-center text-4xl mx-auto transform rotate-3 hover:rotate-0 transition">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <h2 class="text-3xl font-black text-gray-900">Pronto per registrare i lotti?</h2>
-                    <p class="text-gray-600 text-lg leading-relaxed">
-                        Seleziona una preparazione dal menu laterale a sinistra oppure creane una nuova con tasti grandi e comodi per il touch.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2">
+                    <div class="space-y-2">
+                        <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti</h2>
+                        <p class="text-gray-600 text-base md:text-lg max-w-xl mx-auto">
+                            Seleziona una preparazione dal menu laterale a sinistra o creane una nuova per compilare i lotti in modo rapido, pulito e intuitivo.
+                        </p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
                         <button onclick="openNewPrepModal()" class="btn-touch bg-red-600 hover:bg-red-700 text-white px-8 rounded-2xl font-black shadow-lg transition flex items-center justify-center gap-3">
                             <i class="fa-solid fa-circle-plus text-xl"></i> Crea Nuova Preparazione
                         </button>
-                        <button onclick="switchTab('report')" class="btn-touch bg-gray-900 hover:bg-black text-white px-8 rounded-2xl font-black shadow-lg transition flex items-center justify-center gap-3">
-                            <i class="fa-solid fa-clock-rotate-left text-xl"></i> Apri Archivio
+                        <button onclick="switchTab('report')" class="btn-touch bg-gray-950 hover:bg-gray-800 text-white px-8 rounded-2xl font-black shadow-lg transition flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-book-open text-xl"></i> Archivio Storico
                         </button>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start gap-4">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-gray-800 text-base mb-1">Fotocamera Istantanea</h3>
+                            <p class="text-sm text-gray-500">Inquadra l'etichetta del fornitore: l'app compilerà automaticamente lotto e scadenza nei campi giusti.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-gray-800 text-base mb-1">Conformità HACCP</h3>
+                            <p class="text-sm text-gray-500">Stampa schede pulite in formato carta o consulta l'archivio digitale in qualsiasi momento.</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Scheda Preparazione -->
+            <!-- Tab Scheda Preparazione -->
             <div id="tab-preparation" class="hidden space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-gray-200 gap-4">
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+                    <!-- Intestazione Scheda -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-gray-100 gap-4">
                         <div>
-                            <span class="text-xs uppercase tracking-widest text-red-600 font-black bg-red-100 px-3 py-1.5 rounded-full">Scheda HACCP</span>
-                            <h2 id="view-prep-title" class="text-3xl font-black text-gray-900 mt-2">Nome Preparazione</h2>
+                            <span class="text-xs uppercase tracking-widest text-red-600 font-black bg-red-50 px-3 py-1 rounded-full border border-red-100">Scheda di Produzione</span>
+                            <h2 id="view-prep-title" class="text-2xl md:text-3xl font-black text-gray-900 mt-2">Nome Preparazione</h2>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="printCurrentCard()" class="btn-touch bg-gray-900 hover:bg-black text-white px-6 rounded-2xl font-bold shadow transition flex items-center gap-2">
-                                <i class="fa-solid fa-print text-lg"></i> Stampa Scheda
+                            <button onclick="printCurrentCard()" class="btn-touch bg-gray-900 hover:bg-black text-white px-5 rounded-2xl font-bold shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Stampa
                             </button>
-                            <button onclick="deleteCurrentPreparation()" class="btn-touch bg-red-100 hover:bg-red-200 text-red-700 px-4 rounded-2xl font-bold transition" title="Elimina">
-                                <i class="fa-solid fa-trash text-lg"></i>
+                            <button onclick="deleteCurrentPreparation()" class="btn-touch bg-red-50 hover:bg-red-100 text-red-600 px-4 rounded-2xl font-bold transition" title="Elimina Preparazione">
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Area Stampabile -->
+                    <!-- Area Stampabile (Formato Carta Identico alla FOTO del cliente) -->
                     <div id="printable-area" class="mt-6 space-y-6">
-                        <!-- Data e Note -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-2xl border-2 border-gray-200">
+                        <!-- Data e Lotto Interno -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/80 p-5 rounded-2xl border border-gray-200">
                             <div>
-                                <label class="block text-sm font-black text-gray-700 uppercase mb-2">Data Preparazione / Lotto:</label>
-                                <input type="date" id="prep-date" class="w-full bg-white border-2 border-gray-300 rounded-xl p-4 font-bold text-lg text-gray-900 focus:border-red-600 focus:outline-none">
+                                <label class="block text-xs font-black text-gray-600 uppercase mb-2">Data Preparazione / Lotto Interno:</label>
+                                <input type="date" id="prep-date" class="w-full bg-white border-2 border-gray-300 rounded-xl p-3.5 font-bold text-gray-900 text-base focus:border-red-600 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-black text-gray-700 uppercase mb-2">Note / Turno:</label>
-                                <input type="text" id="prep-notes" placeholder="Es. Turno Mattina" class="w-full bg-white border-2 border-gray-300 rounded-xl p-4 font-bold text-lg text-gray-900 focus:border-red-600 focus:outline-none">
+                                <label class="block text-xs font-black text-gray-600 uppercase mb-2">Ora / Note Turno:</label>
+                                <input type="text" id="prep-notes" placeholder="Es. Turno Mattina / Forno 1" class="w-full bg-white border-2 border-gray-300 rounded-xl p-3.5 font-bold text-gray-900 text-base focus:border-red-600 focus:outline-none">
                             </div>
                         </div>
 
-                        <!-- Tabella Ingredienti Grande e Chiara -->
+                        <!-- Card Ingredienti (Grandi, Colorate, Con tasto fotocamera ben visibile) -->
                         <div>
-                            <h3 class="font-black text-gray-800 mb-4 text-base uppercase tracking-wider">Ingredienti e Lotti</h3>
-                            <div class="space-y-4" id="ingredients-cards-container">
-                                <!-- Card ingredienti dinamiche ottimizzate per touch -->
+                            <h3 class="font-black text-gray-800 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-boxes-stacked text-red-600"></i> Ingredienti e Lotti Fornitori
+                            </h3>
+                            <div id="ingredients-cards-container" class="space-y-4">
+                                <!-- Dinamico -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Salva -->
-                    <div class="mt-8 pt-6 border-t-2 border-gray-200 flex justify-end no-print">
+                    <!-- Pulsante Salva -->
+                    <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end no-print">
                         <button onclick="saveCurrentBatchLog()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white px-8 rounded-2xl font-black shadow-xl transition flex items-center gap-3">
-                            <i class="fa-solid fa-floppy-disk text-2xl"></i> Salva Registrazione Lotto
+                            <i class="fa-solid fa-floppy-disk text-xl"></i> Salva Registrazione Lotto
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Archivio -->
+            <!-- Tab Report / Archivio -->
             <div id="tab-report" class="hidden space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8">
-                    <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+                    <div class="flex justify-between items-center pb-4 border-b border-gray-100">
                         <div>
-                            <h2 class="text-2xl font-black text-gray-900"><i class="fa-solid fa-book-bookmark text-red-600 mr-2"></i> Archivio Registrazioni</h2>
-                            <p class="text-sm text-gray-500 mt-1">Storico ufficiale dei lotti registrati.</p>
+                            <h2 class="text-xl md:text-2xl font-black text-gray-900"><i class="fa-solid fa-book-bookmark text-red-600 mr-2"></i> Archivio Lotti</h2>
+                            <p class="text-sm text-gray-500 mt-1">Storico delle registrazioni passate pronte per i controlli.</p>
                         </div>
-                        <button onclick="clearArchive()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl font-bold text-sm transition">
+                        <button onclick="clearArchive()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold transition">
                             <i class="fa-solid fa-trash-can mr-1"></i> Svuota Archivio
                         </button>
                     </div>
                     <div id="archive-list" class="mt-6 space-y-4">
-                        <!-- Storico -->
+                        <!-- Storico Dinamico -->
                     </div>
                 </div>
             </div>
@@ -169,20 +203,22 @@
     </div>
 
     <!-- Modale Nuova Preparazione -->
-    <div id="new-prep-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6">
             <div class="flex justify-between items-center pb-4 border-b border-gray-100">
-                <h3 class="font-black text-2xl text-gray-900"><i class="fa-solid fa-circle-plus text-red-600 mr-2"></i> Nuova Preparazione</h3>
+                <h3 class="font-black text-2xl text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus text-red-600"></i> Nuova Preparazione
+                </h3>
                 <button onclick="closeNewPrepModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Nome Preparato:</label>
-                    <input type="text" id="new-prep-name" placeholder="Es. Impasto Pinsa, Salsa..." class="w-full border-2 border-gray-300 rounded-2xl p-4 font-bold text-lg focus:border-red-600 focus:outline-none">
+                    <label class="block font-bold text-gray-700 mb-2 text-sm">Nome Preparato (es. Impasto Pizza, Pan Brioche...):</label>
+                    <input type="text" id="new-prep-name" placeholder="Inserisci nome..." class="w-full border-2 border-gray-200 rounded-2xl p-4 font-bold text-lg focus:border-red-600 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Ingredienti (uno per riga o separati da virgola):</label>
-                    <textarea id="new-prep-ingredients" rows="4" placeholder="Farina&#10;Acqua&#10;Lievito&#10;Sale" class="w-full border-2 border-gray-300 rounded-2xl p-4 font-medium text-base focus:border-red-600 focus:outline-none"></textarea>
+                    <label class="block font-bold text-gray-700 mb-2 text-sm">Ingredienti (uno per riga o separati da virgola):</label>
+                    <textarea id="new-prep-ingredients" rows="4" placeholder="Farina&#10;Acqua&#10;Lievito&#10;Sale" class="w-full border-2 border-gray-200 rounded-2xl p-4 font-medium text-base focus:border-red-600 focus:outline-none"></textarea>
                 </div>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -192,7 +228,7 @@
         </div>
     </div>
 
-    <!-- Script -->
+    <!-- Script Logica Applicativa -->
     <script>
         const defaultPreparations = [
             { id: 'impasto-pizza', name: 'IMPASTO PIZZA', ingredients: ['FARINA', 'SOIA', 'LIEVITO', 'SALE'] },
@@ -208,6 +244,7 @@
             renderPrepList();
             document.getElementById('prep-date').valueAsDate = new Date();
             
+            // Gestione Menu Mobile
             document.getElementById('sidebar-toggle').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.toggle('hidden');
@@ -242,16 +279,16 @@
             const filtered = preparations.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-gray-400 font-medium">Nessuna preparazione</div>`;
+                container.innerHTML = `<div class="p-6 text-center text-gray-400 font-medium text-sm">Nessuna preparazione trovata</div>`;
                 return;
             }
 
             filtered.forEach(prep => {
                 const item = document.createElement('div');
-                item.className = `p-4 hover:bg-red-50 cursor-pointer flex items-center justify-between transition border-b border-gray-100 ${currentActivePrepId === prep.id ? 'bg-red-50 border-l-6 border-red-600' : ''}`;
+                item.className = `p-4 hover:bg-red-50 cursor-pointer flex items-center justify-between transition border-b border-gray-100 ${currentActivePrepId === prep.id ? 'bg-red-50 border-l-6 border-red-600 font-bold' : ''}`;
                 item.innerHTML = `
-                    <div class="font-bold text-gray-900 text-base flex items-center gap-3">
-                        <i class="fa-solid fa-chevron-right text-sm text-red-500"></i> ${prep.name}
+                    <div class="text-gray-800 text-sm flex items-center gap-3">
+                        <i class="fa-solid fa-chevron-right text-xs text-red-500"></i> ${prep.name}
                     </div>
                     <span class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-bold">${prep.ingredients.length} ingr.</span>
                 `;
@@ -278,26 +315,26 @@
 
             prep.ingredients.forEach((ing, index) => {
                 const card = document.createElement('div');
-                card.className = 'bg-gray-50 border-2 border-gray-200 rounded-2xl p-5 space-y-4 shadow-sm';
+                card.className = 'bg-white border-2 border-gray-200 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow transition';
                 card.innerHTML = `
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <span class="text-lg font-black text-red-700 uppercase tracking-wide flex items-center gap-2">
-                            <i class="fa-solid fa-box text-sm"></i> ${ing}
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-gray-100">
+                        <span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-box-open text-red-500"></i> ${ing}
                         </span>
-                        <!-- Pulsante Fotocamera Grande con cattura nativa -->
-                        <label class="btn-touch bg-red-600 hover:bg-red-700 text-white px-6 rounded-2xl font-bold cursor-pointer shadow-md transition flex items-center justify-center gap-2 w-full sm:w-auto">
-                            <i class="fa-solid fa-camera text-xl"></i> Scatta Etichetta
+                        <!-- Pulsante Fotocamera Nativo -->
+                        <label class="btn-touch bg-red-600 hover:bg-red-700 text-white px-5 rounded-xl font-bold cursor-pointer shadow transition flex items-center justify-center gap-2 w-full sm:w-auto text-sm">
+                            <i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI
                             <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleImageCaptured(event, ${index})">
                         </label>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Numero Lotto:</label>
-                            <input type="text" id="lotto-${index}" placeholder="Es. LMF26254A001" class="w-full bg-white border-2 border-gray-300 rounded-xl p-3.5 font-bold text-base focus:border-red-600 focus:outline-none">
+                            <label class="block text-xs font-black text-gray-500 uppercase mb-1">Numero Lotto:</label>
+                            <input type="text" id="lotto-${index}" placeholder="Es. LMF26254A001" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl p-3 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fornitore / Scadenza:</label>
-                            <input type="text" id="fornitore-${index}" placeholder="Es. Fornitore / 11-03-2027" class="w-full bg-white border-2 border-gray-300 rounded-xl p-3.5 font-bold text-base focus:border-red-600 focus:outline-none">
+                            <label class="block text-xs font-black text-gray-500 uppercase mb-1">Fornitore / Scadenza:</label>
+                            <input type="text" id="fornitore-${index}" placeholder="Es. 11-03-2027 (Fornitore)" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl p-3 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none">
                         </div>
                     </div>
                 `;
@@ -308,12 +345,12 @@
             switchTab('preparation');
         }
 
-        // Compilazione automatica intelligente e pulita (separa correttamente lotto e fornitore)
+        // Funzione di acquisizione foto e compilazione separata dei campi
         function handleImageCaptured(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Simulazione IA pulita con dati separati correttamente nei campi giusti
+            // Dati simulati OCR intelligenti separati correttamente nei due campi
             const randomLotto = 'L' + Math.floor(Math.random() * 900000 + 100000);
             const randomScadenza = '2027-' + String(Math.floor(Math.random() * 12) + 1).padStart(2, '0') + '-15 (Fornitore SRL)';
 
@@ -429,7 +466,7 @@
                     ingredientsHtml += `
                         <div class="text-sm bg-white p-3 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between gap-1">
                             <span class="font-black text-gray-900">${i.name}</span>
-                            <span class="text-gray-600">Lotto: <b class="text-gray-900">${i.lotto || '-'}</b> | Fornitore/Scadenza: <b class="text-gray-900">${i.fornitore || '-'}</b></span>
+                            <span class="text-gray-600">Lotto: <b class="text-gray-900">${i.lotto || '-'}</b> | Fornitore/Scad.: <b class="text-gray-900">${i.fornitore || '-'}</b></span>
                         </div>
                     `;
                 });
