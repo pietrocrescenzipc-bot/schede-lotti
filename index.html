@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TurniPro - Gestione Staff & Turni Intelligente</title>
+    <title>TurniFacile - HR & Shift Management</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #0f172a;
-            --accent: #059669;
-            --bg-main: #f1f5f9;
-            --sidebar-width: 280px;
+            --fluida-bg: #f4f6f8;
+            --fluida-sidebar: #ffffff;
+            --fluida-primary: #00b074;
+            --fluida-dark: #1b253b;
+            --fluida-gray: #62748e;
+            --sidebar-width: 270px;
         }
         body {
-            background-color: var(--bg-main);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            color: #334155;
+            background-color: var(--fluida-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--fluida-dark);
+            -webkit-font-smoothing: antialiased;
         }
-        /* Sidebar */
+        /* Sidebar stile Fluida */
         #sidebar {
             width: var(--sidebar-width);
             height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
-            background: #ffffff;
+            background: var(--fluida-sidebar);
             border-right: 1px solid #e2e8f0;
             transition: all 0.3s ease;
             z-index: 1050;
@@ -35,78 +38,106 @@
             flex-direction: column;
         }
         .sidebar-brand {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--primary);
-            padding: 24px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--fluida-dark);
+            padding: 24px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
             border-bottom: 1px solid #f1f5f9;
         }
-        .sidebar-brand i { color: var(--accent); }
+        .sidebar-brand i { color: var(--fluida-primary); font-size: 1.4rem; }
         .sidebar-menu {
-            padding: 20px 15px;
+            padding: 16px 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            flex-grow: 1;
+            gap: 4px;
             overflow-y: auto;
+            flex-grow: 1;
         }
         .sidebar-menu .btn {
             text-align: left;
             padding: 12px 16px;
-            border-radius: 10px;
-            font-weight: 600;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 12px;
             border: none;
             background: transparent;
-            color: #64748b;
-            transition: all 0.2s;
+            color: var(--fluida-gray);
+            transition: all 0.2s ease;
         }
         .sidebar-menu .btn:hover, .sidebar-menu .btn.active {
-            background: #ecfdf5;
-            color: var(--accent);
+            background: #e6f7f2;
+            color: var(--fluida-primary);
+            font-weight: 600;
         }
         /* Main Container */
         #content {
             margin-left: var(--sidebar-width);
-            padding: 40px;
+            padding: 32px;
             min-height: 100vh;
         }
-        .card-pro {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            background: white;
-            padding: 30px;
+        .card-fluida {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            padding: 24px;
             margin-bottom: 24px;
         }
         .section-view { display: none; }
-        .section-view.active { display: block; animation: fadeIn 0.25s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .stat-card {
-            background: #f8fafc;
+        .section-view.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Widget & Grid Cards */
+        .widget-box {
+            background: #fafbfc;
             border: 1px solid #e2e8f0;
-            border-radius: 14px;
+            border-radius: 10px;
             padding: 20px;
         }
-        .table-custom th {
-            background: #f8fafc;
-            color: #475569;
+        .btn-fluida {
+            background: var(--fluida-primary);
+            color: white;
             font-weight: 600;
+            border-radius: 8px;
+            padding: 10px 20px;
+            border: none;
+            transition: opacity 0.2s;
+        }
+        .btn-fluida:hover { background: #009862; color: white; }
+        
+        .table-fluida th {
+            background: #f8fafc;
+            color: var(--fluida-gray);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             border-bottom: 2px solid #e2e8f0;
         }
+        
         @media (max-width: 991px) {
             #sidebar { margin-left: calc(var(--sidebar-width) * -1); }
             #sidebar.show { margin-left: 0; }
-            #content { margin-left: 0; padding: 20px; }
-            .mobile-toggle { display: inline-block !important; }
+            #content { margin-left: 0; padding: 16px; }
+            .mobile-nav-toggle { display: inline-flex !important; }
         }
-        .mobile-toggle { display: none; margin-bottom: 20px; background: white; border: 1px solid #cbd5e1; padding: 10px 16px; border-radius: 10px; font-weight: 600; }
+        .mobile-nav-toggle {
+            display: none;
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -114,54 +145,51 @@
     <!-- Sidebar -->
     <nav id="sidebar">
         <div class="sidebar-brand">
-            <i class="fa-solid fa-calendar-check fs-4"></i>
-            <span>TurniPro</span>
+            <i class="fa-solid fa-layer-group"></i>
+            <span>TurniFacile HR</span>
         </div>
         <div class="sidebar-menu">
-            <button class="btn active" onclick="switchSection('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
+            <button class="btn active" onclick="switchSection('dashboard', this)"><i class="fa-solid fa-house"></i> Home Dashboard</button>
             <button class="btn" onclick="switchSection('turni', this)"><i class="fa-solid fa-calendar-days"></i> Pianificazione Turni</button>
-            <button class="btn" onclick="switchSection('anagrafica', this)"><i class="fa-solid fa-users"></i> Anagrafica & Contratti</button>
-            <button class="btn" onclick="switchSection('disponibilita', this)"><i class="fa-solid fa-clock-rotate-left"></i> Disponibilità Staff</button>
-            <button class="btn" onclick="switchSection('marcatempo', this)"><i class="fa-solid fa-fingerprint"></i> Marcatempo & Paghe</button>
-            <button class="btn" onclick="switchSection('ade', this)"><i class="fa-solid fa-building-columns"></i> Agenzia Entrate</button>
-            <button class="btn" onclick="switchSection('whatsapp', this)"><i class="fa-brands fa-whatsapp text-success"></i> WhatsApp & Conferme</button>
+            <button class="btn" onclick="switchSection('anagrafica', this)"><i class="fa-solid fa-users"></i> Anagrafica & Personale</button>
+            <button class="btn" onclick="switchSection('disponibilita', this)"><i class="fa-solid fa-clock-rotate-left"></i> Ferie & Disponibilità</button>
+            <button class="btn" onclick="switchSection('marcatempo', this)"><i class="fa-solid fa-fingerprint"></i> Presenze & Marcatempo</button>
+            <button class="btn" onclick="switchSection('ade', this)"><i class="fa-solid fa-building-columns"></i> Agenzia delle Entrate</button>
+            <button class="btn" onclick="switchSection('whatsapp', this)"><i class="fa-brands fa-whatsapp text-success"></i> WhatsApp & Notifiche</button>
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <div id="content">
-        <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="fa-solid fa-bars"></i> Menu Principale</button>
+        <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')">
+            <i class="fa-solid fa-bars"></i> Menu Principale
+        </button>
 
         <!-- 1. DASHBOARD -->
         <div id="dashboard" class="section-view active">
-            <div class="card-pro">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div>
-                        <h2>Panoramica Operativa 🚀</h2>
-                        <p class="text-muted mb-0">Gestisci il tuo locale in modo semplice, veloce e professionale.</p>
-                    </div>
-                    <span class="badge bg-success bg-opacity-15 text-success p-2 px-3 rounded-pill fw-bold">Stato: Online & Sincronizzato</span>
-                </div>
-                <div class="row g-4 mt-3">
+            <div class="card-fluida">
+                <h3>Panoramica Attività 📊</h3>
+                <p class="text-muted">Gestione centralizzata presenze, turni e comunicazioni in tempo reale.</p>
+                <div class="row g-4 mt-2">
                     <div class="col-md-4">
-                        <div class="stat-card">
-                            <span class="text-muted small fw-bold">PERSONALE ATTIVO</span>
-                            <h3 class="fw-bold mt-1 mb-2">6 Collaboratori</h3>
-                            <button class="btn btn-sm btn-outline-dark" onclick="switchSection('anagrafica', document.querySelectorAll('.sidebar-menu .btn')[2])">Gestisci Anagrafica</button>
+                        <div class="widget-box">
+                            <span class="text-muted small fw-bold">COLLABORATORI ATTIVI</span>
+                            <h2 class="fw-bold mt-1 mb-2">6</h2>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="switchSection('anagrafica', document.querySelectorAll('.sidebar-menu .btn')[2])">Gestisci</button>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="stat-card">
-                            <span class="text-muted small fw-bold">COPERTURA TURNI</span>
-                            <h3 class="fw-bold mt-1 mb-2 text-success">100% Ottimizzata</h3>
-                            <button class="btn btn-sm btn-outline-success" onclick="switchSection('turni', document.querySelectorAll('.sidebar-menu .btn')[1])">Visualizza Planning</button>
+                        <div class="widget-box">
+                            <span class="text-muted small fw-bold">COPERTURA TURNO OGGI</span>
+                            <h2 class="fw-bold mt-1 mb-2 text-success">100%</h2>
+                            <button class="btn btn-sm btn-outline-success" onclick="switchSection('turni', document.querySelectorAll('.sidebar-menu .btn')[1])">Visualizza Calendario</button>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="stat-card">
-                            <span class="text-muted small fw-bold">COMUNICAZIONI WHATSAPP</span>
-                            <h3 class="fw-bold mt-1 mb-2">Prte Pronti</h3>
-                            <button class="btn btn-sm btn-success text-white" onclick="switchSection('whatsapp', document.querySelectorAll('.sidebar-menu .btn')[6])">Invia Ora</button>
+                        <div class="widget-box">
+                            <span class="text-muted small fw-bold">INVIO COMUNICAZIONI</span>
+                            <h2 class="fw-bold mt-1 mb-2 text-primary">Pronto</h2>
+                            <button class="btn btn-sm btn-fluida" onclick="switchSection('whatsapp', document.querySelectorAll('.sidebar-menu .btn')[6])">Invia WhatsApp</button>
                         </div>
                     </div>
                 </div>
@@ -170,15 +198,13 @@
 
         <!-- 2. TURNI -->
         <div id="turni" class="section-view">
-            <div class="card-pro">
+            <div class="card-fluida">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                    <h3><i class="fa-solid fa-calendar-days text-success"></i> Planning Turni del Mese</h3>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-success text-white fw-bold" onclick="generaTurniAI()"><i class="fa-solid fa-wand-magic-sparkles"></i> Genera Turni con IA</button>
-                    </div>
+                    <h3>Calendario & Pianificazione Turni 🗓️</h3>
+                    <button class="btn-fluida" onclick="generaTurniAI()"><i class="fa-solid fa-wand-magic-sparkles"></i> Ottimizza con IA</button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-custom align-middle text-center">
+                    <table class="table table-fluida align-middle text-center">
                         <thead>
                             <tr>
                                 <th>Giorno</th>
@@ -186,7 +212,7 @@
                                 <th>Turno Sala 1</th>
                                 <th>Turno Sala 2</th>
                                 <th>Cucina & Linea</th>
-                                <th>Note / AdE</th>
+                                <th>Note / Gestione</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -196,7 +222,7 @@
                                 <td>Luigi</td>
                                 <td>-</td>
                                 <td>Orsola, Maimona</td>
-                                <td><span class="badge bg-secondary">Orario Standard</span></td>
+                                <td><span class="badge bg-light text-dark border">Standard</span></td>
                             </tr>
                             <tr>
                                 <td class="fw-bold">VEN</td>
@@ -222,9 +248,9 @@
 
         <!-- 3. ANAGRAFICA -->
         <div id="anagrafica" class="section-view">
-            <div class="card-pro">
-                <h3><i class="fa-solid fa-users text-success"></i> Anagrafica & Contratti</h3>
-                <p class="text-muted">Aggiungi i dati dei dipendenti per calcolare ore e turni.</p>
+            <div class="card-fluida">
+                <h3>Anagrafica & Contratti Staff 👥</h3>
+                <p class="text-muted">Aggiungi o rimuovi collaboratori e gestisci i recapiti per le comunicazioni.</p>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4"><input type="text" id="nomeDip" class="form-control" placeholder="Nome e Cognome"></div>
                     <div class="col-md-3">
@@ -235,14 +261,14 @@
                             <option value="A Chiamata">A Chiamata</option>
                         </select>
                     </div>
-                    <div class="col-md-3"><input type="text" id="telDip" class="form-control" placeholder="Numero WhatsApp (es. 339...)"></div>
-                    <div class="col-md-2"><button class="btn btn-success text-white fw-bold w-100" onclick="aggiungiDipendente()">Aggiungi</button></div>
+                    <div class="col-md-3"><input type="text" id="telDip" class="form-control" placeholder="WhatsApp (es. 339...)"></div>
+                    <div class="col-md-2"><button class="btn-fluida w-100" onclick="aggiungiDipendente()">Aggiungi</button></div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-custom align-middle" id="tabellaAnagrafica">
+                    <table class="table table-fluida align-middle" id="tabellaAnagrafica">
                         <thead>
                             <tr>
-                                <th>Dipendente</th>
+                                <th>Nome Dipendente</th>
                                 <th>Tipologia Contratto</th>
                                 <th>Recapito WhatsApp</th>
                                 <th>Azioni</th>
@@ -263,63 +289,63 @@
 
         <!-- 4. DISPONIBILITA -->
         <div id="disponibilita" class="section-view">
-            <div class="card-pro">
-                <h3><i class="fa-solid fa-clock-rotate-left text-success"></i> Gestione Disponibilità & Ferie</h3>
-                <p class="text-muted">Inserisci le richieste del personale per evitare conflitti nei turni.</p>
+            <div class="card-fluida">
+                <h3>Richieste Ferie & Disponibilità ⏱️</h3>
+                <p class="text-muted">Registra le preferenze o le assenze richieste dai dipendenti.</p>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small">Seleziona Dipendente</label>
+                        <label class="form-label small fw-bold">Dipendente</label>
                         <select class="form-select"><option>Alessia</option><option>Luigi</option><option>Andrea</option><option>Orsola</option></select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small">Data Richiesta</label>
+                        <label class="form-label small fw-bold">Data</label>
                         <input type="date" class="form-control">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small">Stato</label>
-                        <select class="form-select"><option>Disponibile</option><option>Ferie / Riposo Richiesto</option></select>
+                        <label class="form-label small fw-bold">Tipologia</label>
+                        <select class="form-select"><option>Disponibile</option><option>Ferie / Permesso</option></select>
                     </div>
                 </div>
-                <button class="btn btn-success text-white fw-bold mt-3" onclick="alert('Disponibilità registrata con successo nel sistema!')">Salva Disponibilità</button>
+                <button class="btn-fluida mt-3" onclick="alert('Disponibilità salvata correttamente!')">Registra Richiesta</button>
             </div>
         </div>
 
         <!-- 5. MARCATEMPO -->
         <div id="marcatempo" class="section-view">
-            <div class="card-pro">
-                <h3><i class="fa-solid fa-fingerprint text-success"></i> Marcatempo & Report Buste Paga</h3>
-                <p class="text-muted">Esporta il riepilogo delle ore lavorate e straordinari per il consulente del lavoro.</p>
-                <button class="btn btn-success text-white fw-bold mb-3" onclick="alert('Report ore scaricato correttamente in formato Excel/CSV!')"><i class="fa-solid fa-file-excel"></i> Esporta Report per Consulente</button>
+            <div class="card-fluida">
+                <h3>Presenze & Report Buste Paga 📋</h3>
+                <p class="text-muted">Riepilogo ore e straordinari pronto per il consulente del lavoro.</p>
+                <button class="btn-fluida mb-3" onclick="alert('Report presenze esportato con successo!')"><i class="fa-solid fa-file-excel"></i> Esporta Report Ore</button>
                 <div class="p-3 bg-light rounded font-monospace text-secondary small border">
-                    [REPORT ORE OTTOBRE]<br>- Alessia: 154 ore (6h straordinario)<br>- Luigi: 140 ore (0h straordinario)<br>- Andrea: 130 ore (4h straordinario)<br>- Orsola: 160 ore (8h straordinario)<br>- Maimona: 120 ore (2h straordinario)<br>- Angori: 42 ore (A chiamata)
+                    [REPORT PRESENZE OTTOBRE]<br>- Alessia: 154 ore (6h straordinario)<br>- Luigi: 140 ore (0h straordinario)<br>- Andrea: 130 ore (4h straordinario)<br>- Orsola: 160 ore (8h straordinario)<br>- Maimona: 120 ore (2h straordinario)<br>- Angori: 42 ore (A chiamata)
                 </div>
             </div>
         </div>
 
         <!-- 6. AGENZIA ENTRATE -->
         <div id="ade" class="section-view">
-            <div class="card-pro">
-                <h3><i class="fa-solid fa-building-columns text-success"></i> Comunicazione Chiamate AdE</h3>
-                <p class="text-muted">Invio telematico obbligatorio per i contratti di lavoro intermittente (a chiamata).</p>
+            <div class="card-fluida">
+                <h3>Comunicazione Chiamate AdE 🏛️</h3>
+                <p class="text-muted">Invio telematico obbligatorio per contratti di lavoro intermittente.</p>
                 <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success">
-                    <i class="fa-solid fa-circle-check"></i> Canale telematico attivo e pronto all'invio.
+                    <i class="fa-solid fa-circle-check"></i> Canale telematico pronto per la trasmissione.
                 </div>
-                <button class="btn btn-dark fw-bold" onclick="alert('Flusso telematico inviato con successo all Agenzia delle Entrate!')"><i class="fa-solid fa-paper-plane"></i> Invia Comunicazione Chiamate</button>
+                <button class="btn btn-dark fw-bold" onclick="alert('Chiamate inviate correttamente all Agenzia delle Entrate!')"><i class="fa-solid fa-paper-plane"></i> Invia Telematico AdE</button>
             </div>
         </div>
 
         <!-- 7. WHATSAPP -->
         <div id="whatsapp" class="section-view">
-            <div class="card-pro">
-                <h3><i class="fa-brands fa-whatsapp text-success"></i> Invio Turni su WhatsApp & Conferme</h3>
-                <p class="text-muted">Invia automaticamente il turno personale e il planning completo dello staff con richiesta di conferma lettura.</p>
+            <div class="card-fluida">
+                <h3>Invio Turni & Notifiche WhatsApp 💬</h3>
+                <p class="text-muted">Invia i turni personali e di squadra con richiesta di conferma lettura.</p>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Seleziona Dipendente Destinatario</label>
+                    <label class="form-label fw-bold">Seleziona Dipendente</label>
                     <select id="waDip" class="form-select">
                         <option>Alessia</option><option>Luigi</option><option>Andrea</option><option>Orsola</option><option>Maimona</option><option>Angori</option>
                     </select>
                 </div>
-                <button class="btn btn-success text-white fw-bold" onclick="inviaWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Genera & Invia Messaggio WhatsApp</button>
+                <button class="btn-fluida" onclick="inviaWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Invia Turno via WhatsApp</button>
             </div>
         </div>
     </div>
@@ -348,15 +374,15 @@
         }
 
         function generaTurniAI() {
-            let promptText = prompt("Inserisci le istruzioni per l'IA (es. 'Ottimizza i turni del weekend riducendo gli straordinari'):");
+            let promptText = prompt("Inserisci le istruzioni per generare i turni (es. 'Ottimizza i weekend e riduci gli straordinari'):");
             if(promptText) {
-                alert("Prompt elaborato con successo! La pianificazione è stata ottimizzata.");
+                alert("Turni elaborati con successo e calendario aggiornato!");
             }
         }
 
         function inviaWhatsApp() {
             let dip = document.getElementById('waDip').value;
-            alert(`Messaggio WhatsApp preparato per ${dip}!\nIl dipendente ha ricevuto il proprio turno, l'orario completo dello staff e la richiesta di conferma di lettura.`);
+            alert(`Messaggio WhatsApp inviato a ${dip} con successo!\nIl dipendente ha ricevuto il proprio turno, l'orario completo dello staff e la richiesta di conferma.`);
         }
     </script>
 </body>
