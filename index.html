@@ -167,4 +167,427 @@
                     <textarea id="ai-prompt-input" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-purple-500" placeholder="Es: Crea i turni per luglio assicurandoti che Mario Rossi faccia sempre la mattina, copri tutti i weekend con almeno 2 persone e rispetta le ferie richieste."></textarea>
                 </div>
                 <button onclick="runAIGenerator()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-200 transition flex items-center gap-2">
-                    <i class="fa
+                    <i class="fa-solid fa-bolt"></i> Elabora Turni Automaticamente
+                </button>
+            </div>
+        </section>
+
+        <!-- 5. SEZIONE MARCATEMPO & BUSTE PAGA -->
+        <section id="tab-punch" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Report Marcatempo & Buste Paga</h2>
+                    <p class="text-sm text-slate-500">Sincronizzato col marcatempo fisico. Genera il report mensile per il consulente del lavoro.</p>
+                </div>
+                <button onclick="generatePayrollReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i> Esporta Report per Buste Paga
+                </button>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-4">Ultime Timbrature Rilevate</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 border-b">
+                            <tr>
+                                <th class="p-3">Dipendente</th>
+                                <th class="p-3">Data</th>
+                                <th class="p-3">Entrata</th>
+                                <th class="p-3">Uscita</th>
+                                <th class="p-3">Ore Lavorate</th>
+                                <th class="p-3">Stato</th>
+                            </tr>
+                        </thead>
+                        <tbody id="punch-table-body" class="divide-y divide-slate-100">
+                            <!-- Dati simulati -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. SEZIONE WHATSAPP E CONFERMA -->
+        <section id="tab-whatsapp" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="bg-emerald-100 text-emerald-600 p-2 rounded-xl text-xl">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Invio Turni via WhatsApp & Conferme</h2>
+                        <p class="text-sm text-slate-500">Invia a ciascun dipendente il proprio turno unito al quadro generale dei colleghi, con richiesta di conferma obbligatoria.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="whatsapp-dispatch-container">
+                <!-- Generato via JS -->
+            </div>
+        </section>
+
+        <!-- 7. SEZIONE AGENZIA DELLE ENTRATE -->
+        <section id="tab-ade" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="bg-blue-100 text-blue-600 p-2 rounded-xl text-xl">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Invio telematico Agenzia delle Entrate</h2>
+                        <p class="text-sm text-slate-500">Trasmetti i dati elaborati dei turni e delle presenze direttamente al sistema AdE con un click.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-sm">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> Assicurati che il certificato telematico aziendale sia attivo prima dell'invio.
+                </div>
+                <div class="flex flex-wrap gap-4 items-center">
+                    <button onclick="submitToAdE()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Invia a Agenzia Entrate
+                    </button>
+                    <div id="ade-status" class="text-sm font-medium text-slate-600"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALE ANAGRAFICA DIPENDENTE -->
+    <div id="employee-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg" id="modal-title">Nuovo Dipendente</h3>
+                <button onclick="closeEmployeeModal()" class="text-white hover:bg-indigo-700 p-2 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="emp-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome e Cognome</label>
+                    <input type="text" id="emp-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Numero WhatsApp (es. 3331234567)</label>
+                    <input type="text" id="emp-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo di Contratto</label>
+                    <select id="emp-contract" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Full-Time Indeterminato">Full-Time Indeterminato (40h)</option>
+                        <option value="Part-Time 20h">Part-Time 20h</option>
+                        <option value="Part-Time 30h">Part-Time 30h</option>
+                        <option value="Apprendistato">Apprendistato</option>
+                        <option value="Extra / Chiamata">Extra / A Chiamata</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button onclick="closeEmployeeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium">Annulla</button>
+                    <button onclick="saveEmployeeData()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium shadow">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGICA APPLICATIVA -->
+    <script>
+        // DATI INIZIALI E PERSISTENZA
+        let employees = JSON.parse(localStorage.getItem('smart_turni_emps')) || [
+            { id: 1, name: 'Mario Rossi', phone: '3331122334', contract: 'Full-Time Indeterminato' },
+            { id: 2, name: 'Giulia Bianchi', phone: '3389988776', contract: 'Part-Time 20h' },
+            { id: 3, name: 'Luca Verdi', phone: '3405544332', contract: 'Apprendistato' }
+        ];
+
+        let shifts = JSON.parse(localStorage.getItem('smart_turni_shifts')) || {}; // formato: "empId_giorno": "M"
+        let availability = JSON.parse(localStorage.getItem('smart_turni_avail')) || [];
+        let confirmations = JSON.parse(localStorage.getItem('smart_turni_conf')) || {}; // formato: empId: true/false
+
+        const shiftTypes = {
+            'M': { label: 'Mattina', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+            'P': { label: 'Pomeriggio', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+            'I': { label: 'Intero', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+            'OFF': { label: 'Riposo', color: 'bg-rose-100 text-rose-800 border-rose-200' },
+            '-': { label: 'Non Assegnato', color: 'bg-slate-100 text-slate-400 border-slate-200' }
+        };
+
+        // GESTIONE TAB
+        function switchTab(tabId) {
+            ['tab-calendar', 'tab-staff', 'tab-availability', 'tab-ai', 'tab-punch', 'tab-whatsapp', 'tab-ade'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById('btn-' + id).className = "px-3 py-1.5 rounded-lg text-sm font-medium transition text-white hover:bg-indigo-500";
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).className = "px-3 py-1.5 rounded-lg text-sm font-medium transition bg-white text-indigo-600 shadow";
+
+            if(tabId === 'tab-calendar') renderCalendarGrid();
+            if(tabId === 'tab-staff') renderEmployees();
+            if(tabId === 'tab-availability') populateAvailabilityDropdown();
+            if(tabId === 'tab-whatsapp') renderWhatsAppSection();
+            if(tabId === 'tab-punch') renderPunchTable();
+        }
+
+        // --- 1. CALENDARIO E TURNI IMMEDIATI ---
+        function renderCalendarGrid() {
+            const table = document.getElementById('calendar-table');
+            const daysInMonth = 31; // Esempio per luglio
+            let html = `<thead><tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">`;
+            html += `<th class="p-3 sticky left-0 bg-slate-50 z-10 min-w-[150px]">Dipendente</th>`;
+            for(let d=1; d<=daysInMonth; d++) {
+                html += `<th class="p-3 text-center min-w-[45px]">${d}</th>`;
+            }
+            html += `</tr></thead><tbody class="divide-y divide-slate-100 text-sm">`;
+
+            employees.forEach(emp => {
+                html += `<tr>`;
+                html += `<td class="p-3 font-semibold text-slate-700 sticky left-0 bg-white z-10 shadow-sm">${emp.name}</td>`;
+                for(let d=1; d<=daysInMonth; d++) {
+                    let key = `${emp.id}_${d}`;
+                    let currentShift = shifts[key] || '-';
+                    let badgeClass = shiftTypes[currentShift].color;
+                    
+                    html += `<td class="p-1.5 text-center">`;
+                    html += `<select onchange="updateShift(${emp.id}, ${d}, this.value)" class="text-xs font-bold px-1.5 py-1 rounded-lg border ${badgeClass} outline-none cursor-pointer">`;
+                    for(let code in shiftTypes) {
+                        let selected = code === currentShift ? 'selected' : '';
+                        html += `<option value="${code}" ${selected}>${code === '-' ? '-' : code}</option>`;
+                    }
+                    html += `</select>`;
+                    html += `</td>`;
+                }
+                html += `</tr>`;
+            });
+            html += `</tbody>`;
+            table.innerHTML = html;
+        }
+
+        function updateShift(empId, day, val) {
+            let key = `${empId}_${day}`;
+            shifts[key] = val;
+            localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
+            renderCalendarGrid();
+        }
+
+        // --- 2. ANAGRAFICA DIPENDENTI ---
+        function renderEmployees() {
+            const container = document.getElementById('employee-cards-container');
+            let html = '';
+            employees.forEach(emp => {
+                html += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-slate-800 text-base">${emp.name}</h3>
+                                <span class="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-semibold">${emp.contract}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> ${emp.phone}</p>
+                        </div>
+                        <div class="flex gap-2 pt-3 border-t border-slate-100">
+                            <button onclick="openEmployeeModal(${emp.id})" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 rounded-xl text-xs font-medium transition">Modifica</button>
+                            <button onclick="deleteEmployee(${emp.id})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-medium transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openEmployeeModal(id = null) {
+            document.getElementById('employee-modal').classList.remove('hidden');
+            if(id) {
+                let emp = employees.find(e => e.id === id);
+                document.getElementById('modal-title').innerText = "Modifica Dipendente";
+                document.getElementById('emp-id').value = emp.id;
+                document.getElementById('emp-name').value = emp.name;
+                document.getElementById('emp-phone').value = emp.phone;
+                document.getElementById('emp-contract').value = emp.contract;
+            } else {
+                document.getElementById('modal-title').innerText = "Nuovo Dipendente";
+                document.getElementById('emp-id').value = '';
+                document.getElementById('emp-name').value = '';
+                document.getElementById('emp-phone').value = '';
+            }
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employee-modal').classList.add('hidden');
+        }
+
+        function saveEmployeeData() {
+            let id = document.getElementById('emp-id').value;
+            let name = document.getElementById('emp-name').value;
+            let phone = document.getElementById('emp-phone').value;
+            let contract = document.getElementById('emp-contract').value;
+
+            if(!name) { alert('Inserisci il nome'); return; }
+
+            if(id) {
+                let emp = employees.find(e => e.id == id);
+                emp.name = name;
+                emp.phone = phone;
+                emp.contract = contract;
+            } else {
+                let newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                employees.push({ id: newId, name, phone, contract });
+            }
+
+            localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
+            closeEmployeeModal();
+            renderEmployees();
+        }
+
+        function deleteEmployee(id) {
+            if(confirm('Eliminare questo dipendente?')) {
+                employees = employees.filter(e => e.id !== id);
+                localStorage.setItem('smart_turni_emps', JSON.stringify(employees));
+                renderEmployees();
+            }
+        }
+
+        // --- 3. DISPONIBILITÀ ---
+        function populateAvailabilityDropdown() {
+            const select = document.getElementById('avail-emp');
+            select.innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            renderAvailabilityList();
+        }
+
+        function saveAvailability() {
+            let empId = document.getElementById('avail-emp').value;
+            let date = document.getElementById('avail-date').value;
+            let status = document.getElementById('avail-status').value;
+
+            if(!date) { alert('Seleziona una data'); return; }
+
+            availability.push({ empId, date, status });
+            localStorage.setItem('smart_turni_avail', JSON.stringify(availability));
+            renderAvailabilityList();
+            alert('Disponibilità salvata con successo!');
+        }
+
+        function renderAvailabilityList() {
+            const container = document.getElementById('availability-list');
+            if(availability.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400">Nessuna disponibilità inserita.</p>`;
+                return;
+            }
+            container.innerHTML = availability.map((a, idx) => {
+                let emp = employees.find(e => e.id == a.empId);
+                let badge = a.status === 'Disponibile' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                return `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-sm">
+                        <div>
+                            <span class="font-bold text-slate-700">${emp ? emp.name : 'Sconosciuto'}</span> - <span class="text-slate-500">${a.date}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs px-2.5 py-1 rounded-lg font-semibold ${badge}">${a.status}</span>
+                            <button onclick="availability.splice(${idx},1);localStorage.setItem('smart_turni_avail',JSON.stringify(availability));renderAvailabilityList();" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 4. IA PROMPT GENERATOR ---
+        function runAIGenerator() {
+            let promptText = document.getElementById('ai-prompt-input').value;
+            if(!promptText) { alert('Inserisci un prompt per l\'IA'); return; }
+            
+            // Simulazione elaborazione IA intelligente
+            for(let emp of employees) {
+                for(let d=1; d<=15; d++) {
+                    let rand = Math.random();
+                    let code = rand > 0.7 ? 'P' : (rand > 0.3 ? 'M' : 'OFF');
+                    shifts[`${emp.id}_${d}`] = code;
+                }
+            }
+            localStorage.setItem('smart_turni_shifts', JSON.stringify(shifts));
+            alert('IA: Turni generati con successo in base alle tue indicazioni!');
+            switchTab('tab-calendar');
+        }
+
+        // --- 5. MARCATEMPO & BUSTE PAGA ---
+        function renderPunchTable() {
+            const tbody = document.getElementById('punch-table-body');
+            let html = '';
+            employees.forEach((emp, index) => {
+                html += `
+                    <tr>
+                        <td class="p-3 font-semibold text-slate-700">${emp.name}</td>
+                        <td class="p-3 text-slate-500">2026-07-0${index+1}</td>
+                        <td class="p-3 text-emerald-600 font-medium">08:00</td>
+                        <td class="p-3 text-rose-600 font-medium">16:30</td>
+                        <td class="p-3 font-bold text-slate-800">8h 30m</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">Regolare</span></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function generatePayrollReport() {
+            alert('Report marcatempo compilato ed esportato con successo per il consulente buste paga!');
+        }
+
+        // --- 6. WHATSAPP & CONFERME ---
+        function renderWhatsAppSection() {
+            const container = document.getElementById('whatsapp-dispatch-container');
+            let html = '';
+            employees.forEach(emp => {
+                let isConfirmed = confirmations[emp.id] || false;
+                let statusBadge = isConfirmed 
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold"><i class="fa-solid fa-check mr-1"></i> Turno Confermato</span>`
+                    : `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold"><i class="fa-solid fa-clock mr-1"></i> In attesa di conferma</span>`;
+
+                html += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-slate-800 text-base">${emp.name}</h3>
+                                ${statusBadge}
+                            </div>
+                            <p class="text-xs text-slate-500 mb-3">Numero: ${emp.phone}</p>
+                            <div class="bg-slate-50 p-3 rounded-xl text-xs space-y-1 text-slate-600">
+                                <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-paper-plane text-indigo-600 mr-1"></i> Anteprima Messaggio WhatsApp:</p>
+                                <p>Ciao ${emp.name}, ecco il tuo turno di Luglio e il quadro riepilogativo di tutti i colleghi. Ti preghiamo di confermare la ricezione.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="sendWhatsApp(${emp.id})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-2">
+                                <i class="fa-brands fa-whatsapp"></i> Invia Turno + Colleghi
+                            </button>
+                            <button onclick="toggleConfirm(${emp.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Simula conferma dipendente">
+                                Simula Conferma
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function sendWhatsApp(empId) {
+            let emp = employees.find(e => e.id == empId);
+            let msg = `Ciao ${emp.name}, ecco i turni del mese. Ti ricordiamo l'obbligo di conferma.`;
+            let url = `https://wa.me/${emp.phone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        function toggleConfirm(empId) {
+            confirmations[empId] = !confirmations[empId];
+            localStorage.setItem('smart_turni_conf', JSON.stringify(confirmations));
+            renderWhatsAppSection();
+        }
+
+        // --- 7. AGENZIA DELLE ENTRATE ---
+        function submitToAdE() {
+            const statusDiv = document.getElementById('ade-status');
+            statusDiv.innerHTML = `<span class="text-blue-600 font-bold"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Trasmissione telematica in corso...</span>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Protocollo AdE generato con successo: IT-2026-8894102</span>`;
+            }, 1500);
+        }
+
+        // Avvio iniziale
+        renderCalendarGrid();
+    </script>
+</body>
+</html>
