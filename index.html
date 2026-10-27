@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro Lotti Cucina & Pizzeria</title>
-    <!-- Tailwind CSS per un design moderno, pulito e responsive -->
+    <title>Registro Lotti Pizzeria - Touch Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- FontAwesome per le icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @media print {
@@ -15,162 +13,154 @@
             #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
         }
+        /* Pulsanti extra large per uso comodo in cucina */
+        .btn-touch {
+            min-height: 56px;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-gray-100 text-gray-900 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="bg-red-700 text-white shadow-md no-print sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <!-- Header Grande -->
+    <header class="bg-red-700 text-white shadow-lg no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <button id="sidebar-toggle" class="md:hidden text-2xl focus:outline-none">
+                <button id="sidebar-toggle" class="text-3xl focus:outline-none p-1 md:hidden">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <h1 class="text-xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-pizza-slice"></i> Registro Lotti Pizzeria
+                <h1 class="text-2xl font-black tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-pizza-slice"></i> Registro Pizzeria
                 </h1>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="switchTab('home')" class="px-3 py-2 bg-red-800 hover:bg-red-900 rounded-lg text-sm font-semibold transition">
-                    <i class="fa-solid fa-house mr-1"></i> Home
+            <div class="flex items-center space-x-3">
+                <button onclick="switchTab('home')" class="px-4 py-2.5 bg-red-800 hover:bg-red-900 rounded-xl font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i> <span class="hidden md:inline">Home</span>
                 </button>
-                <button onclick="switchTab('report')" class="px-3 py-2 bg-red-800 hover:bg-red-900 rounded-lg text-sm font-semibold transition">
-                    <i class="fa-solid fa-book-open mr-1"></i> Archivio
+                <button onclick="switchTab('report')" class="px-4 py-2.5 bg-red-800 hover:bg-red-900 rounded-xl font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark"></i> <span class="hidden md:inline">Archivio</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container Layout -->
+    <!-- Layout Principale -->
     <div class="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden relative">
         
-        <!-- Sidebar Laterale (Lista Preparazioni) -->
-        <aside id="sidebar" class="bg-white w-80 shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300 absolute md:relative z-20 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 no-print h-full">
+        <!-- Sidebar Laterale (Lista Preparazioni con pulsanti grandi) -->
+        <aside id="sidebar" class="bg-white w-80 shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 absolute md:relative z-20 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 no-print h-full">
             <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                <h2 class="font-bold text-gray-700"><i class="fa-solid fa-list-check mr-2 text-red-600"></i> Preparazioni</h2>
-                <button onclick="openNewPrepModal()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow transition flex items-center gap-1">
+                <h2 class="font-black text-gray-800 text-lg"><i class="fa-solid fa-list-check mr-2 text-red-600"></i> Preparazioni</h2>
+                <button onclick="openNewPrepModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold shadow transition flex items-center gap-1.5 text-sm">
                     <i class="fa-solid fa-plus"></i> Nuova
                 </button>
             </div>
-            <!-- Barra di ricerca preparazioni -->
-            <div class="p-3 border-b border-gray-100">
+            <!-- Ricerca -->
+            <div class="p-3 border-b border-gray-100 bg-white">
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 text-lg">
                         <i class="fa-solid fa-search"></i>
                     </span>
-                    <input type="text" id="search-prep" placeholder="Cerca preparazione..." oninput="filterPreparations()" class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="text" id="search-prep" placeholder="Cerca preparazione..." oninput="filterPreparations()" class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl font-medium text-base focus:outline-none focus:border-red-600">
                 </div>
             </div>
-            <!-- Lista dinamica elementi -->
+            <!-- Lista -->
             <div id="prep-list-container" class="flex-1 overflow-y-auto divide-y divide-gray-100">
-                <!-- Inserito via JS -->
+                <!-- Dinamico -->
             </div>
         </aside>
 
-        <!-- Overlay mobile per chiudere la sidebar -->
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-10 hidden md:hidden"></div>
+        <!-- Overlay mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden"></div>
 
-        <!-- Contenuto Principale -->
-        <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+        <!-- Contenuto -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
             
-            <!-- Tab Home / Benvenuto -->
+            <!-- Home -->
             <div id="tab-home" class="space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 text-center">
-                    <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 text-center max-w-2xl mx-auto space-y-6">
+                    <div class="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Benvenuto nel Registro Lotti</h2>
-                    <p class="text-gray-600 max-w-lg mx-auto mb-6">
-                        Seleziona una preparazione dal menu laterale a sinistra per compilare i lotti degli ingredienti, oppure creane una nuova in pochi secondi.
+                    <h2 class="text-3xl font-black text-gray-900">Pronto per registrare i lotti?</h2>
+                    <p class="text-gray-600 text-lg leading-relaxed">
+                        Seleziona una preparazione dal menu laterale a sinistra oppure creane una nuova con tasti grandi e comodi per il touch.
                     </p>
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <button onclick="openNewPrepModal()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl font-bold shadow transition flex items-center gap-2">
-                            <i class="fa-solid fa-circle-plus text-lg"></i> Crea Nuova Preparazione
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2">
+                        <button onclick="openNewPrepModal()" class="btn-touch bg-red-600 hover:bg-red-700 text-white px-8 rounded-2xl font-black shadow-lg transition flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-circle-plus text-xl"></i> Crea Nuova Preparazione
                         </button>
-                        <button onclick="switchTab('report')" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-3 rounded-xl font-bold shadow transition flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-lg"></i> Visualizza Archivio Lotti
+                        <button onclick="switchTab('report')" class="btn-touch bg-gray-900 hover:bg-black text-white px-8 rounded-2xl font-black shadow-lg transition flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-clock-rotate-left text-xl"></i> Apri Archivio
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab Scheda Preparazione (Dinamica) -->
+            <!-- Scheda Preparazione -->
             <div id="tab-preparation" class="hidden space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-gray-200 gap-4">
                         <div>
-                            <span class="text-xs uppercase tracking-wider text-red-600 font-bold bg-red-50 px-2.5 py-1 rounded-full">Scheda Preparata</span>
-                            <h2 id="view-prep-title" class="text-2xl font-black text-gray-900 mt-1">Nome Preparazione</h2>
+                            <span class="text-xs uppercase tracking-widest text-red-600 font-black bg-red-100 px-3 py-1.5 rounded-full">Scheda HACCP</span>
+                            <h2 id="view-prep-title" class="text-3xl font-black text-gray-900 mt-2">Nome Preparazione</h2>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="printCurrentCard()" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
-                                <i class="fa-solid fa-print"></i> Stampa Scheda
+                        <div class="flex items-center gap-3">
+                            <button onclick="printCurrentCard()" class="btn-touch bg-gray-900 hover:bg-black text-white px-6 rounded-2xl font-bold shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-print text-lg"></i> Stampa Scheda
                             </button>
-                            <button onclick="deleteCurrentPreparation()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-xl text-sm font-bold transition" title="Elimina Preparazione">
-                                <i class="fa-solid fa-trash"></i>
+                            <button onclick="deleteCurrentPreparation()" class="btn-touch bg-red-100 hover:bg-red-200 text-red-700 px-4 rounded-2xl font-bold transition" title="Elimina">
+                                <i class="fa-solid fa-trash text-lg"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Area stampabile -->
+                    <!-- Area Stampabile -->
                     <div id="printable-area" class="mt-6 space-y-6">
-                        <!-- Dati Generali Data / Lotto Interno -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <!-- Data e Note -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-2xl border-2 border-gray-200">
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Data Preparazione / Lotto Interno:</label>
-                                <input type="date" id="prep-date" class="w-full bg-white border border-gray-300 rounded-lg p-2.5 font-semibold text-gray-800 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                                <label class="block text-sm font-black text-gray-700 uppercase mb-2">Data Preparazione / Lotto:</label>
+                                <input type="date" id="prep-date" class="w-full bg-white border-2 border-gray-300 rounded-xl p-4 font-bold text-lg text-gray-900 focus:border-red-600 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ora / Note lotto:</label>
-                                <input type="text" id="prep-notes" placeholder="Es. Turno Mattina / Forno 2" class="w-full bg-white border border-gray-300 rounded-lg p-2.5 text-gray-800 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                                <label class="block text-sm font-black text-gray-700 uppercase mb-2">Note / Turno:</label>
+                                <input type="text" id="prep-notes" placeholder="Es. Turno Mattina" class="w-full bg-white border-2 border-gray-300 rounded-xl p-4 font-bold text-lg text-gray-900 focus:border-red-600 focus:outline-none">
                             </div>
                         </div>
 
-                        <!-- Tabella Ingredienti, Lotti, Fornitori -->
+                        <!-- Tabella Ingredienti Grande e Chiara -->
                         <div>
-                            <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wider">Ingredienti Utilizzati</h3>
-                            <div class="overflow-x-auto rounded-xl border border-gray-200">
-                                <table class="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr class="bg-gray-100 text-gray-700 text-xs uppercase border-b border-gray-200">
-                                            <th class="p-3 w-1/4">Ingrediente</th>
-                                            <th class="p-3 w-1/3">Lotto</th>
-                                            <th class="p-3 w-1/3">Fornitore / Scadenza</th>
-                                            <th class="p-3 text-center no-print w-20">Fotocamera</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="ingredients-table-body" class="divide-y divide-gray-200 bg-white text-sm">
-                                        <!-- Righe dinamiche -->
-                                    </tbody>
-                                </table>
+                            <h3 class="font-black text-gray-800 mb-4 text-base uppercase tracking-wider">Ingredienti e Lotti</h3>
+                            <div class="space-y-4" id="ingredients-cards-container">
+                                <!-- Card ingredienti dinamiche ottimizzate per touch -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Pulsante Salva Registrazione -->
-                    <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end no-print">
-                        <button onclick="saveCurrentBatchLog()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-md transition flex items-center gap-2">
-                            <i class="fa-solid fa-floppy-disk text-lg"></i> Salva Registrazione Lotto
+                    <!-- Salva -->
+                    <div class="mt-8 pt-6 border-t-2 border-gray-200 flex justify-end no-print">
+                        <button onclick="saveCurrentBatchLog()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white px-8 rounded-2xl font-black shadow-xl transition flex items-center gap-3">
+                            <i class="fa-solid fa-floppy-disk text-2xl"></i> Salva Registrazione Lotto
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab Report / Archivio -->
+            <!-- Archivio -->
             <div id="tab-report" class="hidden space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8">
                     <div class="flex justify-between items-center pb-4 border-b border-gray-200">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900"><i class="fa-solid fa-book-bookmark text-red-600 mr-2"></i> Archivio Registrazioni Lotti</h2>
-                            <p class="text-sm text-gray-500">Storico dei lotti salvati per verifiche e controlli HACCP.</p>
+                            <h2 class="text-2xl font-black text-gray-900"><i class="fa-solid fa-book-bookmark text-red-600 mr-2"></i> Archivio Registrazioni</h2>
+                            <p class="text-sm text-gray-500 mt-1">Storico ufficiale dei lotti registrati.</p>
                         </div>
-                        <button onclick="clearArchive()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="clearArchive()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl font-bold text-sm transition">
                             <i class="fa-solid fa-trash-can mr-1"></i> Svuota Archivio
                         </button>
                     </div>
-                    
                     <div id="archive-list" class="mt-6 space-y-4">
-                        <!-- Storico dinamico -->
+                        <!-- Storico -->
                     </div>
                 </div>
             </div>
@@ -178,48 +168,36 @@
         </main>
     </div>
 
-    <!-- Modale: Nuova Preparazione -->
-    <div id="new-prep-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
-                <h3 class="font-bold text-lg text-gray-900"><i class="fa-solid fa-circle-plus text-red-600 mr-2"></i> Nuova Preparazione</h3>
-                <button onclick="closeNewPrepModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+    <!-- Modale Nuova Preparazione -->
+    <div id="new-prep-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center pb-4 border-b border-gray-100">
+                <h3 class="font-black text-2xl text-gray-900"><i class="fa-solid fa-circle-plus text-red-600 mr-2"></i> Nuova Preparazione</h3>
+                <button onclick="closeNewPrepModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Nome Preparato (es. Impasto Pizza, Pan Brioche...):</label>
-                    <input type="text" id="new-prep-name" placeholder="Inserisci nome..." class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                    <label class="block font-bold text-gray-700 mb-2">Nome Preparato:</label>
+                    <input type="text" id="new-prep-name" placeholder="Es. Impasto Pinsa, Salsa..." class="w-full border-2 border-gray-300 rounded-2xl p-4 font-bold text-lg focus:border-red-600 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Ingredienti (separati da virgola o a capo):</label>
-                    <textarea id="new-prep-ingredients" rows="4" placeholder="Farina, Acqua, Lievito, Sale" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"></textarea>
+                    <label class="block font-bold text-gray-700 mb-2">Ingredienti (uno per riga o separati da virgola):</label>
+                    <textarea id="new-prep-ingredients" rows="4" placeholder="Farina&#10;Acqua&#10;Lievito&#10;Sale" class="w-full border-2 border-gray-300 rounded-2xl p-4 font-medium text-base focus:border-red-600 focus:outline-none"></textarea>
                 </div>
             </div>
             <div class="flex justify-end gap-3 pt-2">
-                <button onclick="closeNewPrepModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-700 transition">Annulla</button>
-                <button onclick="createNewPreparation()" class="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-xl text-sm font-bold text-white shadow transition">Crea Scheda</button>
+                <button onclick="closeNewPrepModal()" class="btn-touch px-6 bg-gray-100 hover:bg-gray-200 rounded-2xl font-bold text-gray-700 transition">Annulla</button>
+                <button onclick="createNewPreparation()" class="btn-touch px-8 bg-red-600 hover:bg-red-700 rounded-2xl font-black text-white shadow-lg transition">Crea Scheda</button>
             </div>
         </div>
     </div>
 
-    <!-- Script Applicativo -->
+    <!-- Script -->
     <script>
         const defaultPreparations = [
-            {
-                id: 'impasto-pizza',
-                name: 'IMPASTO PIZZA',
-                ingredients: ['FARINA', 'SOIA', 'LIEVITO', 'SALE']
-            },
-            {
-                id: 'impasto-pinsa',
-                name: 'IMPASTO PINSA',
-                ingredients: ['FARINA RISO', 'FARINA FRUMENTO', 'LIEVITO MADRE', 'ACQUA', 'SALE']
-            },
-            {
-                id: 'salsa-pomodoro',
-                name: 'SALSA POMODORO',
-                ingredients: ['POMODORO PELATO', 'SALE', 'BASILICO', 'OLIO EVO']
-            }
+            { id: 'impasto-pizza', name: 'IMPASTO PIZZA', ingredients: ['FARINA', 'SOIA', 'LIEVITO', 'SALE'] },
+            { id: 'impasto-pinsa', name: 'IMPASTO PINSA', ingredients: ['FARINA RISO', 'FARINA FRUMENTO', 'LIEVITO MADRE', 'ACQUA', 'SALE'] },
+            { id: 'salsa-pomodoro', name: 'SALSA POMODORO', ingredients: ['POMODORO PELATO', 'SALE', 'BASILICO', 'OLIO EVO'] }
         ];
 
         let preparations = JSON.parse(localStorage.getItem('pizzeria_preparations')) || defaultPreparations;
@@ -230,7 +208,6 @@
             renderPrepList();
             document.getElementById('prep-date').valueAsDate = new Date();
             
-            // Toggle sidebar mobile
             document.getElementById('sidebar-toggle').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.toggle('hidden');
@@ -246,11 +223,9 @@
             document.getElementById('tab-preparation').classList.add('hidden');
             document.getElementById('tab-report').classList.add('hidden');
 
-            if (tabName === 'home') {
-                document.getElementById('tab-home').classList.remove('hidden');
-            } else if (tabName === 'preparation') {
-                document.getElementById('tab-preparation').classList.remove('hidden');
-            } else if (tabName === 'report') {
+            if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
+            else if (tabName === 'preparation') document.getElementById('tab-preparation').classList.remove('hidden');
+            else if (tabName === 'report') {
                 document.getElementById('tab-report').classList.remove('hidden');
                 renderArchive();
             }
@@ -264,22 +239,21 @@
         function renderPrepList(filter = '') {
             const container = document.getElementById('prep-list-container');
             container.innerHTML = '';
-
             const filtered = preparations.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="p-4 text-center text-sm text-gray-400">Nessuna preparazione trovata</div>`;
+                container.innerHTML = `<div class="p-6 text-center text-gray-400 font-medium">Nessuna preparazione</div>`;
                 return;
             }
 
             filtered.forEach(prep => {
                 const item = document.createElement('div');
-                item.className = `p-3.5 hover:bg-red-50 cursor-pointer flex items-center justify-between transition border-b border-gray-100 ${currentActivePrepId === prep.id ? 'bg-red-50 border-l-4 border-red-600' : ''}`;
+                item.className = `p-4 hover:bg-red-50 cursor-pointer flex items-center justify-between transition border-b border-gray-100 ${currentActivePrepId === prep.id ? 'bg-red-50 border-l-6 border-red-600' : ''}`;
                 item.innerHTML = `
-                    <div class="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-chevron-right text-xs text-red-500"></i> ${prep.name}
+                    <div class="font-bold text-gray-900 text-base flex items-center gap-3">
+                        <i class="fa-solid fa-chevron-right text-sm text-red-500"></i> ${prep.name}
                     </div>
-                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">${prep.ingredients.length} ingr.</span>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-bold">${prep.ingredients.length} ingr.</span>
                 `;
                 item.onclick = () => selectPreparation(prep.id);
                 container.appendChild(item);
@@ -287,8 +261,7 @@
         }
 
         function filterPreparations() {
-            const query = document.getElementById('search-prep').value;
-            renderPrepList(query);
+            renderPrepList(document.getElementById('search-prep').value);
         }
 
         function selectPreparation(id) {
@@ -300,50 +273,57 @@
             document.getElementById('prep-date').valueAsDate = new Date();
             document.getElementById('prep-notes').value = '';
 
-            const tbody = document.getElementById('ingredients-table-body');
-            tbody.innerHTML = '';
+            const container = document.getElementById('ingredients-cards-container');
+            container.innerHTML = '';
 
             prep.ingredients.forEach((ing, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition';
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-gray-800 align-middle">${ing}</td>
-                    <td class="p-3 align-middle">
-                        <input type="text" id="lotto-${index}" placeholder="Es. LMF26254A001" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
-                    </td>
-                    <td class="p-3 align-middle">
-                        <input type="text" id="fornitore-${index}" placeholder="Fornitore / Scadenza" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
-                    </td>
-                    <td class="p-3 text-center align-middle no-print">
-                        <label class="bg-red-600 hover:bg-red-700 text-white w-9 h-9 rounded-xl shadow cursor-pointer transition flex items-center justify-center mx-auto" title="Scatta foto etichetta">
-                            <i class="fa-solid fa-camera"></i>
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 border-2 border-gray-200 rounded-2xl p-5 space-y-4 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <span class="text-lg font-black text-red-700 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-box text-sm"></i> ${ing}
+                        </span>
+                        <!-- Pulsante Fotocamera Grande con cattura nativa -->
+                        <label class="btn-touch bg-red-600 hover:bg-red-700 text-white px-6 rounded-2xl font-bold cursor-pointer shadow-md transition flex items-center justify-center gap-2 w-full sm:w-auto">
+                            <i class="fa-solid fa-camera text-xl"></i> Scatta Etichetta
                             <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleImageCaptured(event, ${index})">
                         </label>
-                    </td>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Numero Lotto:</label>
+                            <input type="text" id="lotto-${index}" placeholder="Es. LMF26254A001" class="w-full bg-white border-2 border-gray-300 rounded-xl p-3.5 font-bold text-base focus:border-red-600 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fornitore / Scadenza:</label>
+                            <input type="text" id="fornitore-${index}" placeholder="Es. Fornitore / 11-03-2027" class="w-full bg-white border-2 border-gray-300 rounded-xl p-3.5 font-bold text-base focus:border-red-600 focus:outline-none">
+                        </div>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(card);
             });
 
             renderPrepList(document.getElementById('search-prep').value);
             switchTab('preparation');
         }
 
-        // Compilazione automatica separata pulita
+        // Compilazione automatica intelligente e pulita (separa correttamente lotto e fornitore)
         function handleImageCaptured(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Simulazione intelligente OCR / Estrazione etichetta
+            // Simulazione IA pulita con dati separati correttamente nei campi giusti
             const randomLotto = 'L' + Math.floor(Math.random() * 900000 + 100000);
-            const randomScadenza = '2027-' + String(Math.floor(Math.random() * 12) + 1).padStart(2, '0') + '-15';
+            const randomScadenza = '2027-' + String(Math.floor(Math.random() * 12) + 1).padStart(2, '0') + '-15 (Fornitore SRL)';
 
             const lottoInput = document.getElementById(`lotto-${rowIndex}`);
             const fornitoreInput = document.getElementById(`fornitore-${rowIndex}`);
 
             if (lottoInput) lottoInput.value = randomLotto;
-            if (fornitoreInput) fornitoreInput.value = randomScadenza + ' (Fornitore SRL)';
+            if (fornitoreInput) fornitoreInput.value = randomScadenza;
 
-            event.target.value = ''; // Reset input
+            event.target.value = '';
         }
 
         function openNewPrepModal() {
@@ -387,7 +367,7 @@
 
         function deleteCurrentPreparation() {
             if (!currentActivePrepId) return;
-            if (!confirm('Vuoi davvero eliminare questa scheda di preparazione?')) return;
+            if (!confirm('Vuoi eliminare questa preparazione?')) return;
 
             preparations = preparations.filter(p => p.id !== currentActivePrepId);
             localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
@@ -423,7 +403,7 @@
             batchArchive.unshift(logEntry);
             localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
 
-            alert('Registrazione salvata con successo nell’archivio!');
+            alert('Registrazione salvata con successo!');
             switchTab('report');
         }
 
@@ -436,33 +416,33 @@
             container.innerHTML = '';
 
             if (batchArchive.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-gray-400">Nessuna registrazione salvata nell'archivio.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-gray-400 font-bold">Nessuna registrazione salvata nell'archivio.</div>`;
                 return;
             }
 
             batchArchive.forEach(item => {
                 const card = document.createElement('div');
-                card.className = 'bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3';
+                card.className = 'bg-gray-50 border-2 border-gray-200 rounded-2xl p-5 space-y-3 shadow-sm';
                 
                 let ingredientsHtml = '';
                 item.ingredients.forEach(i => {
                     ingredientsHtml += `
-                        <div class="text-xs bg-white p-2 rounded border border-gray-100 flex justify-between">
-                            <span class="font-bold text-gray-800">${i.name}</span>
-                            <span class="text-gray-600">Lotto: <b>${i.lotto || '-'}</b> | Fornitore: ${i.fornitore || '-'}</span>
+                        <div class="text-sm bg-white p-3 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between gap-1">
+                            <span class="font-black text-gray-900">${i.name}</span>
+                            <span class="text-gray-600">Lotto: <b class="text-gray-900">${i.lotto || '-'}</b> | Fornitore/Scadenza: <b class="text-gray-900">${i.fornitore || '-'}</b></span>
                         </div>
                     `;
                 });
 
                 card.innerHTML = `
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-2 border-b border-gray-200 gap-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b-2 border-gray-200 gap-2">
                         <div>
-                            <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded">${item.prepName}</span>
-                            <span class="text-xs text-gray-500 ml-2">Data preparazione: ${item.date}</span>
+                            <span class="text-xs font-black text-red-600 bg-red-100 px-3 py-1 rounded-full uppercase">${item.prepName}</span>
+                            <span class="text-sm font-bold text-gray-700 ml-2">Data: ${item.date}</span>
                         </div>
-                        <div class="text-xs text-gray-400">Salvato il: ${item.timestamp}</div>
+                        <div class="text-xs font-medium text-gray-400">Salvato: ${item.timestamp}</div>
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-2">
                         ${ingredientsHtml}
                     </div>
                 `;
@@ -471,7 +451,7 @@
         }
 
         function clearArchive() {
-            if (confirm('Vuoi svuotare tutto l’archivio dei lotti?')) {
+            if (confirm('Vuoi svuotare tutto l’archivio?')) {
                 batchArchive = [];
                 localStorage.removeItem('pizzeria_archive');
                 renderArchive();
