@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Turni e Personale Intuitiva</title>
+    <title>TurniFacile & Magico - Gestionale Staff</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --secondary-color: #06b6d4;
-            --bg-color: #f8fafc;
+            --skello-primary: #10b981;
+            --skello-dark: #1e293b;
+            --skello-bg: #f8fafc;
             --sidebar-width: 260px;
         }
         body {
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #1e293b;
-            overflow-x: hidden;
+            background-color: var(--skello-bg);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--skello-dark);
         }
-        /* Sidebar Menu */
+        /* Sidebar in stile Skello */
         #sidebar {
             width: var(--sidebar-width);
             height: 100vh;
@@ -32,28 +31,28 @@
             border-right: 1px solid #e2e8f0;
             transition: all 0.3s ease;
             z-index: 1050;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.02);
         }
         .sidebar-brand {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            padding: 20px;
-            border-bottom: 1px solid #f1f5f9;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0f172a;
+            padding: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            border-bottom: 1px solid #f1f5f9;
         }
+        .sidebar-brand i { color: var(--skello-primary); }
         .sidebar-menu {
-            padding: 15px;
+            padding: 20px 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
         .sidebar-menu .btn {
             text-align: left;
             padding: 12px 16px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -64,340 +63,265 @@
             transition: all 0.2s;
         }
         .sidebar-menu .btn:hover, .sidebar-menu .btn.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            background: #ecfdf5;
+            color: #059669;
         }
         /* Main Content */
         #content {
             margin-left: var(--sidebar-width);
             padding: 30px;
             min-height: 100vh;
-            transition: all 0.3s ease;
         }
-        .card-custom {
+        .card-skello {
             border: none;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
             background: white;
             padding: 24px;
             margin-bottom: 24px;
         }
-        .btn-action {
+        .section-view { display: none; }
+        .section-view.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Griglia Turni stile Planning */
+        .shift-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .employee-shift-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 10px 20px;
-            font-weight: 600;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
-        .section-view {
-            display: none;
-        }
-        .section-view.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Responsive Mobile Layout */
-        @media (max-width: 991px) {
-            #sidebar {
-                margin-left: calc(var(--sidebar-width) * -1);
-            }
-            #sidebar.show {
-                margin-left: 0;
-            }
-            #content {
-                margin-left: 0;
-                padding: 15px;
-            }
-            .mobile-toggle-btn {
-                display: inline-block !important;
-            }
-        }
-        .mobile-toggle-btn {
-            display: none;
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 8px 12px;
+        .shift-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 12px;
             border-radius: 8px;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 8px;
         }
+        
+        @media (max-width: 991px) {
+            #sidebar { margin-left: calc(var(--sidebar-width) * -1); }
+            #sidebar.show { margin-left: 0; }
+            #content { margin-left: 0; padding: 15px; }
+            .mobile-toggle { display: block !important; }
+        }
+        .mobile-toggle { display: none; margin-bottom: 20px; background: white; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Menu Laterale -->
+    <!-- Sidebar -->
     <nav id="sidebar">
         <div class="sidebar-brand">
-            <i class="fa-solid fa-calendar-days fs-4"></i>
-            <span>Gestione Staff</span>
+            <i class="fa-solid fa-layer-group fs-4"></i>
+            <span>TurniFacile</span>
         </div>
         <div class="sidebar-menu">
-            <button class="btn active" onclick="switchSection('dashboard', this)"><i class="fa-solid fa-house"></i> Home Dashboard</button>
-            <button class="btn" onclick="switchSection('turni', this)"><i class="fa-solid fa-calendar-check"></i> Gestione Turni</button>
-            <button class="btn" onclick="switchSection('anagrafica', this)"><i class="fa-solid fa-users"></i> Anagrafica & Contratti</button>
-            <button class="btn" onclick="switchSection('disponibilita', this)"><i class="fa-solid fa-clock-rotate-left"></i> Disponibilità Staff</button>
-            <button class="btn" onclick="switchSection('marcatempo', this)"><i class="fa-solid fa-fingerprint"></i> Marcatempo & Buste Paga</button>
-            <button class="btn" onclick="switchSection('ade', this)"><i class="fa-solid fa-file-invoice-dollar"></i> Agenzia Entrate & Chiamate</button>
-            <button class="btn" onclick="switchSection('whatsapp', this)"><i class="fa-brands fa-whatsapp text-success"></i> Invio WhatsApp & Conferme</button>
+            <button class="btn active" onclick="switchSection('dashboard', this)"><i class="fa-solid fa-house"></i> Panoramica</button>
+            <button class="btn" onclick="switchSection('turni', this)"><i class="fa-solid fa-calendar-days"></i> Pianificazione Turni</button>
+            <button class="btn" onclick="switchSection('anagrafica', this)"><i class="fa-solid fa-id-badge"></i> Anagrafica & Staff</button>
+            <button class="btn" onclick="switchSection('disponibilita', this)"><i class="fa-solid fa-user-clock"></i> Disponibilità</button>
+            <button class="btn" onclick="switchSection('marcatempo', this)"><i class="fa-solid fa-clock"></i> Marcatempo & Paghe</button>
+            <button class="btn" onclick="switchSection('ade', this)"><i class="fa-solid fa-building-columns"></i> Agenzia Entrate</button>
+            <button class="btn" onclick="switchSection('whatsapp', this)"><i class="fa-brands fa-whatsapp text-success"></i> Invio WhatsApp</button>
         </div>
     </nav>
 
-    <!-- Contenuto Principale -->
+    <!-- Contenuto -->
     <div id="content">
-        <button class="mobile-toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i> Menu</button>
+        <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="fa-solid fa-bars"></i> Menu</button>
 
-        <!-- 1. DASHBOARD -->
+        <!-- DASHBOARD -->
         <div id="dashboard" class="section-view active">
-            <div class="card-custom">
-                <h2>Benvenuto nel Gestionale Intuitivo! 🚀</h2>
-                <p class="text-muted">Usa il menu laterale per navigare tra le varie sezioni in modo semplice e veloce.</p>
+            <div class="card-skello">
+                <h2>Bentornato! 👋</h2>
+                <p class="text-muted">Ecco il riepilogo operativo di oggi per il tuo locale.</p>
                 <div class="row g-4 mt-2">
                     <div class="col-md-4">
-                        <div class="p-4 bg-light rounded-4 border">
-                            <h5><i class="fa-solid fa-users text-primary"></i> Dipendenti Attivi</h5>
-                            <h3 id="stat-dipendenti" class="fw-bold mt-2">6</h3>
-                            <button class="btn btn-sm btn-outline-primary mt-2" onclick="switchSection('anagrafica', document.querySelectorAll('.sidebar-menu .btn')[2])">Gestisci Anagrafiche</button>
+                        <div class="p-4 bg-light rounded-4 border-0">
+                            <h6 class="text-muted"><i class="fa-solid fa-user-check text-success"></i> Personale in Servizio Oggi</h6>
+                            <h3 class="fw-bold mt-2">6 Dipendenti</h3>
+                            <span class="badge bg-success bg-opacity-10 text-success">Copertura 100%</span>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="p-4 bg-light rounded-4 border">
-                            <h5><i class="fa-solid fa-calendar-days text-info"></i> Turni Ottobre</h5>
-                            <h3 class="fw-bold mt-2">Configurati</h3>
-                            <button class="btn btn-sm btn-outline-info mt-2" onclick="switchSection('turni', document.querySelectorAll('.sidebar-menu .btn')[1])">Visualizza Turni</button>
+                        <div class="p-4 bg-light rounded-4 border-0">
+                            <h6 class="text-muted"><i class="fa-solid fa-bell text-warning"></i> Richieste Disponibilità</h6>
+                            <h3 class="fw-bold mt-2">2 In attesa</h3>
+                            <button class="btn btn-sm btn-outline-dark mt-1" onclick="switchSection('disponibilita', document.querySelectorAll('.sidebar-menu .btn')[3])">Controlla</button>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="p-4 bg-light rounded-4 border">
-                            <h5><i class="fa-brands fa-whatsapp text-success"></i> Invio WhatsApp</h5>
+                        <div class="p-4 bg-light rounded-4 border-0">
+                            <h6 class="text-muted"><i class="fa-brands fa-whatsapp text-success"></i> Invio Turni Settimanali</h6>
                             <h3 class="fw-bold mt-2">Pronto</h3>
-                            <button class="btn btn-sm btn-outline-success mt-2" onclick="switchSection('whatsapp', document.querySelectorAll('.sidebar-menu .btn')[5])">Invia Turni</button>
+                            <button class="btn btn-sm btn-success mt-1" onclick="switchSection('whatsapp', document.querySelectorAll('.sidebar-menu .btn')[6])">Invia Ora</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. TURNI -->
+        <!-- TURNI -->
         <div id="turni" class="section-view">
-            <div class="card-custom">
+            <div class="card-skello">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                    <h3><i class="fa-solid fa-calendar-check text-primary"></i> Pianificazione Turni Ottobre</h3>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary btn-action" onclick="generaTurniAI()"><i class="fa-solid fa-wand-magic-sparkles"></i> Elabora con Prompt IA</button>
-                    </div>
+                    <h3><i class="fa-solid fa-calendar-days text-success"></i> Planning Turni Ottobre</h3>
+                    <button class="btn btn-success fw-bold text-white" onclick="generaTurniAI()"><i class="fa-solid fa-wand-magic-sparkles"></i> Elabora con Prompt IA</button>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle text-center">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Giorno</th>
-                                <th>Data</th>
-                                <th>Sala / Turno 1</th>
-                                <th>Sala / Turno 2</th>
-                                <th>Cucina</th>
-                                <th>Note / Agenzia</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabella-turni-corpo">
-                            <tr>
-                                <td>GIO</td>
-                                <td>1</td>
-                                <td>LUIGI</td>
-                                <td>-</td>
-                                <td>ORSOLA, MAIMONA</td>
-                                <td><span class="badge bg-secondary">Normale</span></td>
-                            </tr>
-                            <tr>
-                                <td>VEN</td>
-                                <td>2</td>
-                                <td>ALESSIA, ANDREA</td>
-                                <td>AYA</td>
-                                <td>ORSOLA, MAIMONA, ANGORI</td>
-                                <td><span class="badge bg-warning text-dark">CHIAMATE</span></td>
-                            </tr>
-                            <tr>
-                                <td>SAB</td>
-                                <td>3</td>
-                                <td>ALESSIA, ANDREA, LUIGI</td>
-                                <td>AYA</td>
-                                <td>ORSOLA, MAIMONA, ANGORI</td>
-                                <td><span class="badge bg-warning text-dark">CHIAMATE</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="shift-grid">
+                    <div class="employee-shift-card">
+                        <h5 class="fw-bold mb-1">Alessia</h5>
+                        <span class="text-muted small">Sala / Full Time</span>
+                        <div class="shift-badge mt-2">1° - 31 Ott: Turno Mattina / Sera</div>
+                    </div>
+                    <div class="employee-shift-card">
+                        <h5 class="fw-bold mb-1">Luigi</h5>
+                        <span class="text-muted small">Sala / Indeterminato</span>
+                        <div class="shift-badge mt-2">1, 6, 8, 13 Ott: Turno Serale</div>
+                    </div>
+                    <div class="employee-shift-card">
+                        <h5 class="fw-bold mb-1">Andrea</h5>
+                        <span class="text-muted small">Sala / Determinato</span>
+                        <div class="shift-badge mt-2">2, 3, 9, 11 Ott: Weekend Sala</div>
+                    </div>
+                    <div class="employee-shift-card">
+                        <h5 class="fw-bold mb-1">Orsola</h5>
+                        <span class="text-muted small">Cucina / Indeterminato</span>
+                        <div class="shift-badge mt-2">Orario Cucina Completo</div>
+                    </div>
+                    <div class="employee-shift-card">
+                        <h5 class="fw-bold mb-1">Maimona</h5>
+                        <span class="text-muted small">Cucina / Part-time</span>
+                        <div class="shift-badge mt-2">Supporto Cucina & Linea</div>
+                    </div>
+                    <div class="employee-shift-card">
+                        <h5 class="fw-bold mb-1">Angori</h5>
+                        <span class="text-muted small">Cucina / A Chiamata</span>
+                        <div class="shift-badge mt-2">Chiamate AdE attive</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. ANAGRAFICA -->
+        <!-- ANAGRAFICA -->
         <div id="anagrafica" class="section-view">
-            <div class="card-custom">
-                <h3><i class="fa-solid fa-users text-primary"></i> Anagrafica e Contratti Dipendenti</h3>
-                <p class="text-muted">Inserisci o modifica i dati del personale.</p>
+            <div class="card-skello">
+                <h3><i class="fa-solid fa-id-badge text-success"></i> Anagrafica & Contratti Staff</h3>
+                <p class="text-muted">Aggiungi e gestisci i dati dei tuoi collaboratori.</p>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4"><input type="text" id="nomeDip" class="form-control" placeholder="Nome e Cognome"></div>
+                    <div class="col-md-4"><input type="text" id="nomeDip" class="form-control" placeholder="Nome Cognome"></div>
                     <div class="col-md-3">
                         <select id="contrattoDip" class="form-select">
-                            <option value="Indeterminato">Indeterminato</option>
-                            <option value="Determinato">Determinato</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Chiamata">A Chiamata</option>
+                            <option>Indeterminato</option>
+                            <option>Determinato</option>
+                            <option>Part-time</option>
+                            <option>A Chiamata</option>
                         </select>
                     </div>
-                    <div class="col-md-3"><input type="text" id="telDip" class="form-control" placeholder="Numero WhatsApp"></div>
-                    <div class="col-md-2"><button class="btn btn-success w-100 btn-action" onclick="aggiungiDipendente()">Aggiungi</button></div>
+                    <div class="col-md-3"><input type="text" id="telDip" class="form-control" placeholder="WhatsApp"></div>
+                    <div class="col-md-2"><button class="btn btn-success w-100 text-white fw-bold" onclick="aggiungiDipendente()">Aggiungi</button></div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-striped align-middle" id="tabellaAnagrafica">
+                    <table class="table align-middle" id="tabellaAnagrafica">
                         <thead>
-                            <tr>
-                                <th>Nome Dipendente</th>
-                                <th>Tipo Contratto</th>
-                                <th>WhatsApp</th>
-                                <th>Azioni</th>
-                            </tr>
+                            <tr><th>Dipendente</th><th>Contratto</th><th>WhatsApp</th><th>Azioni</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Alessia</td><td>Part-time</td><td>3391318613</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td>Luigi</td><td>Indeterminato</td><td>3391318613</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td>Andrea</td><td>Determinato</td><td>3391318613</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td>Orsola</td><td>Indeterminato</td><td>3391318613</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td>Maimona</td><td>Part-time</td><td>3391318613</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
-                            <tr><td>Angori</td><td>A Chiamata</td><td>3391318613</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
+                            <tr><td>Alessia</td><td>Part-time</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
+                            <tr><td>Luigi</td><td>Indeterminato</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
+                            <tr><td>Andrea</td><td>Determinato</td><td>3391318613</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- 4. DISPONIBILITA -->
+        <!-- DISPONIBILITA -->
         <div id="disponibilita" class="section-view">
-            <div class="card-custom">
-                <h3><i class="fa-solid fa-clock-rotate-left text-primary"></i> Inserimento Disponibilità</h3>
-                <p class="text-muted">Ogni dipendente può indicare i giorni in cui è disponibile o libero.</p>
+            <div class="card-skello">
+                <h3><i class="fa-solid fa-user-clock text-success"></i> Raccolta Disponibilità Staff</h3>
+                <p class="text-muted">I dipendenti possono inserire ferie o giorni liberi.</p>
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Seleziona Dipendente</label>
-                        <select id="dispDip" class="form-select">
-                            <option>Alessia</option><option>Luigi</option><option>Andrea</option><option>Orsola</option><option>Maimona</option><option>Angori</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Giorno / Data</label>
-                        <input type="date" id="dispData" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Stato Disponibilità</label>
-                        <select id="dispStato" class="form-select">
-                            <option value="Disponibile">Disponibile a lavorare</option>
-                            <option value="Ferie/Riposo">Ferie / Riposo richiesto</option>
-                        </select>
-                    </div>
+                    <div class="col-md-4"><select class="form-select"><option>Alessia</option><option>Luigi</option><option>Andrea</option></select></div>
+                    <div class="col-md-4"><input type="date" class="form-control"></div>
+                    <div class="col-md-4"><select class="form-select"><option>Disponibile</option><option>Ferie / Riposo</option></select></div>
                 </div>
-                <button class="btn btn-primary btn-action mt-3" onclick="salvaDisponibilita()"><i class="fa-solid fa-check"></i> Registra Disponibilità</button>
+                <button class="btn btn-success text-white fw-bold mt-3" onclick="alert('Disponibilità salvata!')">Registra</button>
             </div>
         </div>
 
-        <!-- 5. MARCATEMPO -->
+        <!-- MARCATEMPO -->
         <div id="marcatempo" class="section-view">
-            <div class="card-custom">
-                <h3><i class="fa-solid fa-fingerprint text-primary"></i> Marcatempo & Report Buste Paga</h3>
-                <p class="text-muted">Genera il report delle timbrature da inviare al consulente per le buste paga.</p>
-                <button class="btn btn-success btn-action mb-3" onclick="generaReportBustePaga()"><i class="fa-solid fa-file-excel"></i> Genera e Scarica Report per Buste Paga</button>
-                <div class="p-3 bg-light rounded border" id="boxReport" style="font-family: monospace;">
-                    [REPORT MARCATEMPO OTTOBRE]\n- Alessia: 154 ore lavorate, 6 ore straordinario\n- Luigi: 140 ore lavorate, 0 straordinario\n- Andrea: 130 ore lavorate, 4 ore straordinario\n- Orsola: 160 ore lavorate, 8 straordinario\n- Maimona: 120 ore lavorate, 2 straordinario\n- Angori: a chiamata (42 ore)
+            <div class="card-skello">
+                <h3><i class="fa-solid fa-clock text-success"></i> Marcatempo & Report Buste Paga</h3>
+                <p class="text-muted">Esporta il riepilogo ore per il consulente del lavoro.</p>
+                <button class="btn btn-success text-white fw-bold mb-3" onclick="alert('Report scaricato con successo!')"><i class="fa-solid fa-file-excel"></i> Scarica Report Ore</button>
+                <div class="p-3 bg-light rounded font-monospace small">
+                    [REPORT TIMBRATURE OTTOBRE]<br>- Alessia: 154h lavorate<br>- Luigi: 140h lavorate<br>- Andrea: 130h lavorate
                 </div>
             </div>
         </div>
 
-        <!-- 6. AGENZIA ENTRATE & CHIAMATE -->
+        <!-- AGENZIA ENTRATE -->
         <div id="ade" class="section-view">
-            <div class="card-custom">
-                <h3><i class="fa-solid fa-file-invoice-dollar text-primary"></i> Invio Chiamate all'Agenzia delle Entrate</h3>
-                <p class="text-muted">Gestisci e invia automaticamente le comunicazioni obbligatorie per i contratti a chiamata o eventi specifici.</p>
-                <div class="alert alert-info">
-                    <i class="fa-solid fa-circle-info"></i> Stato collegamento telematico: <strong>Pronto per l'invio telematico</strong>
+            <div class="card-skello">
+                <h3><i class="fa-solid fa-building-columns text-success"></i> Invio Chiamate Agenzia delle Entrate</h3>
+                <p class="text-muted">Invio telematico obbligatorio per personale a chiamata.</p>
+                <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success">
+                    <i class="fa-solid fa-circle-check"></i> Sistema telematico pronto per la trasmissione.
                 </div>
-                <button class="btn btn-warning btn-action text-dark fw-bold" onclick="inviaAgenziaEntrate()"><i class="fa-solid fa-paper-plane"></i> Invia Comunicazioni Chiamate all'AdE</button>
+                <button class="btn btn-dark fw-bold" onclick="alert('Chiamate inviate correttamente all AdE!')">Invia Chiamate AdE</button>
             </div>
         </div>
 
-        <!-- 7. WHATSAPP & CONFERME -->
+        <!-- WHATSAPP -->
         <div id="whatsapp" class="section-view">
-            <div class="card-custom">
-                <h3><i class="fa-brands fa-whatsapp text-success"></i> Invio Turni su WhatsApp con Conferma</h3>
-                <p class="text-muted">Invia al singolo dipendente sia il proprio turno personale che quello completo di tutto lo staff.</p>
+            <div class="card-skello">
+                <h3><i class="fa-brands fa-whatsapp text-success"></i> Invio WhatsApp Turni & Conferme</h3>
+                <p class="text-muted">Invia il turno personale e generale con richiesta di conferma lettura.</p>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Seleziona Dipendente a cui inviare:</label>
-                    <select id="waDip" class="form-select">
-                        <option>Alessia</option><option>Luigi</option><option>Andrea</option><option>Orsola</option><option>Maimona</option><option>Angori</option>
-                    </select>
+                    <label class="form-label fw-bold">Seleziona Dipendente</label>
+                    <select class="form-select"><option>Alessia</option><option>Luigi</option><option>Andrea</option></select>
                 </div>
-                <button class="btn btn-success btn-action" onclick="inviaWhatsAppTurni()"><i class="fa-brands fa-whatsapp"></i> Invia Turni Personale + Staff</button>
+                <button class="btn btn-success text-white fw-bold" onclick="alert('Turno inviato via WhatsApp con richiesta di conferma!')"><i class="fa-brands fa-whatsapp"></i> Invia Turni</button>
             </div>
         </div>
-
     </div>
 
-    <!-- Bootstrap JS Bundle -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function switchSection(sectionId, btnElement) {
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
-            
             document.querySelectorAll('.sidebar-menu .btn').forEach(el => el.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
-            
-            if(window.innerWidth < 992) {
-                document.getElementById('sidebar').classList.remove('show');
-            }
+            if(window.innerWidth < 992) document.getElementById('sidebar').classList.remove('show');
         }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-        }
-
         function aggiungiDipendente() {
             let nome = document.getElementById('nomeDip').value;
             let contratto = document.getElementById('contrattoDip').value;
             let tel = document.getElementById('telDip').value;
-            if(!nome) { alert('Inserisci il nome del dipendente'); return; }
-            
+            if(!nome) { alert('Inserisci il nome'); return; }
             let tbody = document.querySelector('#tabellaAnagrafica tbody');
-            let tr = document.createElement('tr');
-            tr.innerHTML = `<td>${nome}</td><td>${contratto}</td><td>${tel}</td><td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">Elimina</button></td>`;
-            tbody.appendChild(tr);
+            tbody.innerHTML += `<tr><td>${nome}</td><td>${contratto}</td><td>${tel}</td><td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Elimina</button></td></tr>`;
             document.getElementById('nomeDip').value = '';
             document.getElementById('telDip').value = '';
-            alert('Dipendente aggiunto con successo!');
+            alert('Aggiunto con successo!');
         }
-
         function generaTurniAI() {
-            let prompt = prompt("Inserisci il prompt per l'elaborazione automatica dei turni (es. 'Ottimizza i turni di Ottobre riducendo gli straordinari e coprendo il weekend'):");
-            if(prompt) {
-                alert("Prompt elaborato con successo dall'IA! Tabella turni aggiornata.");
-            }
-        }
-
-        function salvaDisponibilita() {
-            alert("Disponibilità registrata con successo nel sistema!");
-        }
-
-        function generaReportBustePaga() {
-            alert("Report marcatempo generato con successo e pronto per il consulente paghe!");
-        }
-
-        function inviaAgenziaEntrate() {
-            alert("Flusso telematico avviato: chiamate inviate con successo al portale dell'Agenzia delle Entrate!");
-        }
-
-        function inviaWhatsAppTurni() {
-            let dip = document.getElementById('waDip').value;
-            alert(`Messaggio WhatsApp inviato a ${dip} con successo!\nIl dipendente ha ricevuto il proprio turno e l'orario completo di tutto lo staff con richiesta di conferma lettura.`);
+            let p = prompt("Inserisci il prompt per elaborare i turni (es. 'Ottimizza i weekend e riduci straordinari'):");
+            if(p) alert("Turni elaborati e ottimizzati con successo!");
         }
     </script>
 </body>
