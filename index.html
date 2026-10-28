@@ -161,7 +161,7 @@
     <div id="ai-loading" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white space-y-4">
         <div class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
         <p id="ocr-status-text" class="font-black text-xl">Lettura etichetta in corso...</p>
-        <p class="text-sm text-gray-300">Estrazione automatica Lotto e Scadenza</p>
+        <p class="text-sm text-gray-300">Estrazione mirata Lotto e Scadenza</p>
     </div>
 
     <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -278,7 +278,7 @@
             switchTab('preparation');
         }
 
-        // Funzione OCR ottimizzata per isolare Lotto e Scadenza
+        // Funzione OCR con filtro intelligente per il codice lotto reale (es. preceduto da L. o LOTTO)
         async function processImageWithTesseract(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
@@ -309,36 +309,38 @@
                     let testoGrezzo = result.data.text;
                     console.log("Testo OCR grezzo:", testoGrezzo);
 
-                    // 1. Estrazione Data Scadenza (cerca pattern di date GG/MM/AAAA o simili)
+                    // 1. Estrazione Data Scadenza (cerca pattern di date GG/MM/AAAA)
                     const regexData = /\b\d{2}[\/\.-]\d{2}[\/\.-]\d{2,4}\b/;
                     const dataTrovata = testoGrezzo.match(regexData);
                     let scadenzaTrovata = dataTrovata ? dataTrovata[0] : "";
 
-                    // 2. Estrazione Lotto (cerca parole chiave come LOTTO, LOT, L. seguite da codici o sequenze alfanumeriche)
+                    // 2. Estrazione Lotto Mirata: Cerca rigorosamente la lettera L o LOTTO seguita dal codice (es. L. MF26180F003)
                     let lottoCodice = "";
-                    const regexLottoKw = /(?:lotto|lot|l\.)\s*[:\.\s-]*([a-z0-9\-_/]{4,})/i;
-                    const matchKw = testoGrezzo.match(regexLottoKw);
                     
-                    if (matchKw && matchKw[1]) {
-                        lottoCodice = matchKw[1].trim().toUpperCase();
+                    // Regex pulita che cerca specificamente "L." o "LOT." o "LOTTO" seguito da caratteri alfanumerici complessi
+                    const regexLottoMirato = /(?:lotto|lot|\bl\.)\s*[\.:\-]?\s*([a-z0-9\-_/]{5,})/i;
+                    const matchMirato = testoGrezzo.match(regexLottoMirato);
+
+                    if (matchMirato && matchMirato[1]) {
+                        lottoCodice = matchMirato[1].trim().toUpperCase();
                     } else {
-                        // Ricerca di fallback per stringhe alfanumeriche tipiche di un lotto se la keyword non è chiara
+                        // Fallback: cerca riga per riga escludendo i nomi dei prodotti o le date
                         const lines = testoGrezzo.split('\n');
                         for (let line of lines) {
                             let cleanLine = line.trim();
-                            // Se contiene numeri e lettere ed è lunga tra 5 e 15 caratteri, potrebbe essere il lotto
-                            if (/[0-9]/.test(cleanLine) && /[A-Z]/i.test(cleanLine) && cleanLine.length >= 5 && cleanLine.length <= 20) {
-                                if (!regexData.test(cleanLine)) { // Evita di prendere la data come lotto
-                                    lottoCodice = cleanLine.toUpperCase();
+                            // Se la riga contiene numeri e lettere ed è lunga abbastanza, ma NON è il tipo di farina (es. 0 W 300)
+                            if (/[0-9]/.test(cleanLine) && /[A-Z]/i.test(cleanLine) && cleanLine.length >= 6) {
+                                if (!regexData.test(cleanLine) && !cleanLine.includes("ORO PURO") && !cleanLine.includes("GRANO")) {
+                                    lottoCodice = cleanLine.replace(/^[a-z]\.\s*/i, '').trim().toUpperCase();
                                     break;
                                 }
                             }
                         }
                     }
 
-                    // Scrittura nei campi dedicati della riga attiva
-                    document.getElementById('lotto-' + rowIndex).value = lottoCodice || "Da verificare";
-                    document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata || "Da verificare";
+                    // Scrittura nei campi dedicati
+                    document.getElementById('lotto-' + rowIndex).value = lottoCodice || "";
+                    document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata || "";
 
                     loadingScreen.classList.add('hidden');
                     event.target.value = '';
