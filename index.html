@@ -82,7 +82,7 @@
                     <div class="space-y-2">
                         <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti AI</h2>
                         <p class="text-gray-600 text-base md:text-lg max-w-xl mx-auto">
-                            Inquadra l'etichetta con la fotocamera: il lettore OCR leggerà automaticamente il lotto e la scadenza.
+                            Inquadra l'etichetta con la fotocamera: il lettore OCR estrarrà automaticamente il lotto e la scadenza.
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -160,8 +160,8 @@
 
     <div id="ai-loading" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white space-y-4">
         <div class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-        <p id="ocr-status-text" class="font-black text-xl">Analisi dell'etichetta in corso...</p>
-        <p class="text-sm text-gray-300">Estrazione automatica con OCR locale</p>
+        <p id="ocr-status-text" class="font-black text-xl">Lettura etichetta in corso...</p>
+        <p class="text-sm text-gray-300">Estrazione automatica Lotto e Scadenza</p>
     </div>
 
     <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -278,7 +278,7 @@
             switchTab('preparation');
         }
 
-        // Funzione OCR con Tesseract.js e scrittura diretta nei campi
+        // Funzione OCR ottimizzata per isolare Lotto e Scadenza
         async function processImageWithTesseract(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
@@ -286,7 +286,7 @@
             const loadingScreen = document.getElementById('ai-loading');
             const statusText = document.getElementById('ocr-status-text');
             loadingScreen.classList.remove('hidden');
-            statusText.innerText = "Preparazione immagine...";
+            statusText.innerText = "Elaborazione immagine...";
 
             try {
                 const reader = new FileReader();
@@ -306,22 +306,39 @@
                         }
                     );
 
-                    let testoGrezzo = result.data.text.trim();
-                    console.log("Testo OCR letto:", testoGrezzo);
+                    let testoGrezzo = result.data.text;
+                    console.log("Testo OCR grezzo:", testoGrezzo);
 
-                    // Pulizia e ricerca data scadenza
+                    // 1. Estrazione Data Scadenza (cerca pattern di date GG/MM/AAAA o simili)
                     const regexData = /\b\d{2}[\/\.-]\d{2}[\/\.-]\d{2,4}\b/;
                     const dataTrovata = testoGrezzo.match(regexData);
                     let scadenzaTrovata = dataTrovata ? dataTrovata[0] : "";
 
-                    // Ricerca lotto o assegnazione del testo pulito se la regex fallisce
-                    const regexLotto = /(?:lotto|lot|l\.)\s*[:\.\s-]*\s*([a-z0-9\-_/]+)/i;
-                    const lottoTrovato = testoGrezzo.match(regexLotto);
-                    let lottoCodice = (lottoTrovato && lottoTrovato[1]) ? lottoTrovato[1].toUpperCase() : "";
+                    // 2. Estrazione Lotto (cerca parole chiave come LOTTO, LOT, L. seguite da codici o sequenze alfanumeriche)
+                    let lottoCodice = "";
+                    const regexLottoKw = /(?:lotto|lot|l\.)\s*[:\.\s-]*([a-z0-9\-_/]{4,})/i;
+                    const matchKw = testoGrezzo.match(regexLottoKw);
+                    
+                    if (matchKw && matchKw[1]) {
+                        lottoCodice = matchKw[1].trim().toUpperCase();
+                    } else {
+                        // Ricerca di fallback per stringhe alfanumeriche tipiche di un lotto se la keyword non è chiara
+                        const lines = testoGrezzo.split('\n');
+                        for (let line of lines) {
+                            let cleanLine = line.trim();
+                            // Se contiene numeri e lettere ed è lunga tra 5 e 15 caratteri, potrebbe essere il lotto
+                            if (/[0-9]/.test(cleanLine) && /[A-Z]/i.test(cleanLine) && cleanLine.length >= 5 && cleanLine.length <= 20) {
+                                if (!regexData.test(cleanLine)) { // Evita di prendere la data come lotto
+                                    lottoCodice = cleanLine.toUpperCase();
+                                    break;
+                                }
+                            }
+                        }
+                    }
 
-                    // Assegnazione sicura ai campi (se non trova il pattern esatto, inserisce il testo estratto per non lasciare vuoto)
-                    document.getElementById('lotto-' + rowIndex).value = lottoCodice || testoGrezzo.substring(0, 30);
-                    document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata || "Controlla etichetta";
+                    // Scrittura nei campi dedicati della riga attiva
+                    document.getElementById('lotto-' + rowIndex).value = lottoCodice || "Da verificare";
+                    document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata || "Da verificare";
 
                     loadingScreen.classList.add('hidden');
                     event.target.value = '';
