@@ -6,7 +6,6 @@
     <title>Registro Lotti Pizzeria AI</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Libreria Tesseract.js per OCR offline nel browser -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         @media print {
@@ -279,7 +278,7 @@
             switchTab('preparation');
         }
 
-        // Funzione OCR con Tesseract.js integrata perfettamente
+        // Funzione OCR con Tesseract.js e scrittura diretta nei campi
         async function processImageWithTesseract(event, rowIndex) {
             const file = event.target.files[0];
             if (!file) return;
@@ -307,24 +306,22 @@
                         }
                     );
 
-                    let testoGrezzo = result.data.text;
+                    let testoGrezzo = result.data.text.trim();
+                    console.log("Testo OCR letto:", testoGrezzo);
 
-                    // Logica di estrazione basata sul tuo codice
+                    // Pulizia e ricerca data scadenza
                     const regexData = /\b\d{2}[\/\.-]\d{2}[\/\.-]\d{2,4}\b/;
                     const dataTrovata = testoGrezzo.match(regexData);
                     let scadenzaTrovata = dataTrovata ? dataTrovata[0] : "";
 
+                    // Ricerca lotto o assegnazione del testo pulito se la regex fallisce
                     const regexLotto = /(?:lotto|lot|l\.)\s*[:\.\s-]*\s*([a-z0-9\-_/]+)/i;
                     const lottoTrovato = testoGrezzo.match(regexLotto);
                     let lottoCodice = (lottoTrovato && lottoTrovato[1]) ? lottoTrovato[1].toUpperCase() : "";
 
-                    // Se non trova con regex, prova a inserire righe sensate o lascia compilabile
-                    if (lottoCodice) {
-                        document.getElementById('lotto-' + rowIndex).value = lottoCodice;
-                    }
-                    if (scadenzaTrovata) {
-                        document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata;
-                    }
+                    // Assegnazione sicura ai campi (se non trova il pattern esatto, inserisce il testo estratto per non lasciare vuoto)
+                    document.getElementById('lotto-' + rowIndex).value = lottoCodice || testoGrezzo.substring(0, 30);
+                    document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata || "Controlla etichetta";
 
                     loadingScreen.classList.add('hidden');
                     event.target.value = '';
