@@ -6,6 +6,8 @@
     <title>Registro Lotti Pizzeria AI</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Libreria Tesseract.js per OCR offline nel browser -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         @media print {
             body * { visibility: hidden; }
@@ -14,8 +16,8 @@
             .no-print { display: none !important; }
         }
         .btn-fancy-camera {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
             transition: all 0.2s ease;
         }
         .btn-fancy-camera:active {
@@ -35,7 +37,7 @@
                     <div class="w-10 h-10 bg-white/15 rounded-2xl flex items-center justify-center text-xl shadow-inner backdrop-blur-sm">
                         <i class="fa-solid fa-pizza-slice"></i>
                     </div>
-                    <h1 class="text-lg md:text-2xl font-black tracking-wide">Registro Lotti Pizzeria</h1>
+                    <h1 class="text-lg md:text-2xl font-black tracking-wide">Registro Lotti Pizzeria AI</h1>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -79,9 +81,9 @@
                         <i class="fa-solid fa-utensils"></i>
                     </div>
                     <div class="space-y-2">
-                        <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti</h2>
+                        <h2 class="text-3xl font-black text-gray-900">Benvenuto nel Registro Lotti AI</h2>
                         <p class="text-gray-600 text-base md:text-lg max-w-xl mx-auto">
-                            Gestisci le tue preparazioni, incolla rapidamente da Google Lens e tieni sotto controllo le scadenze.
+                            Inquadra l'etichetta con la fotocamera: il lettore OCR leggerà automaticamente il lotto e la scadenza.
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -93,8 +95,6 @@
                         </button>
                     </div>
                 </div>
-
-                <div id="expiry-alerts-container" class="space-y-3"></div>
             </div>
 
             <div id="tab-preparation" class="hidden space-y-6">
@@ -104,14 +104,11 @@
                             <span class="text-xs uppercase tracking-widest text-red-600 font-black bg-red-50 px-3.5 py-1.5 rounded-full border border-red-100 shadow-sm">Scheda di Produzione</span>
                             <h2 id="view-prep-title" class="text-2xl md:text-3xl font-black text-gray-900 mt-2">Nome Preparazione</h2>
                         </div>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <button onclick="openEditPrepModal()" class="py-3 px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-2xl font-bold transition shadow-sm flex items-center gap-2 text-sm">
-                                <i class="fa-solid fa-pen-to-square"></i> Modifica Scheda
-                            </button>
-                            <button onclick="printCurrentCard()" class="py-3 px-5 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold shadow-md transition flex items-center gap-2 text-sm">
+                        <div class="flex items-center gap-3">
+                            <button onclick="printCurrentCard()" class="py-3 px-5 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold shadow-md transition flex items-center gap-2">
                                 <i class="fa-solid fa-print"></i> Stampa
                             </button>
-                            <button onclick="deleteCurrentPreparation()" class="py-3 px-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl font-bold transition shadow-sm text-sm" title="Elimina">
+                            <button onclick="deleteCurrentPreparation()" class="py-3 px-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl font-bold transition shadow-sm" title="Elimina">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -162,11 +159,16 @@
         </main>
     </div>
 
-    <!-- Modale Nuova / Modifica Preparazione -->
+    <div id="ai-loading" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white space-y-4">
+        <div class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <p id="ocr-status-text" class="font-black text-xl">Analisi dell'etichetta in corso...</p>
+        <p class="text-sm text-gray-300">Estrazione automatica con OCR locale</p>
+    </div>
+
     <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6">
             <div class="flex justify-between items-center pb-4 border-b border-gray-100">
-                <h3 id="modal-title" class="font-black text-2xl text-gray-900 flex items-center gap-2">
+                <h3 class="font-black text-2xl text-gray-900 flex items-center gap-2">
                     <i class="fa-solid fa-circle-plus text-red-600"></i> Nuova Preparazione
                 </h3>
                 <button onclick="closeNewPrepModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
@@ -183,7 +185,7 @@
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button onclick="closeNewPrepModal()" class="py-3 px-6 bg-gray-100 hover:bg-gray-200 rounded-2xl font-bold text-gray-700 transition">Annulla</button>
-                <button onclick="savePreparationData()" class="py-3 px-8 bg-red-600 hover:bg-red-700 rounded-2xl font-black text-white shadow-lg shadow-red-600/30 transition">Salva Scheda</button>
+                <button onclick="createNewPreparation()" class="py-3 px-8 bg-red-600 hover:bg-red-700 rounded-2xl font-black text-white shadow-lg shadow-red-600/30 transition">Crea Scheda</button>
             </div>
         </div>
     </div>
@@ -198,11 +200,9 @@
         let preparations = JSON.parse(localStorage.getItem('pizzeria_preparations')) || defaultPreparations;
         let batchArchive = JSON.parse(localStorage.getItem('pizzeria_archive')) || [];
         let currentActivePrepId = null;
-        let isEditingMode = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPrepList();
-            checkLatestExpiryAlerts();
             document.getElementById('prep-date').valueAsDate = new Date();
             
             document.getElementById('sidebar-toggle').addEventListener('click', () => {
@@ -215,15 +215,12 @@
             });
         });
 
-        window.switchTab = function(tabName) {
+        function switchTab(tabName) {
             document.getElementById('tab-home').classList.add('hidden');
             document.getElementById('tab-preparation').classList.add('hidden');
             document.getElementById('tab-report').classList.add('hidden');
 
-            if (tabName === 'home') {
-                document.getElementById('tab-home').classList.remove('hidden');
-                checkLatestExpiryAlerts();
-            }
+            if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
             else if (tabName === 'preparation') document.getElementById('tab-preparation').classList.remove('hidden');
             else if (tabName === 'report') {
                 document.getElementById('tab-report').classList.remove('hidden');
@@ -234,96 +231,9 @@
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
             }
-        };
+        }
 
-        window.checkLatestExpiryAlerts = function() {
-            const container = document.getElementById('expiry-alerts-container');
-            container.innerHTML = '';
-
-            if (batchArchive.length === 0) return;
-
-            const latestIngredientsMap = new Map();
-
-            batchArchive.forEach(entry => {
-                entry.ingredients.forEach(ing => {
-                    const normalizedName = ing.name.trim().toUpperCase();
-                    if (!latestIngredientsMap.has(normalizedName)) {
-                        latestIngredientsMap.set(normalizedName, {
-                            prepName: entry.prepName,
-                            dateSaved: entry.date,
-                            lotto: ing.lotto,
-                            fornitore: ing.fornitore
-                        });
-                    }
-                });
-            });
-
-            let alertsHtml = '';
-            const today = new Date();
-            today.setHours(0,0,0,0);
-
-            latestIngredientsMap.forEach((data, ingName) => {
-                if (!data.fornitore) return;
-
-                const dateRegex = /\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/;
-                const match = data.fornitore.match(dateRegex);
-
-                if (match) {
-                    let day = parseInt(match[1], 10);
-                    let month = parseInt(match[2], 10) - 1;
-                    let year = parseInt(match[3], 10);
-                    if (year < 100) year += 2000;
-
-                    const expiryDate = new Date(year, month, day);
-                    expiryDate.setHours(0,0,0,0);
-
-                    const diffTime = expiryDate - today;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    if (diffDays <= 3) {
-                        let badgeColor = 'bg-amber-500 text-white';
-                        let statusText = `Scade tra ${diffDays} giorni`;
-                        if (diffDays < 0) {
-                            badgeColor = 'bg-red-600 text-white animate-pulse';
-                            statusText = `SCADUTO da ${Math.abs(diffDays)} giorni!`;
-                        } else if (diffDays === 0) {
-                            badgeColor = 'bg-red-600 text-white animate-pulse';
-                            statusText = 'Scade OGGI!';
-                        }
-
-                        alertsHtml += `
-                            <div class="bg-white border-2 border-red-200 rounded-3xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
-                                        <i class="fa-solid fa-triangle-exclamation"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-black text-gray-900 text-base">Ultimo lotto inserito: <span class="text-red-600">${ingName}</span></h4>
-                                        <p class="text-xs text-gray-500 font-medium">Lotto: <b class="text-gray-800">${data.lotto || 'N/D'}</b> | Scadenza: <b class="text-gray-800">${data.fornitore}</b></p>
-                                    </div>
-                                </div>
-                                <span class="px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider ${badgeColor} shadow-sm w-full sm:w-auto text-center">
-                                    ${statusText}
-                                </span>
-                            </div>
-                        `;
-                    }
-                }
-            });
-
-            if (alertsHtml) {
-                container.innerHTML = `
-                    <div class="space-y-3 pt-2">
-                        <h3 class="font-black text-gray-800 text-sm uppercase tracking-wider flex items-center gap-2 px-1">
-                            <i class="fa-solid fa-bell text-red-600 animate-bounce"></i> Avvisi Scadenza (Ultimi Lotti)
-                        </h3>
-                        ${alertsHtml}
-                    </div>
-                `;
-            }
-        };
-
-        window.renderPrepList = function(filter = '') {
+        function renderPrepList(filter = '') {
             const container = document.getElementById('prep-list-container');
             container.innerHTML = '';
             const filtered = preparations.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
@@ -340,13 +250,13 @@
                 item.onclick = () => selectPreparation(prep.id);
                 container.appendChild(item);
             });
-        };
+        }
 
-        window.filterPreparations = function() {
+        function filterPreparations() {
             renderPrepList(document.getElementById('search-prep').value);
-        };
+        }
 
-        window.selectPreparation = function(id) {
+        function selectPreparation(id) {
             const prep = preparations.find(p => p.id === id);
             if (!prep) return;
 
@@ -361,95 +271,85 @@
             prep.ingredients.forEach((ing, index) => {
                 const card = document.createElement('div');
                 card.className = 'bg-white border-2 border-gray-200/80 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow-md transition';
-                card.innerHTML = `
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100">
-                        <span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2">
-                            <i class="fa-solid fa-box-open text-red-500"></i> ${ing}
-                        </span>
-                        <button type="button" onclick="smartPaste(${index})" class="btn-fancy-camera text-white px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 text-xs shadow-md w-full sm:w-auto">
-                            <i class="fa-solid fa-paste"></i> Incolla da Lens (Smart)
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                        <div>
-                            <label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label>
-                            <input type="text" id="lotto-${index}" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label>
-                            <input type="text" id="fornitore-${index}" placeholder="Es. 11-03-2027" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition">
-                        </div>
-                    </div>`;
+                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithTesseract(event, ' + index + ')"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Scadenza)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
                 container.appendChild(card);
             });
 
             renderPrepList(document.getElementById('search-prep').value);
             switchTab('preparation');
-        };
+        }
 
-        // Funzione Smart ultra-pulita: estrae solo il codice lotto escludendo etichette e scritte estranee
-        window.smartPaste = async function(index) {
+        // Funzione OCR con Tesseract.js integrata perfettamente
+        async function processImageWithTesseract(event, rowIndex) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loadingScreen = document.getElementById('ai-loading');
+            const statusText = document.getElementById('ocr-status-text');
+            loadingScreen.classList.remove('hidden');
+            statusText.innerText = "Preparazione immagine...";
+
             try {
-                const text = await navigator.clipboard.readText();
-                if (!text) {
-                    alert("Appunti vuoti. Copia prima il testo con Google Lens.");
-                    return;
-                }
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const imageSrc = e.target.result;
+                    
+                    statusText.innerText = "Lettura dati etichetta...";
+                    const result = await Tesseract.recognize(
+                        imageSrc,
+                        'ita',
+                        {
+                            logger: m => {
+                                if(m.status === 'recognizing text') {
+                                    statusText.innerText = `Lettura dati: ${Math.round(m.progress * 100)}%`;
+                                }
+                            }
+                        }
+                    );
 
-                let lottoField = document.getElementById(`lotto-${index}`);
-                let scadField = document.getElementById(`fornitore-${index}`);
-                const cleanText = text.trim();
+                    let testoGrezzo = result.data.text;
 
-                const dateRegex = /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/;
-                const dateMatch = cleanText.match(dateRegex);
+                    // Logica di estrazione basata sul tuo codice
+                    const regexData = /\b\d{2}[\/\.-]\d{2}[\/\.-]\d{2,4}\b/;
+                    const dataTrovata = testoGrezzo.match(regexData);
+                    let scadenzaTrovata = dataTrovata ? dataTrovata[0] : "";
 
-                if (dateMatch) {
-                    scadField.value = dateMatch[0];
-                    let remaining = cleanText.replace(dateMatch[0], '');
-                    // Rimuove etichette testuali indesiderate e simboli isolati
-                    remaining = remaining.replace(/(scad|scadenza|exp|data|lotto|lot|n\.|nr\.|cod\.)/gi, '');
-                    remaining = remaining.replace(/[\.\-\:\•\·]+/g, ' ').trim();
-                    lottoField.value = remaining.replace(/[\n\r]+/g, ' ').trim();
-                } else {
-                    const lines = cleanText.split(/[\n\r]+/).filter(l => l.trim().length > 0);
-                    if (lines.length >= 2) {
-                        let line0 = lines[0].replace(/(lotto|lot|n\.|nr\.)/gi, '').replace(/[\.\-\:\•\·]+/g, ' ').trim();
-                        lottoField.value = line0;
-                        scadField.value = lines[1].replace(/(scad|scadenza|exp|data)/gi, '').replace(/[\.\-\:\•\·]+/g, ' ').trim();
-                    } else {
-                        let singleClean = cleanText.replace(/(lotto|lot|scad|scadenza|n\.|nr\.)/gi, '').replace(/[\.\-\:\•\·]+/g, ' ').trim();
-                        lottoField.value = singleClean;
+                    const regexLotto = /(?:lotto|lot|l\.)\s*[:\.\s-]*\s*([a-z0-9\-_/]+)/i;
+                    const lottoTrovato = testoGrezzo.match(regexLotto);
+                    let lottoCodice = (lottoTrovato && lottoTrovato[1]) ? lottoTrovato[1].toUpperCase() : "";
+
+                    // Se non trova con regex, prova a inserire righe sensate o lascia compilabile
+                    if (lottoCodice) {
+                        document.getElementById('lotto-' + rowIndex).value = lottoCodice;
                     }
-                }
-            } catch (err) {
-                alert("Impossibile leggere automaticamente gli appunti. Tieni premuto sul campo 'Numero Lotto' e seleziona Incolla.");
-            }
-        };
+                    if (scadenzaTrovata) {
+                        document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata;
+                    }
 
-        window.openNewPrepModal = function() {
-            isEditingMode = false;
-            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-circle-plus text-red-600"></i> Nuova Preparazione';
+                    loadingScreen.classList.add('hidden');
+                    event.target.value = '';
+                };
+                reader.readAsDataURL(file);
+
+            } catch (error) {
+                console.error("Errore OCR:", error);
+                alert("Errore durante la lettura dell'etichetta.");
+                loadingScreen.classList.add('hidden');
+                event.target.value = '';
+            }
+        }
+
+        function openNewPrepModal() {
             document.getElementById('new-prep-name').value = '';
             document.getElementById('new-prep-ingredients').value = '';
             document.getElementById('new-prep-modal').classList.remove('hidden');
-        };
+        }
 
-        window.openEditPrepModal = function() {
-            const prep = preparations.find(p => p.id === currentActivePrepId);
-            if (!prep) return;
-
-            isEditingMode = true;
-            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-600"></i> Modifica Preparazione';
-            document.getElementById('new-prep-name').value = prep.name;
-            document.getElementById('new-prep-ingredients').value = prep.ingredients.join('\n');
-            document.getElementById('new-prep-modal').classList.remove('hidden');
-        };
-
-        window.closeNewPrepModal = function() {
+        function closeNewPrepModal() {
             document.getElementById('new-prep-modal').classList.add('hidden');
-        };
+        }
 
-        window.savePreparationData = function() {
+        function createNewPreparation() {
             const name = document.getElementById('new-prep-name').value.trim();
             const rawIngredients = document.getElementById('new-prep-ingredients').value.trim();
 
@@ -462,35 +362,23 @@
                 ? rawIngredients.split(/[\n,]+/).map(i => i.trim().toUpperCase()).filter(i => i.length > 0)
                 : ['INGREDIENTE 1'];
 
-            if (isEditingMode) {
-                const prep = preparations.find(p => p.id === currentActivePrepId);
-                if (prep) {
-                    prep.name = name;
-                    prep.ingredients = ingredients;
-                    localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
-                    closeNewPrepModal();
-                    renderPrepList();
-                    selectPreparation(currentActivePrepId);
-                }
-            } else {
-                const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                
-                if (preparations.some(p => p.id === newId)) {
-                    alert('Esiste già una preparazione con questo nome.');
-                    return;
-                }
-
-                const newPrep = { id: newId, name: name, ingredients: ingredients };
-                preparations.push(newPrep);
-                localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
-
-                closeNewPrepModal();
-                renderPrepList();
-                selectPreparation(newId);
+            const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            
+            if (preparations.some(p => p.id === newId)) {
+                alert('Esiste già una preparazione con questo nome.');
+                return;
             }
-        };
 
-        window.deleteCurrentPreparation = function() {
+            const newPrep = { id: newId, name: name, ingredients: ingredients };
+            preparations.push(newPrep);
+            localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+
+            closeNewPrepModal();
+            renderPrepList();
+            selectPreparation(newId);
+        }
+
+        function deleteCurrentPreparation() {
             if (!currentActivePrepId) return;
             if (!confirm('Vuoi eliminare questa preparazione?')) return;
 
@@ -500,9 +388,9 @@
             currentActivePrepId = null;
             renderPrepList();
             switchTab('home');
-        };
+        }
 
-        window.saveCurrentBatchLog = function() {
+        function saveCurrentBatchLog() {
             const prep = preparations.find(p => p.id === currentActivePrepId);
             if (!prep) return;
 
@@ -529,14 +417,14 @@
             localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
 
             alert('Registrazione salvata con successo!');
-            switchTab('home');
-        };
+            switchTab('report');
+        }
 
-        window.printCurrentCard = function() {
+        function printCurrentCard() {
             window.print();
-        };
+        }
 
-        window.renderArchive = function() {
+        function renderArchive() {
             const container = document.getElementById('archive-list');
             container.innerHTML = '';
 
@@ -557,16 +445,15 @@
                 card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b-2 border-gray-200 gap-2"><div><span class="text-xs font-black text-red-600 bg-red-100 px-3 py-1 rounded-full uppercase shadow-sm">' + item.prepName + '</span><span class="text-sm font-bold text-gray-700 ml-2">Data: ' + item.date + '</span></div><div class="text-xs font-medium text-gray-400">Salvato: ' + item.timestamp + '</div></div><div class="space-y-2">' + ingredientsHtml + '</div>';
                 container.appendChild(card);
             });
-        };
+        }
 
-        window.clearArchive = function() {
+        function clearArchive() {
             if (confirm("Vuoi svuotare tutto l'archivio?")) {
                 batchArchive = [];
                 localStorage.removeItem('pizzeria_archive');
                 renderArchive();
-                checkLatestExpiryAlerts();
             }
-        };
+        }
     </script>
 </body>
 </html>
