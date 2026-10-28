@@ -269,4 +269,220 @@
 
             prep.ingredients.forEach((ing, index) => {
                 const card = document.createElement('div');
-                card.className = 'bg-white border-2 border-gray-200/80 rounded-2xl p-5 space-y-4 shadow
+                card.className = 'bg-white border-2 border-gray-200/80 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow-md transition';
+                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithTesseract(event, ' + index + ')"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Scadenza)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
+                container.appendChild(card);
+            });
+
+            renderPrepList(document.getElementById('search-prep').value);
+            switchTab('preparation');
+        }
+
+        // Funzione OCR avanzata per catturare il codice lotto reale vicino alla scadenza
+        async function processImageWithTesseract(event, rowIndex) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loadingScreen = document.getElementById('ai-loading');
+            const statusText = document.getElementById('ocr-status-text');
+            loadingScreen.classList.remove('hidden');
+            statusText.innerText = "Elaborazione immagine...";
+
+            try {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const imageSrc = e.target.result;
+                    
+                    statusText.innerText = "Lettura dati etichetta...";
+                    const result = await Tesseract.recognize(
+                        imageSrc,
+                        'ita',
+                        {
+                            logger: m => {
+                                if(m.status === 'recognizing text') {
+                                    statusText.innerText = `Lettura dati: ${Math.round(m.progress * 100)}%`;
+                                }
+                            }
+                        }
+                    );
+
+                    let testoGrezzo = result.data.text;
+                    console.log("Testo OCR grezzo:", testoGrezzo);
+
+                    // 1. Estrazione Data Scadenza
+                    const regexData = /\b\d{2}[\/\.-]\d{2}[\/\.-]\d{2,4}\b/;
+                    const dataTrovata = testoGrezzo.match(regexData);
+                    let scadenzaTrovata = dataTrovata ? dataTrovata[0] : "";
+
+                    // 2. Estrazione Lotto Intelligente
+                    let lottoCodice = "";
+                    
+                    // Cerca parole chiave o sequenze alfanumeriche complesse (es. MF26180F003) escludendo il tipo di farina (0 W 300)
+                    const lines = testoGrezzo.split('\n');
+                    for (let line of lines) {
+                        let cleanLine = line.trim();
+                        let upperLine = cleanLine.toUpperCase();
+
+                        // Salta righe con il nome commerciale della farina
+                        if (upperLine.includes("ORO PURO") || upperLine.includes("GRANO") || (upperLine.includes("W") && upperLine.includes("300"))) {
+                            continue;
+                        }
+
+                        // Cerca una sequenza alfanumerica che assomigli a un lotto (lunghezza tra 6 e 20 caratteri, con lettere e numeri)
+                        // Spesso l'etichetta ha "L." o "LOT" ma se viene perso cerchiamo la stringa mista
+                        const words = cleanLine.split(/\s+/);
+                        for (let word of words) {
+                            let cleanWord = word.replace(/^[i|l|1]\./i, '').trim(); // Rimuove prefissi errati tipo i. o l.
+                            // Un codice lotto valido ha almeno 6 caratteri e contiene sia lettere che numeri
+                            if (cleanWord.length >= 6 && /[0-9]/.test(cleanWord) && /[A-Z]/i.test(cleanWord) && !regexData.test(cleanWord)) {
+                                lottoCodice = cleanWord.toUpperCase();
+                                break;
+                            }
+                        }
+                        if (lottoCodice) break;
+                    }
+
+                    // Fallback ulteriore se non trovato per parola: cerca pattern con L o MF
+                    if (!lottoCodice) {
+                        const regexFallback = /[A-Z]{2}[0-9]{5,}[A-Z0-9]*/i;
+                        const matchFb = testoGrezzo.match(regexFallback);
+                        if (matchFb) {
+                            lottoCodice = matchFb[0].toUpperCase();
+                        }
+                    }
+
+                    // Scrittura nei campi dedicati
+                    document.getElementById('lotto-' + rowIndex).value = lottoCodice || "";
+                    document.getElementById('fornitore-' + rowIndex).value = scadenzaTrovata || "";
+
+                    loadingScreen.classList.add('hidden');
+                    event.target.value = '';
+                };
+                reader.readAsDataURL(file);
+
+            } catch (error) {
+                console.error("Errore OCR:", error);
+                alert("Errore durante la lettura dell'etichetta.");
+                loadingScreen.classList.add('hidden');
+                event.target.value = '';
+            }
+        }
+
+        function openNewPrepModal() {
+            document.getElementById('new-prep-name').value = '';
+            document.getElementById('new-prep-ingredients').value = '';
+            document.getElementById('new-prep-modal').classList.remove('hidden');
+        }
+
+        function closeNewPrepModal() {
+            document.getElementById('new-prep-modal').classList.add('hidden');
+        }
+
+        function createNewPreparation() {
+            const name = document.getElementById('new-prep-name').value.trim();
+            const rawIngredients = document.getElementById('new-prep-ingredients').value.trim();
+
+            if (!name) {
+                alert('Inserisci il nome della preparazione.');
+                return;
+            }
+
+            const ingredients = rawIngredients 
+                ? rawIngredients.split(/[\n,]+/).map(i => i.trim().toUpperCase()).filter(i => i.length > 0)
+                : ['INGREDIENTE 1'];
+
+            const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            
+            if (preparations.some(p => p.id === newId)) {
+                alert('Esiste già una preparazione con questo nome.');
+                return;
+            }
+
+            const newPrep = { id: newId, name: name, ingredients: ingredients };
+            preparations.push(newPrep);
+            localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+
+            closeNewPrepModal();
+            renderPrepList();
+            selectPreparation(newId);
+        }
+
+        function deleteCurrentPreparation() {
+            if (!currentActivePrepId) return;
+            if (!confirm('Vuoi eliminare questa preparazione?')) return;
+
+            preparations = preparations.filter(p => p.id !== currentActivePrepId);
+            localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+
+            currentActivePrepId = null;
+            renderPrepList();
+            switchTab('home');
+        }
+
+        function saveCurrentBatchLog() {
+            const prep = preparations.find(p => p.id === currentActivePrepId);
+            if (!prep) return;
+
+            const date = document.getElementById('prep-date').value;
+            const notes = document.getElementById('prep-notes').value;
+
+            const ingredientsData = [];
+            prep.ingredients.forEach((ing, index) => {
+                const lotto = document.getElementById('lotto-' + index).value;
+                const fornitore = document.getElementById('fornitore-' + index).value;
+                ingredientsData.push({ name: ing, lotto: lotto, fornitore: fornitore });
+            });
+
+            const logEntry = {
+                id: Date.now(),
+                prepName: prep.name,
+                date: date,
+                notes: notes,
+                ingredients: ingredientsData,
+                timestamp: new Date().toLocaleString()
+            };
+
+            batchArchive.unshift(logEntry);
+            localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
+
+            alert('Registrazione salvata con successo!');
+            switchTab('report');
+        }
+
+        function printCurrentCard() {
+            window.print();
+        }
+
+        function renderArchive() {
+            const container = document.getElementById('archive-list');
+            container.innerHTML = '';
+
+            if (batchArchive.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-400 font-bold">Nessuna registrazione salvata nell\'archivio.</div>';
+                return;
+            }
+
+            batchArchive.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 border-2 border-gray-200 rounded-2xl p-5 space-y-3 shadow-sm';
+                
+                let ingredientsHtml = '';
+                item.ingredients.forEach(i => {
+                    ingredientsHtml += '<div class="text-sm bg-white p-3 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between gap-1 shadow-sm"><span class="font-black text-gray-900">' + i.name + '</span><span class="text-gray-600">Lotto: <b class="text-gray-900">' + (i.lotto || '-') + '</b> | Fornitore/Scad.: <b class="text-gray-900">' + (i.fornitore || '-') + '</b></span></div>';
+                });
+
+                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b-2 border-gray-200 gap-2"><div><span class="text-xs font-black text-red-600 bg-red-100 px-3 py-1 rounded-full uppercase shadow-sm">' + item.prepName + '</span><span class="text-sm font-bold text-gray-700 ml-2">Data: ' + item.date + '</span></div><div class="text-xs font-medium text-gray-400">Salvato: ' + item.timestamp + '</div></div><div class="space-y-2">' + ingredientsHtml + '</div>';
+                container.appendChild(card);
+            });
+        }
+
+        function clearArchive() {
+            if (confirm("Vuoi svuotare tutto l'archivio?")) {
+                batchArchive = [];
+                localStorage.removeItem('pizzeria_archive');
+                renderArchive();
+            }
+        }
+    </script>
+</body>
+</html>
