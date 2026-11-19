@@ -7,3 +7,5 @@ Registro lotti della cucina: per ogni preparazione si fotografano le etichette d
 - Avvisi per ingredienti scaduti o in scadenza entro 7 giorni
 - Etichetta interna stampabile
 - Esportazione Excel (CSV) per l'HACCP, backup e ripristino dei dati
+- Archivio condiviso tra più telefoni con Firebase (stesso "codice cucina" nelle Impostazioni)
+- Pulsante "Foto con AI" con Gemini (chiave salvata solo sul telefono, mai nella repository)

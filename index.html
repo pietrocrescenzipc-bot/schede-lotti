@@ -40,6 +40,10 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2">
+                <span id="cloud-status" title="Archivio condiviso" class="text-lg opacity-60"><i class="fa-solid fa-cloud"></i></span>
+                <button onclick="openSettings()" class="px-3 py-2.5 bg-red-800/80 hover:bg-red-800 rounded-2xl font-bold text-sm shadow-md transition" title="Impostazioni">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
                 <button onclick="switchTab('home')" class="px-4 py-2.5 bg-red-800/80 hover:bg-red-800 rounded-2xl font-bold text-sm shadow-md transition flex items-center gap-2">
                     <i class="fa-solid fa-house"></i> <span class="hidden sm:inline">Home</span>
                 </button>
@@ -193,6 +197,33 @@
         </div>
     </div>
 
+    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                <h3 class="font-black text-xl text-gray-900"><i class="fa-solid fa-gear text-red-600 mr-1"></i> Impostazioni</h3>
+                <button onclick="closeSettings()" class="text-gray-400 text-3xl font-bold">&times;</button>
+            </div>
+            <div class="space-y-2">
+                <label class="block font-black text-gray-700 text-sm"><i class="fa-solid fa-cloud mr-1"></i> Codice cucina (archivio condiviso)</label>
+                <p class="text-xs text-gray-500">Metti lo stesso codice su tutti i telefoni: vedranno le stesse schede e lo stesso archivio. Tienilo riservato. Vuoto = solo su questo telefono.</p>
+                <div class="flex gap-2">
+                    <input type="text" id="set-codice" placeholder="Es. GALLEON7K2P9Q" class="flex-1 min-w-0 border-2 border-gray-200 rounded-2xl p-3 font-black uppercase focus:border-red-600 focus:outline-none">
+                    <button onclick="document.getElementById('set-codice').value = generaCodice()" class="px-4 bg-gray-100 rounded-2xl font-bold text-sm">Genera</button>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="block font-black text-gray-700 text-sm"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Chiave Gemini (facoltativa)</label>
+                <p class="text-xs text-gray-500">Se l'etichetta non viene letta, l'app chiede aiuto a Gemini (piano gratuito). La chiave resta solo su questo telefono.</p>
+                <input type="password" id="set-gemini" placeholder="AIza..." class="w-full border-2 border-gray-200 rounded-2xl p-3 font-bold focus:border-red-600 focus:outline-none">
+                <input type="text" id="set-model" placeholder="Modello (vuoto = gemini-flash-lite-latest)" class="w-full border-2 border-gray-200 rounded-2xl p-3 text-sm focus:border-red-600 focus:outline-none">
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeSettings()" class="py-3 px-5 bg-gray-100 rounded-2xl font-bold text-gray-700">Annulla</button>
+                <button onclick="saveSettings()" class="py-3 px-6 bg-red-600 rounded-2xl font-black text-white">Salva</button>
+            </div>
+        </div>
+    </div>
+
     <div id="new-prep-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6">
             <div class="flex justify-between items-center pb-4 border-b border-gray-100">
@@ -231,6 +262,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPrepList();
+            aggiornaPulsantiAI();
             document.getElementById('prep-date').valueAsDate = new Date();
             
             document.getElementById('sidebar-toggle').addEventListener('click', () => {
@@ -299,7 +331,7 @@
             prep.ingredients.forEach((ing, index) => {
                 const card = document.createElement('div');
                 card.className = 'bg-white border-2 border-gray-200/80 rounded-2xl p-5 space-y-4 shadow-sm hover:shadow-md transition';
-                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithTesseract(event, ' + index + ')"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Scadenza)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
+                card.innerHTML = '<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-100"><span class="text-base font-black text-red-700 uppercase tracking-wide flex items-center gap-2"><i class="fa-solid fa-box-open text-red-500"></i> ' + ing + '</span><label class="btn-fancy-camera text-white px-6 py-3 rounded-2xl font-black cursor-pointer flex items-center justify-center gap-2.5 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-camera text-lg"></i> Scatta Etichetta AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithTesseract(event, ' + index + ')"></label><label class="ai-btn hidden bg-violet-600 text-white px-4 py-3 rounded-2xl font-black cursor-pointer items-center justify-center gap-2 w-full sm:w-auto text-sm shadow-md"><i class="fa-solid fa-wand-magic-sparkles"></i> Foto con AI<input type="file" accept="image/*" capture="environment" class="hidden" onchange="processImageWithTesseract(event, ' + index + ', true)"></label></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Numero Lotto:</label><input type="text" id="lotto-' + index + '" placeholder="Es. LMF26254A001" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div><div><label class="block text-xs font-black text-gray-500 uppercase mb-1.5">Fornitore / Scadenza:</label><input type="text" id="fornitore-' + index + '" placeholder="Es. 11-03-2027 (Scadenza)" class="w-full bg-gray-50/50 border-2 border-gray-200 rounded-2xl p-3.5 font-bold text-gray-900 text-base focus:bg-white focus:border-red-600 focus:outline-none shadow-sm transition"></div></div>';
                 container.appendChild(card);
             });
 
@@ -310,6 +342,7 @@
             aggiornaScadenzaMin();
 
             renderPrepList(document.getElementById('search-prep').value);
+            aggiornaPulsantiAI();
             switchTab('preparation');
         }
 
@@ -531,7 +564,7 @@
             return { lotto, scadenza };
         }
 
-        async function processImageWithTesseract(event, rowIndex) {
+        async function processImageWithTesseract(event, rowIndex, soloAI = false) {
             const file = event.target.files[0];
             if (!file) return;
             const loadingScreen = document.getElementById('ai-loading');
@@ -555,7 +588,7 @@
                 if (bc) dati = { lotto: bc.lotto || '', scadenza: bc.scadenza || '' };
 
                 // 2) OCR se manca qualcosa
-                if (!dati.lotto || !dati.scadenza) {
+                if (!soloAI && (!dati.lotto || !dati.scadenza)) {
                     const worker = await getOcrWorker();
                     let testoTot = '';
                     for (const invert of [false, true]) {
@@ -570,6 +603,15 @@
                         if (dati.lotto && dati.scadenza) break;
                     }
                 }
+                // 3) Gemini (se c'è la chiave) quando manca ancora qualcosa
+                if ((!dati.lotto || !dati.scadenza) && getSetting('gemini')) {
+                    statusText.innerText = "Chiedo all'AI...";
+                    try {
+                        const ai = await leggiConGemini(zona);
+                        dati.lotto = dati.lotto || ai.lotto;
+                        dati.scadenza = dati.scadenza || ai.scadenza;
+                    } catch (e) { console.warn('Gemini:', e); if (soloAI) alert('AI non disponibile: ' + e.message); }
+                } else if (soloAI && !getSetting('gemini')) alert('Inserisci prima la chiave Gemini nelle Impostazioni (ingranaggio in alto).');
                 URL.revokeObjectURL(img.src);
 
                 campoLotto.value = dati.lotto;
@@ -590,6 +632,77 @@
                 loadingScreen.classList.add('hidden');
                 event.target.value = '';
             }
+        }
+
+        // ===================== IMPOSTAZIONI =====================
+        function getSetting(k) { return localStorage.getItem('lotti_set_' + k) || ''; }
+        function generaCodice() {
+            const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r = 'GAL';
+            const a = new Uint32Array(10); crypto.getRandomValues(a); a.forEach(n => r += c[n % c.length]); return r;
+        }
+        function openSettings() {
+            document.getElementById('set-codice').value = getSetting('codice');
+            document.getElementById('set-gemini').value = getSetting('gemini');
+            document.getElementById('set-model').value = getSetting('model');
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+        function saveSettings() {
+            const codice = document.getElementById('set-codice').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (codice && codice.length < 10) { alert('Il codice cucina deve avere almeno 10 lettere/numeri. Premi "Genera".'); return; }
+            const cambiato = codice !== getSetting('codice');
+            localStorage.setItem('lotti_set_codice', codice);
+            localStorage.setItem('lotti_set_gemini', document.getElementById('set-gemini').value.trim());
+            localStorage.setItem('lotti_set_model', document.getElementById('set-model').value.trim());
+            closeSettings(); aggiornaPulsantiAI();
+            if (cambiato) location.reload();
+        }
+        function aggiornaPulsantiAI() {
+            const on = !!getSetting('gemini');
+            document.querySelectorAll('.ai-btn').forEach(b => { b.classList.toggle('hidden', !on); b.classList.toggle('flex', on); });
+        }
+
+        // ===================== GEMINI =====================
+        async function leggiConGemini(sorgente) {
+            const max = 1280, sc = Math.min(1, max / Math.max(sorgente.width, sorgente.height));
+            const c = document.createElement('canvas');
+            c.width = Math.round(sorgente.width * sc); c.height = Math.round(sorgente.height * sc);
+            c.getContext('2d').drawImage(sorgente, 0, 0, c.width, c.height);
+            const b64 = c.toDataURL('image/jpeg', 0.85).split(',')[1];
+            const model = getSetting('model') || 'gemini-flash-lite-latest';
+            const prompt = 'Questa è la foto di un\'etichetta di un prodotto alimentare. Estrai il NUMERO DI LOTTO (dopo "L", "LOT", "LOTTO") e la DATA DI SCADENZA o TMC (non la data di produzione). ' +
+                'Rispondi solo con JSON: {"lotto":"...","scadenza":"GG-MM-AAAA"} (se c\'è solo mese e anno usa "MM-AAAA"). Se un dato non è leggibile metti stringa vuota.';
+            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-goog-api-key': getSetting('gemini') },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
+                    generationConfig: { responseMimeType: 'application/json', temperature: 0 }
+                })
+            });
+            const j = await res.json();
+            if (!res.ok) throw new Error((j.error && j.error.message) || ('errore ' + res.status));
+            const testo = j.candidates[0].content.parts.map(p => p.text || '').join('');
+            const d = JSON.parse(testo.replace(/^```json|```$/g, '').trim());
+            const scad = d.scadenza ? (findDates(String(d.scadenza))[0] || { value: String(d.scadenza) }).value : '';
+            return { lotto: pulisciLotto(String(d.lotto || '')), scadenza: scad };
+        }
+
+        // ===================== ARCHIVIO CONDIVISO (collegamento a Firebase) =====================
+        // window.cloud viene creato dal modulo Firebase in fondo alla pagina (solo se c'è il codice cucina)
+        function salvaLocale() {
+            localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+            localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
+        }
+        function cloudCall(fn, ...args) {
+            if (window.cloud && window.cloud[fn]) window.cloud[fn](...args).catch(e => { console.error(e); alert('Archivio condiviso: salvataggio non riuscito (' + (e.code || e.message) + ').'); });
+        }
+        function onCloudData(preps, archive) {
+            if (preps) preparations = preps;
+            if (archive) batchArchive = archive;
+            salvaLocale();
+            renderPrepList(document.getElementById('search-prep').value);
+            if (!document.getElementById('tab-report').classList.contains('hidden')) renderArchive();
         }
 
         // ===================== RITAGLIO ZONA =====================
@@ -722,8 +835,7 @@
                     d.preparations.forEach(p => { if (!preparations.some(x => x.id === p.id)) preparations.push(p); });
                     d.batchArchive.forEach(b => { if (!batchArchive.some(x => x.id === b.id)) batchArchive.push(b); });
                     batchArchive.sort((a, b) => b.id - a.id);
-                    localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
-                    localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
+                    salvaLocale(); cloudCall('saveAll', preparations, batchArchive);
                     renderPrepList(); renderArchive(); alert('Backup ripristinato.');
                 } catch (e) { alert('File di backup non valido.'); }
                 event.target.value = '';
@@ -764,6 +876,7 @@
             const newPrep = { id: newId, name: name, ingredients: ingredients };
             preparations.push(newPrep);
             localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+            cloudCall('savePreps', preparations);
 
             closeNewPrepModal();
             renderPrepList();
@@ -776,6 +889,7 @@
 
             preparations = preparations.filter(p => p.id !== currentActivePrepId);
             localStorage.setItem('pizzeria_preparations', JSON.stringify(preparations));
+            cloudCall('savePreps', preparations);
 
             currentActivePrepId = null;
             renderPrepList();
@@ -808,6 +922,7 @@
 
             batchArchive.unshift(logEntry);
             localStorage.setItem('pizzeria_archive', JSON.stringify(batchArchive));
+            cloudCall('saveEntry', logEntry);
 
             alert('Registrazione salvata con successo!');
             switchTab('report');
@@ -855,8 +970,83 @@
             if (confirm("Vuoi svuotare tutto l'archivio?")) {
                 batchArchive = [];
                 localStorage.removeItem('pizzeria_archive');
+                cloudCall('clearArchive');
                 renderArchive();
             }
+        }
+    </script>
+    <script type="module">
+        // ===================== FIREBASE: archivio condiviso tra i telefoni =====================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { initializeFirestore, persistentLocalCache, collection, doc, setDoc, getDocs, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJG-hkZsieKyyWZhMlLPBWvFJJxSaQJzo",
+            authDomain: "schede-lotti.firebaseapp.com",
+            projectId: "schede-lotti",
+            storageBucket: "schede-lotti.firebasestorage.app",
+            messagingSenderId: "639065636017",
+            appId: "1:639065636017:web:79580e0e9f5f2f7be7b690"
+        };
+
+        const codice = getSetting('codice');
+        const icona = document.getElementById('cloud-status');
+        const stato = (col, tit) => { icona.style.color = col; icona.style.opacity = 1; icona.title = tit; };
+
+        if (codice) {
+            stato('#fde68a', 'Connessione...');
+            const app = initializeApp(firebaseConfig);
+            const db = initializeFirestore(app, { localCache: persistentLocalCache() }); // funziona anche senza rete
+            const auth = getAuth(app);
+            const col = collection(db, 'cucina_' + codice);
+            const PREP_ID = '_preparazioni';
+            const pulito = o => JSON.parse(JSON.stringify(o));
+
+            window.cloud = {
+                savePreps: preps => setDoc(doc(col, PREP_ID), { items: pulito(preps) }),
+                saveEntry: e => setDoc(doc(col, String(e.id)), pulito(e)),
+                clearArchive: async () => {
+                    const snap = await getDocs(col); const b = writeBatch(db);
+                    snap.forEach(d => { if (d.id !== PREP_ID) b.delete(d.ref); });
+                    return b.commit();
+                },
+                saveAll: async (preps, archive) => {
+                    const b = writeBatch(db);
+                    b.set(doc(col, PREP_ID), { items: pulito(preps) });
+                    archive.slice(0, 450).forEach(e => b.set(doc(col, String(e.id)), pulito(e)));
+                    return b.commit();
+                }
+            };
+
+            let avviato = false;
+            onAuthStateChanged(auth, user => {
+                if (!user || avviato) return;
+                avviato = true;
+                let primo = true;
+                onSnapshot(col, { includeMetadataChanges: true }, snap => {
+                    let preps = null; const arch = [];
+                    snap.forEach(d => { if (d.id === PREP_ID) preps = d.data().items; else arch.push(d.data()); });
+                    if (primo && !snap.metadata.fromCache) {
+                        primo = false;
+                        // prima connessione: carica online quello che c'è già su questo telefono
+                        const mancanti = batchArchive.filter(l => !arch.some(c => c.id === l.id));
+                        if (!preps || mancanti.length) {
+                            window.cloud.saveAll(preps || preparations, mancanti).catch(console.error);
+                            if (!preps) preps = preparations;
+                            mancanti.forEach(m => arch.push(m));
+                        }
+                    }
+                    if (primo && snap.empty) return; // aspetta la risposta del server prima di svuotare
+                    arch.sort((a, b) => b.id - a.id);
+                    onCloudData(preps, arch);
+                    stato(snap.metadata.fromCache ? '#fde68a' : '#bbf7d0', snap.metadata.fromCache ? 'Archivio condiviso (offline)' : 'Archivio condiviso attivo');
+                }, err => {
+                    console.error(err); stato('#fecaca', 'Errore: ' + err.code);
+                    alert('Archivio condiviso non accessibile (' + err.code + '). Controlla le regole di Firestore.');
+                });
+            });
+            signInAnonymously(auth).catch(err => { console.error(err); stato('#fecaca', 'Accesso non riuscito: ' + err.code); });
         }
     </script>
 </body>
